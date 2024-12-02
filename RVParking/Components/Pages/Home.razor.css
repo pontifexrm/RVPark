@@ -1,0 +1,139 @@
+﻿body {
+}
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-image: linear-gradient( darkgreen, darkolivegreen );
+}
+img {
+    width: 100%;
+    height: auto;
+}
+/* Style the header */
+.header {
+    background-color: #f1f1f1;
+    /*padding: 30px;*/
+    text-align: center;
+    font-size: 35px;
+}
+.header-text {
+    background-color: #0047ff;
+    color: white
+    /*padding: 30px;*/
+    text-align: center;
+    font-size: 15px;
+}
+/* Container for flexboxes */
+.row {
+    display: -webkit-flex;
+    display: flex;
+}
+
+/* Create three equal columns that sits next to each other */
+.column {
+    -webkit-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    /*padding: 10px;*/
+    /*height: 300px;  Should be removed. Only for demonstration */
+}
+/* Create three equal columns that sits next to each other */
+.column-l {
+    -webkit-flex: 2;
+    -ms-flex: 2;
+    flex: 2;
+    /*padding: 10px;*/
+    /*height: 300px;  Should be removed. Only for demonstration */
+}
+
+/* Style the footer */
+.footer {
+    background-color: #f1f1f1;
+    color: brown
+    padding: 10px;
+    text-align: center;
+}
+
+/* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
+@media (max-width: 600px) {
+    .row {
+        -webkit-flex-direction: column;
+        flex-direction: column;
+    }
+}
+.container {
+    position: relative;
+    width: 400px;
+    height: 300px;
+}
+
+.image {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+}
+
+/*.text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}*/
+/* Container holding the image and the text */
+/*.container {
+    position: relative;
+    text-align: center;
+    color: black;
+}*/
+
+/* Bottom left text */
+/*.bottom-left {
+    position: absolute;
+    bottom: 8px;
+    left: 16px;
+}*/
+
+/* Top left text */
+/*.top-left {
+    position: absolute;
+    top: 8px;
+    left: 16px;
+}*/
+
+/* Top right text */
+/*.top-right {
+    position: absolute;
+    top: 8px;
+    right: 16px;
+}
+.top-center {
+    position: absolute;
+    top: 8px;
+    left: calc(100% - 50%);
+    text-align: center;
+    width: calc(300%);
+    transform: translate(50%,50%);
+}*/
+
+/* Bottom right text */
+/*.bottom-right {
+    position: absolute;
+    bottom: 8px;
+    right: 16px;
+}*/
+
+/* Centered text */
+/*.centered {
+    position: absolute;
+    top: calc(100% - 75%);
+    left: calc(200% - 5%);
+    text-align: center;
+    transform: translate(50%,50%);
+}*/
