@@ -13,16 +13,15 @@ public class EmailMessage
     public string Name { get; set; } = string.Empty; 
     [Required]
     public string Subject { get; set; } = string.Empty;
-    [Required]
+   
     public string Message { get; set; } = string.Empty;
-    [Required]
+    
     public string Nzmca { get; set; } = string.Empty;
-    [Required]
-    public string Fmdate { get; set; } = string.Empty;
-    [Required]
-    public string Todate { get; set; } = string.Empty;
 
-    public string IsSentOK { get; set; } = string.Empty;
+    public DateTime Fmdate { get; set; } = DateTime.Now.Date;
+
+    public DateTime Todate { get; set; } = DateTime.Now.Date;
+
 
     public string ChkMsg
     { 

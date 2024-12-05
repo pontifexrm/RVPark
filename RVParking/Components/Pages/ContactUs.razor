@@ -9,6 +9,7 @@
 
 @inject IEmailSnder EmailSender
 @inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Contact Us</PageTitle>
 
@@ -20,65 +21,67 @@
 }
 else
 {
-    <EditForm Model=@emailMessage OnValidSubmit=@ValidFormSubmitted method="post" FormName="ContactUs">
+    <EditForm Model=@emailMessage OnValidSubmit=@ValidFormSubmitted method="post" FormName="ContactUs" >
         <DataAnnotationsValidator />
         <ValidationSummary />
-
+        
         <div class="form-group" style="max-width: 50%">
-            <label for="email">Your Email</label>
-            <InputText @bind-Value=emailMessage.Email class="form-control" id="email" />
-            <ValidationMessage For="() => emailMessage.Email" />
-        </div>
-        <div class="form-group" style="max-width: 50%">
-            <label for="phone">Your Phone Number</label>
-            <InputText @bind-Value=emailMessage.Phone class="form-control" id="phone" />
-            <ValidationMessage For="() => emailMessage.Phone" />
-        </div>
-        <div class="form-group">
             <label for="name">Your Name</label>
             <InputText @bind-Value=emailMessage.Name class="form-control" id="name" />
             <ValidationMessage For="() => emailMessage.Name" />
         </div>
-        <div class="form-group">
+        <div class="form-group" style="display:flex;flex-direction:row;">
+            <div class="form-group" style="max-width: 25%">
+                <label for="email">Your Email</label>
+                <InputText @bind-Value=emailMessage.Email class="form-control" id="email" />
+                <ValidationMessage For="() => emailMessage.Email" />
+            </div>
+            <div class="form-group" style="max-width: 25%">
+                <label for="phone">Your Phone Number</label>
+                <InputText @bind-Value=emailMessage.Phone class="form-control" id="phone" />
+                <ValidationMessage For="() => emailMessage.Phone" />
+            </div>
+
+        </div>
+        
+
+        <div class="form-group" style="max-width: 50%">
             <label for="subject">Subject</label>
             <InputText @bind-Value=emailMessage.Subject class="form-control" id="subject" />
             <ValidationMessage For="() => emailMessage.Subject" />
         </div>
-        <div class="form-group">
-            <label for="nzmca">NZMCA Number</label>
-            <InputText @bind-Value=emailMessage.Nzmca class="form-control" id="nzmca" />
-            <ValidationMessage For="() => emailMessage.Nzmca" />
+        <div class="form-group" style="max-width: 50%">
+            <label for="nzmca">NZMCA Number(optional)</label>
+            <InputText @bind-Value=emailMessage.Nzmca  class="form-control" id="nzmca" />
+            @* <ValidationMessage For="() => emailMessage.Nzmca" /> *@
         </div>
-        <div class="form-group">
-            <label for="fmdate">From Date</label>
-            <InputText @bind-Value=emailMessage.Fmdate class="form-control" id="fmdate" />
-            <ValidationMessage For="() => emailMessage.Fmdate" />
-        </div>
-        <div class="form-group">
-            <label for="todate">To Date</label>
-            <InputText @bind-Value=emailMessage.Todate class="form-control" id="todate" />
-            <ValidationMessage For="() => emailMessage.Todate" />
-        </div>
+        <div class="form-group" style="display:flex;flex-direction:row;">
+            <div class="form-group" style="max-width: 25%">
+                <label for="fmdate">From Date</label>
+                <InputDate @bind-Value=emailMessage.Fmdate class="form-control" id="fmdate" />
+                @* <ValidationMessage For="() => emailMessage.Fmdate" /> *@
+            </div>
+            <div class="form-group" style="max-width: 25%">
+                <label for="todate">To Date</label>
+                <InputDate @bind-Value=emailMessage.Todate class="form-control" id="todate" />
+                @* <ValidationMessage For="() => emailMessage.Todate" /> *@
+            </div>
 
-        <div class="form-group">
+        </div>
+     
+
+        <div class="form-group" style="max-width: 50%">
             <label for="message">Message</label>
             <InputTextArea @bind-Value=emailMessage.Message class="form-control" id="message" />
-            <ValidationMessage For="() => emailMessage.Message" />
+            @* <ValidationMessage For="() => emailMessage.Message" /> *@
         </div>
-        <div class="form-group">
-            <label for="message">IsSentOK</label>
-            <InputTextArea @bind-Value=emailMessage.IsSentOK class="form-control" id="issentok" />
-            <ValidationMessage For="() => emailMessage.IsSentOK" />
-        </div>
+
 
         <input type="submit" class="btn btn-primary" value="Send" />
 
     </EditForm>
 
-    <div class="form-group">
-        <label for="result">Result:</label>
-        <input type="text" value=@result readonly class="form-control" id="result" />
-    </div>
+
 }
 
 
@@ -86,6 +89,7 @@ else
 
 
 @code {
+    bool isSubmitting;
     private string result = string.Empty;
     [SupplyParameterFromForm]
     public EmailMessage emailMessage { get; set; } = new EmailMessage();
@@ -93,26 +97,23 @@ else
 
     private async Task ValidFormSubmitted()
     {
-        // We are going to send 2 emails. 1) to rvpark
-        if (emailMessage is null) return;
-        if (emailMessage.IsSentOK == "Y")
-        {
-            Navigation.NavigateTo("/");
-            //return;
-        }
-
+        if (isSubmitting) 
+            return;
+        isSubmitting = true;
         try
         {
             result = "sending your request...";
-            // Send it to client as we have a Bcc added in the send class
             await EmailSender.SendEmailAsync(emailMessage.Email, emailMessage.Subject, emailMessage.ChkMsg);
-            emailMessage.IsSentOK = "Y";
-            result = "All Good, we have got that. Many Thanks";
         }
         catch (Exception ex)
         {
             result = "Woops and Error:\n" + ex.Message;
         }
+        finally
+        {
+            isSubmitting = false;
+        }
+        Navigation.NavigateTo("/", forceLoad: true); // does not work if in the try catch block further work needed.
     }
 
 
