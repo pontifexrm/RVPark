@@ -146,6 +146,15 @@ a, a:visited {
     box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
     box-sizing: border-box;
 }
+.card_sm {
+    flex: 1 1 50%;
+    max-width: 300px;
+    background: #fff;
+    margin-bottom: 2em;
+    /*padding: 1em;*/
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+}
 
 a:hover {
     box-shadow: 0.3em 0.3em 0.6em rgba(0,0,0,0.1);

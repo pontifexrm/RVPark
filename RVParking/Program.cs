@@ -4,6 +4,7 @@ using RVParking.Data;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +34,22 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+//builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+// Add services to the container.
+//builder.Services.AddTransient<IEmailSender, EmailSenderSystem>();
+builder.Services.AddTransient<IEmailSnder, EmailSenderMailKit>();
+builder.Services.Configure<EmailConfiguration>(options =>
+{
+    builder.Configuration.GetSection("Email").Bind(options);
+
+    //options.Host = builder.Configuration.GetValue<string>("Email:Host");
+    //options.Port = builder.Configuration.GetValue<int>("Email:Port");
+    //options.Username = builder.Configuration.GetValue<string>("Email:Username");
+    //options.Password = builder.Configuration.GetValue<string>("Email:Password");
+    //options.From = builder.Configuration.GetValue<string>("Email:From");
+    //options.Name = builder.Configuration.GetValue<string>("Email:Name");
+    //options.EnableSSL = builder.Configuration.GetValue<bool>("Email:EnableSSL");
+});
 
 var app = builder.Build();
 

@@ -1,6 +1,7 @@
 using RVParking.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using IEmailSender = Microsoft.AspNetCore.Identity.UI.Services.IEmailSender;
 
 namespace RVParking.Components.Account
 {

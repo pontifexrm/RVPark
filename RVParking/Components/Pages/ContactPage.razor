@@ -1,0 +1,76 @@
+﻿@page "/Contact"
+@rendermode InteractiveServer
+@* @attribute [Authorize] *@
+@* 
+@inject IContactsRepo ContactsRepo
+@inject IEmailService EmailService
+@inject IConfiguration Configuration
+@inject ILogger<ContactPage> Logger
+*@
+@inject NavigationManager NavigationManager
+
+<h1>Contact The Site Admin</h1>
+@* <div class="row">
+    <div class="col-md-8">
+        <EditForm Model="Contact" asp-route-returnUrl="ThankYouForYourMessage" method="post" OnValidSubmit="SubmitAsync" FormName="register">
+            <DataAnnotationsValidator />
+            <h2>Your Message.</h2>
+            <hr />
+            <ValidationSummary class="text-danger" role="alert" />
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Contact.Subject" class="form-control" aria-required="true" placeholder="subject" />
+                <label for="email">Subject</label>
+                <ValidationMessage For="() => Contact.Subject" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputTextArea @bind-Value="Contact.Body" class="form-control" aria-required="true" placeholder="Message Body" style="height: 160px;" />
+                <label for="message">Message</label>
+                <ValidationMessage For="() => Contact.Body" class="text-danger" />
+            </div>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Submit Message</button>
+        </EditForm>
+    </div>
+</div>
+
+<div class="alert alert-primary @HideAlert" role="alert">
+    @AlertContent
+</div> *@
+
+@code {
+    // [SupplyParameterFromForm]
+    // public Contact Contact { get; set; } = new Contact();
+
+    // [CascadingParameter]
+    // private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    // private string HideAlert { get; set; } = "d-none";
+    // private string AlertContent { get; set; }
+
+    // private async Task SubmitAsync()
+    // {
+    //     try
+    //     {
+    //         var user = (await authenticationStateTask).User;
+    //         Contact.Email = user.Identity?.Name ?? "No Name Found";
+    //         await ContactsRepo.AddAsync(Contact);
+    //         var adminEmail = Configuration.GetSection("Admin:Email").Value;
+    //         var mailData = new MailData(
+    //             to: new List<string> { adminEmail },
+    //             subject: "You have a new contact",
+    //             body: $"You have a new contact from {Contact.Email}.\n{Contact.Subject}\n{Contact.Body}.\n\nReminder do not click on links in this message unless you know they are safe.",
+    //             displayName: "Hacker Space Contact Manager"
+    //             );
+    //         await EmailService.SendEmailAsync(mailData);
+    //         NavigationManager.NavigateTo("ThankYouForYourMessage");
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Logger.LogError(ex, "Error sending contact message");
+    //         AlertContent = "There was an error sending your message. Please try again later.";
+    //         HideAlert = "";
+    //     }
+
+    // }
+// 
+// 
+}
