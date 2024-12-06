@@ -13,9 +13,9 @@ public class EmailMessage
     public string Name { get; set; } = string.Empty; 
     [Required]
     public string Subject { get; set; } = string.Empty;
-   
+    [Required]
     public string Message { get; set; } = string.Empty;
-    
+    [Required]
     public string Nzmca { get; set; } = string.Empty;
 
     public DateTime Fmdate { get; set; } = DateTime.Now.Date;
