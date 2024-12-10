@@ -22,7 +22,26 @@ public class EmailMessage
 
     public DateTime Todate { get; set; } = DateTime.Now.Date;
 
-
+    public string  E_164_Phone  //IntPhoneFmt //The proper E.164 format is [+] [country code] [area code] [subscriber number].
+    {
+        get
+        {
+            // purpose of this return is to gie the phone number in the +64nnnnnnnnnn format if it is not already.
+            string srtn = string.Empty;
+            if(this.Phone.Length > 0)
+            {
+                if (Phone.StartsWith("+")) // then likely in the corect format already
+                {
+                    srtn = Phone.Trim();
+                }
+                else if(Phone.StartsWith("0"))// then likely miss country code so remove the "0" and add "+64"
+                {
+                    srtn = string.Concat("+64" + Phone[1..]); // this prefix should be a configurable for the ountry the app is being run in.
+                }
+            }
+            return srtn;
+        }
+    }
     public string ChkMsg
     { 
         get{
@@ -34,13 +53,26 @@ public class EmailMessage
                               "Your Phone number is [{2}] \r\n" +
                               "You are interested in dates from [{3}] to [{4}] \r\n" +
                               "If you are an NZMCA member your number being [{5}] \r\n" +
-                              "And finally your message is [{6}] \r\n\r\n" +
+                              "And finally your message is \r\n[{6}] \r\n\r\n" +
                               "Many thanks \r\n" +
                               "RV Park on Fitz \r\n",
             this.Name, this.Email, this.Phone,
-            this.Fmdate, this.Todate, this.Nzmca,
+            this.Fmdate.ToShortDateString(), this.Todate.ToShortDateString(), this.Nzmca,
             this.Message, this.Subject);
             return sRtn;
         } 
+    }
+    public string smsMsg
+    {
+        get
+        {
+            string sRtn = string.Format("RVPark fm: {0} \r\n" +                              
+                              "SUBJECT: [{3}]\r\n" +
+                              "email [{1}] \r\n" +
+                              "Phone [{2}] ",
+            this.Name, this.Email, this.E_164_Phone,
+            this.Subject);
+            return sRtn;
+        }
     }
 }
