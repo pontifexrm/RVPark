@@ -67,11 +67,11 @@ public class EmailMessage
         get
         {
             string sRtn = string.Format("RVPark fm: {0} \r\n" +                              
-                              "SUBJECT: [{3}]\r\n" +
-                              "email [{1}] \r\n" +
-                              "Phone [{2}] ",
+                              "SUBJECT: {3}  - {4}\r\n" +
+                              "email {1} \r\n" +
+                              "Phone {2} ",
             this.Name, this.Email, this.E_164_Phone,
-            this.Subject);
+            this.Subject, this.Message);
             return sRtn;
         }
     }

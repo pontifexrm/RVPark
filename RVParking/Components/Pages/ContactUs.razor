@@ -79,8 +79,8 @@ else
             @* <ValidationMessage For="() => emailMessage.Message" /> *@
         </div>
 
-        <div class="btn btn-primary" style="max-width: 75%;width:500px;  margin-left: 2%">
-            <input type="submit" class="btn btn-primary" value="Send" />
+        <div class="form-group" style="max-width: 75%;width:500px;  margin-left: 2%">
+            <input type="submit" class="btn btn-primary" style="max-width: 100%;width:500px;  " value="Send" />
 
         </div>
 
@@ -137,14 +137,14 @@ else
         );
 
         // next send an SMS to admin to say we have a contact.
-        emailMessage.Phone = "";
-        const string rept = "+64224516753";    // this shoild come from configuration injection
+       // emailMessage.Phone = "";
+        const string rept = "+64273042002";    // this shoild come from configuration injection
         const string txtmsg = "From RVPark using TNZ API out of Blazor";
 
         var response = client.Messaging.SMS.SendMessage
                     (
                         destination: rept,                     // Recipient
-                        messageText: emailMessage.Message     // SMS Message
+                        messageText: emailMessage.smsMsg     // SMS Message
                                                                   //sendMode: Enums.SendModeType.Test           // TEST Mode - Remove this to send live traffic
                     );
 
