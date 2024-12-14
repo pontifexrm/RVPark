@@ -66,7 +66,7 @@ else
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();  // removed for deployment to VPS on Hostinger
 
 
 app.UseAntiforgery();
