@@ -59,7 +59,7 @@ public class EmailMessage
                               "Date: {8}",
             this.Name, this.Email, this.Phone,
             this.Fmdate.ToString("yyyy-MM-dd"), this.Todate.ToString("yyyy-MM-dd"), this.Nzmca,
-            this.Message, this.Subject, DateTime.Now.ToString("f"));
+            this.Message, this.Subject, DateTime.Now.ToString("g"));
             return sRtn;
         } 
     }

@@ -130,16 +130,16 @@ else
         var client = new TNZApiClient(apiUser);
 
         var reponseEmail = client.Messaging.Email.SendMessage(
-            fromEmail: "info@rvpark.nz",  // this shoild come from configuration injection
+            fromEmail: "rvpark@pontifex.nz",  // this shoild come from configuration injection
             emailSubject: emailMessage.Subject,
             messagePlain: emailMessage.ChkMsg,
             destination: emailMessage.Email
         );
         var reponseEmailcc = client.Messaging.Email.SendMessage(
-            fromEmail: "info@rvpark.nz",  // this shoild come from configuration injection
+            fromEmail: "rvpark@pontifex.nz",  // this shoild come from configuration injection
             emailSubject: emailMessage.Subject,
             messagePlain: emailMessage.ChkMsg,
-            destination: "info@rvpark.nz"
+            destination: "rvpark@pontifex.nz"
         );
 
         // next send an SMS to admin to say we have a contact.
