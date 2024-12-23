@@ -46,7 +46,7 @@ public class EmailMessage
     { 
         get{
             string sRtn = string.Format("Hi {0} \r\n" +
-                              "Thanks for your interest in RV Park NZ.\r\n\r\nWe have received your message and will be contacting you soon with out response. \r\n" +
+                              "Thanks for your interest in RV Park NZ.\r\n\r\nWe have received your message and will be contacting you soon with our response. \r\n" +
                               "Just so you have a record of this message here are the details you sent to us. \r\n\r\n" +
                               "SUBJECT: [{7}]\r\n" +
                               "Your email address is [{1}] \r\n" +
@@ -55,10 +55,11 @@ public class EmailMessage
                               "If you are an NZMCA member your number being [{5}] \r\n" +
                               "And finally your message is \r\n[{6}] \r\n\r\n" +
                               "Many thanks \r\n" +
-                              "RV Park on Fitz \r\n",
+                              "RV Park on Fitz \r\n" +
+                              "Date: {8}",
             this.Name, this.Email, this.Phone,
-            this.Fmdate.ToShortDateString(), this.Todate.ToShortDateString(), this.Nzmca,
-            this.Message, this.Subject);
+            this.Fmdate.ToString("yyyy-MM-dd"), this.Todate.ToString("yyyy-MM-dd"), this.Nzmca,
+            this.Message, this.Subject, DateTime.Now.ToString("f"));
             return sRtn;
         } 
     }
@@ -69,9 +70,10 @@ public class EmailMessage
             string sRtn = string.Format("RVPark fm: {0} \r\n" +                              
                               "SUBJECT: {3}  - {4}\r\n" +
                               "email {1} \r\n" +
-                              "Phone {2} ",
+                              "Phone {2} \r\n" +
+                              "{5}",
             this.Name, this.Email, this.E_164_Phone,
-            this.Subject, this.Message);
+            this.Subject, this.Message, DateTime.Now.ToString("g"));
             return sRtn;
         }
     }
