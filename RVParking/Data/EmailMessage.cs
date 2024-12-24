@@ -1,21 +1,26 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Net.Mail;
+using System.Net.Sockets;
+
 
 namespace RVParking.Data;
 
 public class EmailMessage
 {
-    [EmailAddress]
+    
+    [Required, EmailAddress,MaxLength(48)]
     public string Email { get; set; } = string.Empty;
-    [Required]
+    [Required, Phone]
     public string Phone { get; set; } = string.Empty;
-    [Required]
-    public string Name { get; set; } = string.Empty; 
-    [Required]
+    [Required, MinLength(3), MaxLength(128)]
+    public string Name { get; set; } = string.Empty;
+    [Required, MinLength(4), MaxLength(80)]
     public string Subject { get; set; } = string.Empty;
-    [Required]
+
+    [Required, MinLength(3), MaxLength(128)]
     public string Message { get; set; } = string.Empty;
-    [Required]
+    [Required, MaxLength(32)]
     public string Nzmca { get; set; } = string.Empty;
 
     public DateTime Fmdate { get; set; } = DateTime.Now.Date;
@@ -77,4 +82,20 @@ public class EmailMessage
             return sRtn;
         }
     }
+
+
+    public bool HasValidMxRecord(string email)
+    {
+        try
+        {
+            string domain = email.Split('@')[1];
+            IPHostEntry host = Dns.GetHostEntry(domain);
+            return host.AddressList.Any(ip => ip.AddressFamily == AddressFamily.InterNetwork || ip.AddressFamily == AddressFamily.InterNetworkV6);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
 }

@@ -1,9 +1,12 @@
 ﻿@page "/contactus"
 
+@using Microsoft.AspNetCore.Components.Forms
 @using RVParking.Data
 @using System.ComponentModel.DataAnnotations
+@using System.ComponentModel
 @using System.Text
 @using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using TNZAPI.NET;
@@ -46,7 +49,6 @@ else
             </div>
 
         </div>
-
 
         <div class="form-group" style="max-width: 75%;width: 500px; margin-left: 2%">
             <label for="subject">Subject</label>
@@ -105,6 +107,11 @@ else
     {
         if (isSubmitting) 
             return;
+        if (emailMessage.HasValidMxRecord(emailMessage.Email) == false)  // checked to see if a valid email address
+        {
+            emailMessage.Email = string.Empty;
+            return;
+        }
         isSubmitting = true;
         #region
         // try
@@ -130,13 +137,13 @@ else
         var client = new TNZApiClient(apiUser);
 
         var reponseEmail = client.Messaging.Email.SendMessage(
-            fromEmail: "rvpark@pontifex.nz",  // this shoild come from configuration injection
+            fromEmail: "rvpark@pontifex.nz",  // this should come from configuration injection
             emailSubject: emailMessage.Subject,
             messagePlain: emailMessage.ChkMsg,
             destination: emailMessage.Email
         );
         var reponseEmailcc = client.Messaging.Email.SendMessage(
-            fromEmail: "rvpark@pontifex.nz",  // this shoild come from configuration injection
+            fromEmail: "rvpark@pontifex.nz",  // this should come from configuration injection
             emailSubject: emailMessage.Subject,
             messagePlain: emailMessage.ChkMsg,
             destination: "rvpark@pontifex.nz"
