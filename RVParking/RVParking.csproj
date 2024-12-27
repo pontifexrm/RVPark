@@ -9,6 +9,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\images\bethanylogo.png" />
+    <Content Remove="wwwroot\images\GettyImages-954695858.jpg" />
+    <Content Remove="wwwroot\images\nz1983-1-scaled.jpg" />
+    <Content Remove="wwwroot\images\pattern.png" />
+    <Content Remove="wwwroot\images\profilePicture.jpg" />
+    <Content Remove="wwwroot\images\RVParkAbb.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="RVPark.ico" />
   </ItemGroup>
 

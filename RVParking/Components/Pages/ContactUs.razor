@@ -16,6 +16,7 @@
 
 @inject IEmailSnder EmailSender
 @inject NavigationManager Navigation
+@inject IConfiguration configuration
 
 <PageTitle>RV Park Contact Us</PageTitle>
 
@@ -132,27 +133,27 @@ else
         // Using TNZ
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
             {
-                AuthToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid0Jka3ZBbnRCaVhzbGZlTUMwanpLQT09IiwiY3JlYXRlZCI6IjIwMjQtMTItMDkgMjE6MDc6MzkuODk3OCIsImNoZWNrc3VtIjoiNERCR0hIZTNQd2JUb0h5VWY5ZmtqTnFaOHAxUGxzYVB0RWFNUjhqTFRXK2pkc2Z2RTVuRHZiUjlaYUlYeno0QyJ9.UnjeD4Ze1hgDFSwv7-xgKGf5bE_XbmAPWRntE3EWeZQ"
+                AuthToken = configuration["TNZ:AuthToken"]
             };
         var client = new TNZApiClient(apiUser);
 
         var reponseEmail = client.Messaging.Email.SendMessage(
-            fromEmail: "rvpark@pontifex.nz",  // this should come from configuration injection
+            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
             emailSubject: emailMessage.Subject,
             messagePlain: emailMessage.ChkMsg,
             destination: emailMessage.Email
         );
         var reponseEmailcc = client.Messaging.Email.SendMessage(
-            fromEmail: "rvpark@pontifex.nz",  // this should come from configuration injection
+            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
             emailSubject: emailMessage.Subject,
             messagePlain: emailMessage.ChkMsg,
-            destination: "rvpark@pontifex.nz"
+            destination: configuration["TNZ:CCemail"]
         );
 
         // next send an SMS to admin to say we have a contact.
-       // emailMessage.Phone = "";
-        const string rept = "+64273042002";    // this shoild come from configuration injection
-        //const string txtmsg = "From RVPark using TNZ API out of Blazor";
+        // emailMessage.Phone = "";
+         string rept = configuration["TNZ:SMSrept"]; //"+64273042002";    // this shoild come from configuration injection
+                                                           //const string txtmsg = "From RVPark using TNZ API out of Blazor";
 
         var response = client.Messaging.SMS.SendMessage
                     (
