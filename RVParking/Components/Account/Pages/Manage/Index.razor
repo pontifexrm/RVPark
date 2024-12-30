@@ -28,6 +28,26 @@
                 <label for="Input.PhoneNumber" class="form-label">Phone number</label>
                 <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
             </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.FirstNames" id="Input.FistNames" class="form-control" placeholder="Enter your First Names" />
+                <label for="Input.FirstNames" class="form-label">First Names</label>
+                <ValidationMessage For="() => Input.FirstNames" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.LastName" id="Input.LastName" class="form-control" placeholder="Enter your Last Name" />
+                <label for="Input.LastName" class="form-label">Last Name</label>
+                <ValidationMessage For="() => Input.LastName" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.City" id="Input.City" class="form-control" placeholder="Enter your City" />
+                <label for="Input.City" class="form-label">City</label>
+                <ValidationMessage For="() => Input.City" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Country" id="Input.Country" class="form-control" placeholder="Enter your Country" />
+                <label for="Input.Country" class="form-label">Country</label>
+                <ValidationMessage For="() => Input.Country" class="text-danger" />
+            </div>
             <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
         </EditForm>
     </div>
@@ -37,6 +57,10 @@
     private ApplicationUser user = default!;
     private string? username;
     private string? phoneNumber;
+    private string? firstnames;
+    private string? lastName;
+    private string? city;
+    private string? country;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -49,8 +73,17 @@
         user = await UserAccessor.GetRequiredUserAsync(HttpContext);
         username = await UserManager.GetUserNameAsync(user);
         phoneNumber = await UserManager.GetPhoneNumberAsync(user);
+        
+        firstnames = user.FirstNames;
+        lastName = user.LastName;
+        city = user.City;
+        country = user.Country;
 
         Input.PhoneNumber ??= phoneNumber;
+        Input.FirstNames ??= firstnames;
+        Input.LastName ??= lastName;
+        Input.City ??= city;
+        Input.Country ??= country;
     }
 
     private async Task OnValidSubmitAsync()
@@ -61,7 +94,21 @@
             if (!setPhoneResult.Succeeded)
             {
                 RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone number.", HttpContext);
+                return;
             }
+        }
+        user.FirstNames = Input.FirstNames;
+        user.LastName = Input.LastName;
+        user.City = Input.City;
+        user.Country = Input.Country;
+
+        var updateResult = await UserManager.UpdateAsync(user);
+
+
+        if (!updateResult.Succeeded)
+        {
+            RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to update profile.", HttpContext);
+            return;
         }
 
         await SignInManager.RefreshSignInAsync(user);
@@ -73,5 +120,18 @@
         [Phone]
         [Display(Name = "Phone number")]
         public string? PhoneNumber { get; set; }
+
+        //[FirstNames]
+        [Display(Name = "First Names")]
+        public string? FirstNames { get; set; }
+
+        [Display(Name = "Last Name")]
+        public string? LastName { get; set; }
+
+        [Display(Name = "City")]
+        public string? City { get; set; }
+
+        [Display(Name = "Country")]
+        public string? Country { get; set; }
     }
 }

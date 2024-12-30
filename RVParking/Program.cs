@@ -13,44 +13,40 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-//builder.Services.AddCascadingAuthenticationState();
-//builder.Services.AddScoped<IdentityUserAccessor>();
-//builder.Services.AddScoped<IdentityRedirectManager>();
-//builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<IdentityUserAccessor>();
+builder.Services.AddScoped<IdentityRedirectManager>();
+builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
-//builder.Services.AddAuthentication(options =>
-//    {
-//        options.DefaultScheme = IdentityConstants.ApplicationScheme;
-//        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-//    })
-//    .AddIdentityCookies();
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+    })
+    .AddIdentityCookies();
 
-//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//    options.UseSqlServer(connectionString));
-//builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-//builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-//    .AddEntityFrameworkStores<ApplicationDbContext>()
-//    .AddSignInManager()
-//    .AddDefaultTokenProviders();
-
-//builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
-// Add services to the container.
-//builder.Services.AddTransient<IEmailSender, EmailSenderSystem>();
-builder.Services.AddTransient<IEmailSnder, EmailSenderMailKit>();
-builder.Services.Configure<EmailConfiguration>(options =>
-{
-    builder.Configuration.GetSection("Email").Bind(options);
-
-    //options.Host = builder.Configuration.GetValue<string>("Email:Host");
-    //options.Port = builder.Configuration.GetValue<int>("Email:Port");
-    //options.Username = builder.Configuration.GetValue<string>("Email:Username");
-    //options.Password = builder.Configuration.GetValue<string>("Email:Password");
-    //options.From = builder.Configuration.GetValue<string>("Email:From");
-    //options.Name = builder.Configuration.GetValue<string>("Email:Name");
-    //options.EnableSSL = builder.Configuration.GetValue<bool>("Email:EnableSSL");
+builder.Services.ConfigureApplicationCookie(options => {
+    options.ExpireTimeSpan = TimeSpan.FromDays(5);
+    options.SlidingExpiration = true;
 });
+
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+    options.TokenLifespan = TimeSpan.FromHours(3));
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseMySql((connectionString), new MySqlServerVersion(new Version(8, 0, 40))));
+
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddSignInManager()
+    .AddDefaultTokenProviders();
+
+builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
+
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, EmailSender>();
 
 var app = builder.Build();
 
@@ -65,8 +61,7 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
-//app.UseHttpsRedirection();  // removed for deployment to VPS on Hostinger
+app.UseHttpsRedirection();
 
 
 app.UseAntiforgery();
@@ -75,7 +70,16 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+
 // Add additional endpoints required by the Identity /Account Razor components.
-//app.MapAdditionalIdentityEndpoints();
+app.MapAdditionalIdentityEndpoints();
+
+// Migrate database if needed
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.Migrate();
+}
+
 
 app.Run();

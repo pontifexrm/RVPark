@@ -54,10 +54,10 @@
         </div> *@
 
         <AuthorizeView>
-           @*  <Authorized>
-                <div class="nav-item px-3">
+            <Authorized> 
+                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
+                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Profile @context.User.Identity?.Name
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
@@ -81,10 +81,10 @@
                         <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
                     </NavLink>
                 </div>
-            </NotAuthorized> *@
+            </NotAuthorized>
         </AuthorizeView>
     </nav>
-    <div style="font-size: 0.6em; color: aliceblue; text-align:center;"><br /><br />ver: 0.0.17 2024-12-28</div>
+    <div style="font-size: 0.6em; color: aliceblue; text-align:center;"><br /><br />ver: 0.0.18 2024-12-30</div>
 </div>
 @* <div style="font-size: 0.6em; color: aliceblue; text-align:left;"><br /><br />ver: 0.0.12</div> *@
 
