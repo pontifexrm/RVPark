@@ -1,7 +1,12 @@
-﻿namespace RVParking.Data
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+
+namespace RVParking.Data
 {
     public class Bkg_Payment
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int PaymentId { get; set; }
         public int UserId { get; set; }
         public int BookingId { get; set; }

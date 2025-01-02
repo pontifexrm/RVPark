@@ -1,7 +1,12 @@
-﻿namespace RVParking.Data
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+
+namespace RVParking.Data
 {
     public class Bkg_User
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int UserId { get; set; }
         public string UserName { get; set; } = string.Empty;
         public string UserFirstName { get; set; } = string.Empty;

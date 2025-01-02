@@ -9,6 +9,11 @@ namespace RVParking.Data
         public string Country { get; set; } = string.Empty;
         public string FirstNames { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
+        public string UserAddress { get; set; } = string.Empty;
+        public string UserState { get; set; } = string.Empty;
+        public string UserZip { get; set; } = string.Empty;
+        public string UserStatus { get; set; } = string.Empty;
+        public string UserPassword { get; set; } = string.Empty;
 
     }
 

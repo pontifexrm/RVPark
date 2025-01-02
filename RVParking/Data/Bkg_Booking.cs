@@ -1,9 +1,13 @@
-﻿using System.Diagnostics.Contracts;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.Contracts;
 
 namespace RVParking.Data
 {
     public class Bkg_Booking
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)] 
         public int BookingId { get; set; }
         public int PropertyId { get; set; }
         public int UserId { get; set; }
