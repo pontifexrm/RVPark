@@ -12,8 +12,8 @@ using RVParking.Data;
 namespace RVParking.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250102095222_initialcreate")]
-    partial class initialcreate
+    [Migration("20250103102833_InitalCreate")]
+    partial class InitalCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -536,6 +536,10 @@ namespace RVParking.Migrations
                         .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("UserId"));
+
+                    b.Property<string>("AppUserId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("UserAddress")
                         .IsRequired()

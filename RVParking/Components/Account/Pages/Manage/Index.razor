@@ -8,6 +8,9 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
+@inject ApplicationDbContext ApplicationDbContext
+@inject Bkg_UserService Bkg_UserService 
+
 
 <PageTitle>Profile</PageTitle>
 
@@ -55,6 +58,7 @@
 
 @code {
     private ApplicationUser user = default!;
+    private Bkg_User? bkgUser = default!;
     private string? username;
     private string? phoneNumber;
     private string? firstnames;
@@ -84,6 +88,8 @@
         Input.LastName ??= lastName;
         Input.City ??= city;
         Input.Country ??= country;
+
+        bkgUser = await Bkg_UserService.GetBkgUserByAppUserIdAsync(user.Id);
     }
 
     private async Task OnValidSubmitAsync()
@@ -109,6 +115,27 @@
         {
             RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to update profile.", HttpContext);
             return;
+        }
+        // update bky_user
+        var bkg_User = new Bkg_User
+            {
+                UserEmail = user.Email,
+                UserName = user.Email,
+                AppUserId = user.Id
+            };
+
+        if (bkg_User != null)
+        {
+            bkg_User.UserFirstName = user.FirstNames;
+            bkg_User.UserLastName = user.LastName;
+            bkg_User.UserCity = user.City;
+            bkg_User.UserCountry = user.Country;
+            bkg_User.UserPhone = user.PhoneNumber;
+
+            // Save bkg_User to the database  <<<< TODO: Is create another record
+            await ApplicationDbContext.bkg_Users.AddAsync(bkg_User);
+            await ApplicationDbContext.SaveChangesAsync();
+
         }
 
         await SignInManager.RefreshSignInAsync(user);

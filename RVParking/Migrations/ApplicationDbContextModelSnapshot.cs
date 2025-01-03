@@ -534,6 +534,10 @@ namespace RVParking.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("UserId"));
 
+                    b.Property<string>("AppUserId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<string>("UserAddress")
                         .IsRequired()
                         .HasColumnType("longtext");

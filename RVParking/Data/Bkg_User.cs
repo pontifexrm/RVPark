@@ -8,6 +8,7 @@ namespace RVParking.Data
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int UserId { get; set; }
+        public string AppUserId { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
         public string UserFirstName { get; set; } = string.Empty;
         public string UserLastName { get; set; } = string.Empty;
