@@ -42,6 +42,16 @@
                 <ValidationMessage For="() => Input.LastName" class="text-danger" />
             </div>
             <div class="form-floating mb-3">
+                <InputTextArea @bind-Value="Input.Address" id="Input.Address" class="form-control" placeholder="Enter your Address" />
+                <label for="Input.City" class="form-label">Address</label>
+                <ValidationMessage For="() => Input.Address" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Zip" id="Input.Zip" class="form-control" placeholder="Enter your Zip" />
+                <label for="Input.City" class="form-label">Zip Code</label>
+                <ValidationMessage For="() => Input.Zip" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
                 <InputText @bind-Value="Input.City" id="Input.City" class="form-control" placeholder="Enter your City" />
                 <label for="Input.City" class="form-label">City</label>
                 <ValidationMessage For="() => Input.City" class="text-danger" />
@@ -58,11 +68,13 @@
 
 @code {
     private ApplicationUser user = default!;
-    private Bkg_User? bkgUser = default!;
+    private Bkg_User? bkg_User = default!;
     private string? username;
     private string? phoneNumber;
     private string? firstnames;
     private string? lastName;
+    private string? address;
+    private string? zip;
     private string? city;
     private string? country;
 
@@ -86,10 +98,12 @@
         Input.PhoneNumber ??= phoneNumber;
         Input.FirstNames ??= firstnames;
         Input.LastName ??= lastName;
+        Input.Address ??= address;
+        Input.Zip ??= zip;
         Input.City ??= city;
         Input.Country ??= country;
 
-        bkgUser = await Bkg_UserService.GetBkgUserByAppUserIdAsync(user.Id);
+        bkg_User = await Bkg_UserService.GetBkgUserByAppUserIdAsync(user.Id);
     }
 
     private async Task OnValidSubmitAsync()
@@ -105,6 +119,8 @@
         }
         user.FirstNames = Input.FirstNames;
         user.LastName = Input.LastName;
+        user.UserAddress = Input.Address;
+        user.UserZip = Input.Zip;  
         user.City = Input.City;
         user.Country = Input.Country;
 
@@ -116,24 +132,18 @@
             RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to update profile.", HttpContext);
             return;
         }
-        // update bky_user
-        var bkg_User = new Bkg_User
-            {
-                UserEmail = user.Email,
-                UserName = user.Email,
-                AppUserId = user.Id
-            };
 
         if (bkg_User != null)
         {
             bkg_User.UserFirstName = user.FirstNames;
             bkg_User.UserLastName = user.LastName;
+            bkg_User.UserAddress = user.UserAddress;
+            bkg_User.UserZip = user.UserZip;
             bkg_User.UserCity = user.City;
             bkg_User.UserCountry = user.Country;
             bkg_User.UserPhone = user.PhoneNumber;
 
-            // Save bkg_User to the database  <<<< TODO: Is create another record
-            await ApplicationDbContext.bkg_Users.AddAsync(bkg_User);
+            // Save bkg_User to the database  
             await ApplicationDbContext.SaveChangesAsync();
 
         }
@@ -154,6 +164,12 @@
 
         [Display(Name = "Last Name")]
         public string? LastName { get; set; }
+
+        [Display(Name = "Address")]
+        public string? Address { get; set; }
+        
+        [Display(Name = "Zip")]
+        public string? Zip { get; set; }
 
         [Display(Name = "City")]
         public string? City { get; set; }
