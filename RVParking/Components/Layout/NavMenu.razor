@@ -25,11 +25,11 @@
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
+@*         <div class="nav-item px-3">
             <NavLink class="nav-link" href="booking">
                 <span class="bi bi-book-nav-menu" aria-hidden="true"></span> Bookings
             </NavLink>
-        </div>
+        </div> *@
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="things">
@@ -54,23 +54,24 @@
         </div> *@
 
         <AuthorizeView>
-            <Authorized> 
-                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Profile @context.User.Identity?.Name
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="mybooking">
+                        <span class="bi bi-book-nav-menu" aria-hidden="true"></span> My Bookings 
                     </NavLink>
                 </div>
-                <div class="nav-item px-3">
-                    <form action="Account/Logout" method="post">
-                        <AntiforgeryToken />
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                        </button>
-                    </form>
+                 <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Manage">
+                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span>@context.User.Identity?.Name
+                    </NavLink>
                 </div>
             </Authorized>
             <NotAuthorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="booking">
+                        <span class="bi bi-book-nav-menu" aria-hidden="true"></span> Booking Info
+                    </NavLink>
+                </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Register">
                         <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
@@ -83,8 +84,31 @@
                 </div>
             </NotAuthorized>
         </AuthorizeView>
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="admin">
+                        <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Admin Panel
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken />
+@*                         <input type="hidden" name="ReturnUrl" value="@currentUrl"  />  After Logout return to Home Nav Itwm as the old Auth page was still showing*@
+                        <input type="hidden" name="ReturnUrl" value="" />
+                            <button type="submit" class="nav-link">
+                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                        </button>
+                    </form>
+                </div>
+            </Authorized>
+         </AuthorizeView>
     </nav>
-    <div style="font-size: 0.6em; color: aliceblue; text-align:center;"><br /><br />ver: 0.0.18 2024-12-30</div>
+    <div style="font-size: 0.6em; color: aliceblue; text-align:center;"><br /><br />ver: 0.0.19 2025-01-04</div>
 </div>
 @* <div style="font-size: 0.6em; color: aliceblue; text-align:left;"><br /><br />ver: 0.0.12</div> *@
 

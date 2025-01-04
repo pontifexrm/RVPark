@@ -43,7 +43,7 @@ namespace RVParking.Data
         public ICollection<Bkg_Availability> Bkg_Availabilities { get; set; }
         public ICollection<Bkg_Booking> Bkg_Bookings { get; set; }  
 
-        public Bkg_User Bkg_User { get; set; }
+        public Bkg_User? Bkg_User { get; set; }
 
 
     }

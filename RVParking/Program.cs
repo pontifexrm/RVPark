@@ -44,13 +44,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
+
 builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, EmailSender>();
+
+
 
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));

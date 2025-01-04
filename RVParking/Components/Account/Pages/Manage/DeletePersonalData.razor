@@ -9,6 +9,9 @@
 @inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<DeletePersonalData> Logger
+@inject ApplicationDbContext DbContext
+@inject Bkg_UserService Bkg_UserService
+
 
 <PageTitle>Delete Personal Data</PageTitle>
 
@@ -41,6 +44,8 @@
 @code {
     private string? message;
     private ApplicationUser user = default!;
+    private Bkg_User? bkg_User = default!;
+
     private bool requirePassword;
 
     [CascadingParameter]
@@ -54,28 +59,53 @@
         Input ??= new();
         user = await UserAccessor.GetRequiredUserAsync(HttpContext);
         requirePassword = await UserManager.HasPasswordAsync(user);
+
+        bkg_User = await Bkg_UserService.GetBkgUserByAppUserIdAsync(user.Id);
     }
 
-    private async Task OnValidSubmitAsync()
-    {
-        if (requirePassword && !await UserManager.CheckPasswordAsync(user, Input.Password))
-        {
-            message = "Error: Incorrect password.";
-            return;
-        }
+    @code {
+        private async Task OnValidSubmitAsync()  
+        {  
+            if (requirePassword && !await UserManager.CheckPasswordAsync(user, Input.Password))  
+            {  
+                message = "Error: Incorrect password.";  
+                return;  
+            }
+            bool hasBookings = false; bool hasReviews = false;
+           // Check if there are any records in Bkg_Bookings, Bkg_Properties, or Bkg_Reviews for the user  
+           if(bkg_User != null)
+           {
+               hasBookings = await Bkg_UserService.BookingAnyAsync(bkg_User.UserId);
+               hasReviews = await Bkg_UserService.ReviewAnyAsync(bkg_User.UserId);
+           }
 
-        var result = await UserManager.DeleteAsync(user);
-        if (!result.Succeeded)
-        {
-            throw new InvalidOperationException("Unexpected error occurred deleting user.");
-        }
+           if (hasBookings || hasReviews)  
+           {  
+               message = "Error: Cannot delete user with existing bookings, properties, or reviews.";  
+               return;  
+           }  
 
-        await SignInManager.SignOutAsync();
+           var result = await UserManager.DeleteAsync(user);  
+           if (!result.Succeeded)  
+           {  
+               throw new InvalidOperationException("Unexpected error occurred deleting user.");  
+           }  
+           if (bkg_User != null)
+           {
+                var result1 = await Bkg_UserService.DeleteBkgUserAsync(bkg_User.UserId);
+                if (result1 == null)
+                {
+                    throw new InvalidOperationException("Unexpected error occurred deleting bkg user.");
+                }
+           }
+        
+           await SignInManager.SignOutAsync();  
 
-        var userId = await UserManager.GetUserIdAsync(user);
-        Logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);
+           var userId = await UserManager.GetUserIdAsync(user);  
+           Logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);  
 
-        RedirectManager.RedirectToCurrentPage();
+           RedirectManager.RedirectToCurrentPage();  
+       }  
     }
 
     private sealed class InputModel

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RVParking.Migrations
 {
     /// <inheritdoc />
-    public partial class InitalCreate : Migration
+    public partial class initialcreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -347,7 +347,7 @@ namespace RVParking.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     LivingAreaDescription = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Bkg_UserUserId = table.Column<int>(type: "int", nullable: false)
+                    Bkg_UserUserId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -356,8 +356,7 @@ namespace RVParking.Migrations
                         name: "FK_bkg_Properties_bkg_Users_Bkg_UserUserId",
                         column: x => x.Bkg_UserUserId,
                         principalTable: "bkg_Users",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "UserId");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 

@@ -12,8 +12,8 @@ using RVParking.Data;
 namespace RVParking.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250103102833_InitalCreate")]
-    partial class InitalCreate
+    [Migration("20250103211009_initialcreate")]
+    partial class initialcreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -397,7 +397,7 @@ namespace RVParking.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("Bkg_UserUserId")
+                    b.Property<int?>("Bkg_UserUserId")
                         .HasColumnType("int");
 
                     b.Property<string>("City")
@@ -700,9 +700,7 @@ namespace RVParking.Migrations
                 {
                     b.HasOne("RVParking.Data.Bkg_User", "Bkg_User")
                         .WithMany("Bkg_Properties")
-                        .HasForeignKey("Bkg_UserUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("Bkg_UserUserId");
 
                     b.Navigation("Bkg_User");
                 });
