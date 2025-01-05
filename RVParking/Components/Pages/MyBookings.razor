@@ -1,12 +1,33 @@
-﻿@page "/mybooking"
+﻿@page "/mybookings"
 @rendermode InteractiveServer
 
 
 <PageTitle>RV Park My Bookings</PageTitle>
 
-<h1>My Bookings</h1>
-<p></p>
-<div class="card" style="max-width: 500px">
+
+<div class="tabs"> 
+    <button class="@(activeTab == "Tab1" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab1"))">New Booking</button>
+    <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">Existing Bkgs</button>
+    
+</div>
+<hr />
+<div id="Tab1" class="tabcontent" style="@(activeTab == "Tab1" ? "display: block;" : "display: none;")"> 
+    <h3>New Booking</h3> 
+    <p>Make a new booking here.</p>
+    <p>****** STILL A WORK IN PROGRESS SORRY ******</p>
+</div>
+
+<div id="Tab2" class="tabcontent" style="@(activeTab == "Tab2" ? "display: block;" : "display: none;")">
+    <h3>Existing Bookings</h3> 
+    <p>Here you can see your existing bookings.</p>
+    <p>****** STILL bloody working on it.... a  WORK IN PROGRESS SORRY ******</p>
+</div>
+
+
+
+
+
+@* <div class="card" style="max-width: 500px">
     <div class="card-sm" style="max-width: 500px; text-align: center;">
 
         <img src="images/RVParkBlkAA.png" alt="https://via.placeholder.com/100" max-width="300px" ; class="card-sm" />
@@ -24,9 +45,32 @@
         <p>However if you are a NZMCA Member then please use the <br /> <a href="./ContactUs">"Contact Us"</a> <br />page to arrange your booking with membership discount.</p>
     </div>
 </div>
-
+ *@
 
 
 @code {
+    private string activeTab = "Tab1";
 
+    // private void OpenTab(string tabName) 
+    // { 
+    //     activeTab = tabName;
+
+    //     // var tabContents = document.GetElementsByClassName("tabcontent"); 
+    //     // foreach (var tabContent in tabContents) 
+    //     // {
+    //     //     tabContent.Style.Display = "none"; 
+    //     // } 
+    //     // var tabLinks = document.GetElementsByClassName("tablinks"); 
+    //     // foreach (var tabLink in tabLinks) 
+    //     // {
+    //     //     tabLink.ClassName = tabLink.ClassName.Replace(" active", ""); 
+    //     // }
+    //     // document.GetElementById(tabName).Style.Display = "block"; 
+    //     // document.GetElementById(tabName).ClassName += " active"; 
+    // }
+
+    private void SetActiveTab(string tabName)
+    {
+        activeTab = tabName;
+    }
 }

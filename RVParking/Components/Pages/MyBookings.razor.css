@@ -1,0 +1,40 @@
+﻿.tabs {
+    overflow: hidden;
+    background-color: #f4f4f4;
+}
+
+    .tabs button {
+        background-color: inherit;
+        float: left;
+        border: none;
+        outline: none;
+        border-radius: 5px;
+        padding: 2px 2px;
+        margin: 2px 2px;
+        cursor: pointer;
+        padding: 14px 16px;
+        transition: 0.3s;
+    }
+
+        .tabs button:hover {
+            background-color: #4CAF50;
+        }
+
+        .tabs button.active {
+            background-color: #4CAF50;
+            color:aliceblue
+        }
+
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border-top: none;
+}
+
+    .tabcontent[style*='display: block;'] {
+        display: block;
+    }
+    .tabcontent.active {
+        display: block;
+    }
+
