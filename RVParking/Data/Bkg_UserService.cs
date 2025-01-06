@@ -41,4 +41,18 @@ public class Bkg_UserService
         return buser;
     }
 
+    public bool Bkg_AvailableAllSync(DateTime Fmdate, DateTime Todate)
+    {
+        if (_context.bkg_Availabilities == null)
+        {
+            return false;
+        }
+        bool res = _context.bkg_Availabilities
+            .Where(b => b.DateAvailable >= Fmdate && b.DateAvailable <= Todate)
+            .All(b => b.Available);
+        return  res;
+        // TODO: this return true even where there are NO records in the table.
+
+    }
+
 }

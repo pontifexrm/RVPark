@@ -1,26 +1,59 @@
 ﻿@page "/mybookings"
 @rendermode InteractiveServer
-
-
 <PageTitle>RV Park My Bookings</PageTitle>
+
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.EntityFrameworkCore
+@using RVParking.Data
+
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject NavigationManager NavigationManager
+@inject ApplicationDbContext ApplicationDbContext
+@inject Bkg_UserService Bkg_UserService
 
 
 <div class="tabs"> 
     <button class="@(activeTab == "Tab1" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab1"))">New Booking</button>
-    <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">Existing Bkgs</button>
-    
+    <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">Current Bookings</button>
+    <button class="@(activeTab == "Tab3" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab3"))">Past Bookings</button>
+
 </div>
-<hr />
 <div id="Tab1" class="tabcontent" style="@(activeTab == "Tab1" ? "display: block;" : "display: none;")"> 
-    <h3>New Booking</h3> 
-    <p>Make a new booking here.</p>
-    <p>****** STILL A WORK IN PROGRESS SORRY ******</p>
+    <h4>New Booking for <b>@BkgType</b></h4> 
+    <div class="form-group" style="display:flex;flex-direction:row;">
+        <div class="form-group" style="max-width: 25%; text-align:center; margin-left: 2%">
+            <label for="fmdate">Arriving</label>
+            <InputDate @bind-Value=Fmdate class="form-control" id="fmdate" />
+            @* <ValidationMessage For="() => emailMessage.Fmdate" /> *@
+        </div>
+        <div class="form-group" style="max-width: 25%; text-align:center; margin-left: 2%;">
+            <label for="todate">Departing</label>
+            <InputDate @bind-Value=Todate class="form-control" id="todate" />
+            @* <ValidationMessage For="() => emailMessage.Todate" /> *@
+        </div>
+    </div>
+    <div>
+        <button class="btn btn-primary" style="min-width: 40%; align-content: center;" @onclick="CheckBkgRequest">Request Booking</button>
+    </div>
 </div>
 
 <div id="Tab2" class="tabcontent" style="@(activeTab == "Tab2" ? "display: block;" : "display: none;")">
     <h3>Existing Bookings</h3> 
     <p>Here you can see your existing bookings.</p>
     <p>****** STILL bloody working on it.... a  WORK IN PROGRESS SORRY ******</p>
+</div>
+<div id="Tab2" class="tabcontent" style="@(activeTab == "Tab3" ? "display: block;" : "display: none;")">
+    <h3>Past Bookings</h3>
+    <p>Here are the bookings you have had in the past.</p>
+    <p>****** W. I. P. ******</p>
 </div>
 
 
@@ -50,27 +83,46 @@
 
 @code {
     private string activeTab = "Tab1";
+    private string BkgType = "RVPark On Fitz";
+    public DateTime Fmdate { get; set; } = DateTime.Now.Date;
 
-    // private void OpenTab(string tabName) 
-    // { 
-    //     activeTab = tabName;
+    public DateTime Todate { get; set; } = DateTime.Now.Date;
 
-    //     // var tabContents = document.GetElementsByClassName("tabcontent"); 
-    //     // foreach (var tabContent in tabContents) 
-    //     // {
-    //     //     tabContent.Style.Display = "none"; 
-    //     // } 
-    //     // var tabLinks = document.GetElementsByClassName("tablinks"); 
-    //     // foreach (var tabLink in tabLinks) 
-    //     // {
-    //     //     tabLink.ClassName = tabLink.ClassName.Replace(" active", ""); 
-    //     // }
-    //     // document.GetElementById(tabName).Style.Display = "block"; 
-    //     // document.GetElementById(tabName).ClassName += " active"; 
-    // }
+    private bool allDatesAvailable  = false;
 
     private void SetActiveTab(string tabName)
     {
         activeTab = tabName;
+    }
+    private void CheckBkgRequest()
+    {
+        // LINQ query to check if all dates in the range are available
+        //var result =  Bkg_UserService.Bkg_AvailableAllSync(Fmdate, Todate);
+        if (ApplicationDbContext.bkg_Availabilities == null)
+        {
+            allDatesAvailable = false;
+        }
+        else
+        {
+            var recordsInRange =  ApplicationDbContext.bkg_Availabilities
+                                .Where(b => b.DateAvailable <= Fmdate && b.DateAvailable <= Todate)
+                                .ToList();
+            if (recordsInRange.Count() == 0)  
+            {
+                allDatesAvailable = false;
+            }
+            else
+            {
+                // check number of records returned is same as number of days in range
+                // see if any are Not available
+                allDatesAvailable = false;
+            }
+        }
+
+      //  var recordsInRange = ApplicationDbContext.bkg_Availabilities.Where(b => b.DateAvailable <= Fmdate && b.DateAvailable <= Todate).ToListAsync();
+
+
+   
+
     }
 }
