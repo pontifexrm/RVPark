@@ -1,0 +1,59 @@
+﻿.tabs {
+    overflow: hidden;
+    background-color: #f4f4f4;
+}
+
+    .tabs button {
+        background-color: inherit;
+        float: left;
+        border: none;
+        outline: none;
+        border-radius: 5px;
+        padding: 6px 6px;
+        margin: 2px 2px;
+        cursor: pointer;      
+        transition: 0.3s;
+    }
+
+        .tabs button:hover {
+            background-color: #4CAF50;
+        }
+
+        .tabs button.active {
+            background-color: #4CAF50;
+            color:aliceblue
+        }
+
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border-top: none;
+}
+
+    .tabcontent[style*='display: block;'] {
+        display: block;
+    }
+    .tabcontent.active {
+        display: block;
+    }
+
+.form-control:focus {
+    outline: 2px solid #4CAF50; /* Change the color and width of the outline */
+    outline-offset: 2px; /* Offset the outline from the border */
+    box-shadow: 0 0 5px rgb(76, 255, 0); /* Add a shadow effect */
+}
+.custom-input-date {
+    width: 200px;
+    padding: 10px;
+    border: 2px solid #007BFF;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+    .custom-input-date:focus {
+        border-color: #0056b3;
+        box-shadow: 0 0 5px rgba(0, 86, 179, 0.5);
+        outline: none;
+    }
