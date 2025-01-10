@@ -66,8 +66,192 @@
 </div>
 <div id="Tab5" class="tabcontent" style="@(activeTab == "Tab5" ? "display: block;" : "display: none;")">
     <h3>Property Maintenance</h3>
-    <p>Here are the bookings you have had in the past.</p>
-    <p>****** W. I. P. ******</p>
+    <button class="btn btn-primary" @onclick="OpenAddModal">Add New Property</button>
+    <div style="max-height: 80%; overflow-y: auto;">
+        @foreach (var property in BkgProperties)
+        {
+            <div class="card mb-2">
+                <div class="card-body">
+                    <h5 class="card-title">@property.Name</h5>
+                    <p class="card-text">
+                        <strong>Description:</strong> @property.Description<br />
+                        <strong>Address:</strong> @property.Address, @property.City, @property.State, @property.Zip, @property.Country<br />
+                        <strong>Price Per Period:</strong> @property.PricePerPeriod.ToString("c") <br />
+                        <strong>Max Guests:</strong> @property.MaxGuestNbr.ToString("##") &nbsp;
+                        <strong>Max RV Length:</strong> @property.MaxRVLength.ToString("#.#") &nbsp;
+                        <strong>Max Park Width:</strong> @property.MaxParkWidth.ToString("#.#")<br />
+                        <label for="HasElectic">     Has Power: </label>
+                            <InputCheckbox @bind-Value="property.HasElectric" />
+                        &nbsp; Max Amp: @property.MaxAmp &nbsp;
+                        <label for="HasWifi"> Has Wifi: </label>
+                        <InputCheckbox @bind-Value="property.HasWifi" /><br />
+                        <label for="HasWater"> Has Pottable Water: </label>
+                            <InputCheckbox @bind-Value="property.HasWater" />
+                        <label for="HasGrayWater"> GrayWater waste: </label>
+                            <InputCheckbox @bind-Value="property.HasElectric" />
+                        <label for="HasSewer"> Has Sewer: </label>
+                        <InputCheckbox @bind-Value="property.HasSewer" /><br />
+                        <label for="HasWifi"> Has Wifi: </label>
+                        <InputCheckbox @bind-Value="property.HasWifi" />
+                        <label for="HasEVCharge"> EV Charging: </label>
+                        <InputCheckbox @bind-Value="property.HasEVCharge" />
+                        CnnType: @property.EVChargeType<br />
+
+
+@*                         <strong>Pet Situation:</strong> @property.PetSituation<br />
+                        <strong>Has Bathroom:</strong> @property.HasBathroom<br />
+                        <strong>Has Laundry:</strong> @property.HasLaundry<br />
+                        <strong>Has Kitchenette:</strong> @property.HasKitchenette<br />
+                        <strong>Has Bedroom:</strong> @property.HasBedroom<br />
+                        <strong>Has Living Area:</strong> @property.HasLivingArea<br />
+                        <strong>Has Off-Street Car Park:</strong> @property.HasOffStreetCarPark<br />
+ *@ @*                         <strong>Kitchen Description:</strong> @property.KitchenDescription<br />
+                        <strong>Bedroom Description:</strong> @property.BedroomDescription<br />
+                        <strong>Bathroom Description:</strong> @property.BathroomDescription<br />
+                        <strong>Living Area Description:</strong> @property.LivingAreaDescription<br /> *@
+                    </p>
+                    <button class="btn btn-warning" @onclick="() => OpenEditModal(property)">Edit</button>
+                    <button class="btn btn-danger" @onclick="() => DeleteProperty(property.PropertyId)">Delete</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<!-- Modal for Add/Edit Property -->
+<div class="modal fade @(isModalOpen ? "show d-block" : "")" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" @onclick="CloseModal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button> &nbsp;&nbsp;&nbsp;
+                <h5 class="modal-title">@modalTitle</h5>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@currentProperty" OnValidSubmit="SaveProperty">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <InputText id="name" class="form-control" @bind-Value="currentProperty.Name" />
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <InputTextArea id="description" class="form-control" @bind-Value="currentProperty.Description" />
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <InputText id="address" class="form-control" @bind-Value="currentProperty.Address" />
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <InputText id="city" class="form-control" @bind-Value="currentProperty.City" />
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <InputText id="state" class="form-control" @bind-Value="currentProperty.State" />
+                    </div>
+                    <div class="form-group">
+                        <label for="zip">Zip</label>
+                        <InputText id="zip" class="form-control" @bind-Value="currentProperty.Zip" />
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <InputText id="country" class="form-control" @bind-Value="currentProperty.Country" />
+                    </div>
+                    <div class="form-group">
+                        <label for="pricePerPeriod">Price Per Period</label>
+                        <InputNumber id="pricePerPeriod" class="form-control" @bind-Value="currentProperty.PricePerPeriod" />
+                    </div>
+                    <div class="form-group">
+                        <label for="maxGuestNbr">Max Guests</label>
+                        <InputNumber id="maxGuestNbr" class="form-control" @bind-Value="currentProperty.MaxGuestNbr" />
+                    </div>
+                    <div class="form-group">
+                        <label for="maxRVLength">Max RV Length</label>
+                        <InputNumber id="maxRVLength" class="form-control" @bind-Value="currentProperty.MaxRVLength" />
+                    </div>
+                    <div class="form-group">
+                        <label for="maxParkWidth">Max Park Width</label>
+                        <InputNumber id="maxParkWidth" class="form-control" @bind-Value="currentProperty.MaxParkWidth" />
+                    </div>
+                    <div class="form-group">
+                        <label for="maxAmp">Max Amp</label>
+                        <InputNumber id="maxAmp" class="form-control" @bind-Value="currentProperty.MaxAmp" />
+                    </div>
+                    <div class="form-group">
+                        <label for="hasWater">Has Water</label>
+                        <InputCheckbox id="hasWater" class="form-control" @bind-Value="currentProperty.HasWater" />
+                    </div>
+                    <div class="form-group">
+                        <label for="hasSewer">Has Sewer</label>
+                        <InputCheckbox id="hasSewer" class="form-control" @bind-Value="currentProperty.HasSewer" />
+                    </div>
+                    <div class="form-group">
+                        <label for="hasElectric">Has Electric</label>
+                        <InputCheckbox id="hasElectric" class="form-control" @bind-Value="currentProperty.HasElectric" />
+                    </div>
+                    <div class="form-group">
+                        <label for="hasWifi">Has Wifi</label>
+                        <InputCheckbox id="hasWifi" class="form-control" @bind-Value="currentProperty.HasWifi" />
+                    </div>
+                    <div class="form-group">
+                        <label for="hasEVCharge">Has EV Charge</label>
+                        <InputCheckbox id="hasEVCharge" class="form-control" @bind-Value="currentProperty.HasEVCharge" />
+                    </div>
+                    <div class="form-group">
+                        <label for="evChargeType">EV Charge Type</label>
+                        <InputText id="evChargeType" class="form-control" @bind-Value="currentProperty.EVChargeType" />
+                    </div>
+                    <div class="form-group">
+                        <label for="petSituation">Pet Situation</label>
+                        <InputText id="petSituation" class="form-control" @bind-Value="currentProperty.PetSituation" />
+                    </div>
+                    <div class="form-group">
+                        <label for="hasBathroom">Has Bathroom</label>
+                        <InputCheckbox id="hasBathroom"  @bind-Value="currentProperty.HasBathroom" />
+                    </div>
+                    <div class="form-group">
+                        <label for="hasLaundry">Has Laundry</label>
+                        <InputCheckbox id="hasLaundry" class="form-control" @bind-Value="currentProperty.HasLaundry" />
+                    </div>
+                    <div class="form-group">
+                        <label for="hasKitchenette">Has Kitchenette</label>
+                        <InputCheckbox id="hasKitchenette" class="form-control" @bind-Value="currentProperty.HasKitchenette" />
+                    </div>
+                    <div class="form-group">
+                        <label for="hasBedroom">Has Bedroom</label>
+                        <InputCheckbox id="hasBedroom" class="form-control" @bind-Value="currentProperty.HasBedroom" />
+                    </div>
+                    <div class="form-group">
+                        <label for="hasLivingArea">Has Living Area</label>
+                        <InputCheckbox id="hasLivingArea" class="form-control" @bind-Value="currentProperty.HasLivingArea" />
+                    </div>
+                    <div class="form-group">
+                        <label for="hasOffStreetCarPark">Has Off-Street Car Park</label>
+                        <InputCheckbox id="hasOffStreetCarPark" class="form-control" @bind-Value="currentProperty.HasOffStreetCarPark" />
+                    </div>
+                    <div class="form-group">
+                        <label for="kitchenDescription">Kitchen Description</label>
+                        <InputText id="kitchenDescription" class="form-control" @bind-Value="currentProperty.KitchenDescription" />
+                    </div>
+                    <div class="form-group">
+                        <label for="bedroomDescription">Bedroom Description</label>
+                        <InputText id="bedroomDescription" class="form-control" @bind-Value="currentProperty.BedroomDescription" />
+                    </div>
+                    <div class="form-group">
+                        <label for="bathroomDescription">Bathroom Description</label>
+                        <InputText id="bathroomDescription" class="form-control" @bind-Value="currentProperty.BathroomDescription" />
+                    </div>
+                    <div class="form-group">
+                        <label for="livingAreaDescription">Living Area Description</label>
+                        <InputText id="livingAreaDescription" class="form-control" @bind-Value="currentProperty.LivingAreaDescription" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
 </div>
 <div id="Tab6" class="tabcontent" style="@(activeTab == "Tab6" ? "display: block;" : "display: none;")">
     <h4>Create Update or Delete Bkg_Availability Records</h4>
@@ -83,7 +267,7 @@
         <div class="form-group" style="max-width: 60%; text-align:center;">
             <label for="bkgType">Select Property</label>
             <select class="form-control" id="bkgType" @bind="BkgType">
-                @foreach (var property in BkgProperties)
+                @foreach (var property in BkgPropertiesAvail)
                 {
                     <option value="@property.PropertyId">@property.Name</option>
                 }
@@ -138,48 +322,24 @@
 
 
 
-
-@* <div class="card" style="max-width: 500px">
-    <div class="card-sm" style="max-width: 500px; text-align: center;">
-
-        <img src="images/RVParkBlkAA.png" alt="https://via.placeholder.com/100" max-width="300px" ; class="card-sm" />
-        <br />
-        <a href="https://campable.com/locations/5137171604307968" color="white" text-align="center" target="_blank">RVPark On Fitz</a>
-        <p>We manage your bookings through this web site where you can see availablity, make and manage your bookings.</p>
-        <p>****** STILL A WORK IN PROGRESS SORRY ******</p>
-    </div>
-</div>
-<div class="card" style="max-width: 500px">
-    <div class="card-sm" style="max-width: 500px; text-align: center;">
-        <br />
-
-        <img src="images/NZMCALogoA.png" alt="https://via.placeholder.com/100" class="card-sm" />
-        <p>However if you are a NZMCA Member then please use the <br /> <a href="./ContactUs">"Contact Us"</a> <br />page to arrange your booking with membership discount.</p>
-    </div>
-</div>
- *@
-
-
 @code {
-    private string activeTab = "Tab6";
+    private string activeTab = "Tab5";
     private string BkgType = "RVPark On Fitz";
     private string isAvail = "Yes";
     public DateTime Fmdate { get; set; } = DateTime.Now.Date;
-
     public DateTime Todate { get; set; } = DateTime.Now.Date;
-
     private bool allDatesAvailable = false;
     private string toDelete = "no";
     private string status = string.Empty;
-    private List<Bkg_Property> BkgProperties = new List<Bkg_Property>();
-
+    private List<Bkg_Property> BkgPropertiesAvail = new List<Bkg_Property>();
     protected override async Task OnInitializedAsync()
     {
-        BkgProperties = await ApplicationDbContext.bkg_Properties.ToListAsync();
-        if (BkgProperties.Any())
+        BkgPropertiesAvail = await ApplicationDbContext.bkg_Properties.ToListAsync();
+        if (BkgPropertiesAvail.Any())
         {
-            BkgType = BkgProperties.First().PropertyId.ToString();
+            BkgType = BkgPropertiesAvail.First().PropertyId.ToString();
         }
+        BkgProperties = await ApplicationDbContext.bkg_Properties.ToListAsync();
     }
     private void OnBkgTypeChange(ChangeEventArgs e)
     {
@@ -187,7 +347,6 @@
         // Update other fields based on the selected BkgType
         // For example, you can fetch additional data from the database and update the UI
     }
-
     private void SetActiveTab(string tabName)
     {
         activeTab = tabName;
@@ -216,7 +375,6 @@
             // var res1 =  ApplicationDbContext.SaveChangesAsync();
         }
     }
-
     private async Task CrudBkBkgAvailablilty()
     {
         if (toDelete == "YES")
@@ -255,6 +413,56 @@
         }
         await ApplicationDbContext.SaveChangesAsync();
     }
+    //  Bkg_Property CRUD
+    private List<Bkg_Property> BkgProperties = new List<Bkg_Property>();
+    private Bkg_Property currentProperty = new Bkg_Property();
+    private bool isModalOpen = false;
+    private string modalTitle = "Add New Property";
+    private void OpenAddModal()
+    {
+        currentProperty = new Bkg_Property();
+        modalTitle = "Add New Property";
+        isModalOpen = true;
+    }
+
+    private void OpenEditModal(Bkg_Property property)
+    {
+        currentProperty = property;
+        modalTitle = "Edit Property";
+        isModalOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalOpen = false;
+    }
+
+    private async Task SaveProperty()
+    {
+        if (currentProperty.PropertyId == 0)
+        {
+            ApplicationDbContext.bkg_Properties.Add(currentProperty);
+        }
+        else
+        {
+            ApplicationDbContext.bkg_Properties.Update(currentProperty);
+        }
+        await ApplicationDbContext.SaveChangesAsync();
+        BkgProperties = await ApplicationDbContext.bkg_Properties.ToListAsync();
+        CloseModal();
+    }
+    private async Task DeleteProperty(int propertyId)
+    {
+        var property = await ApplicationDbContext.bkg_Properties.FindAsync(propertyId);
+        if (property != null)
+        {
+            ApplicationDbContext.bkg_Properties.Remove(property);
+            await ApplicationDbContext.SaveChangesAsync();
+            BkgProperties = await ApplicationDbContext.bkg_Properties.ToListAsync();
+        }
+    }
+
+
 }
 
 
