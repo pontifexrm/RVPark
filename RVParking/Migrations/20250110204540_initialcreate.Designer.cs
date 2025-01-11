@@ -12,7 +12,7 @@ using RVParking.Data;
 namespace RVParking.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250103211009_initialcreate")]
+    [Migration("20250110204540_initialcreate")]
     partial class initialcreate
     {
         /// <inheritdoc />
@@ -422,10 +422,13 @@ namespace RVParking.Migrations
                     b.Property<bool>("HasBedroom")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<bool>("HasEBikeCharge")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<bool>("HasEVCharge")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool>("HasElectric")
+                    b.Property<bool>("HasGreyWaterWaste")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("HasKitchenette")
@@ -440,10 +443,13 @@ namespace RVParking.Migrations
                     b.Property<bool>("HasOffStreetCarPark")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool>("HasSewer")
+                    b.Property<bool>("HasPottableWater")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool>("HasWater")
+                    b.Property<bool>("HasPower")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("HasSewer")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("HasWifi")
@@ -463,8 +469,8 @@ namespace RVParking.Migrations
                     b.Property<int>("MaxGuestNbr")
                         .HasColumnType("int");
 
-                    b.Property<int>("MaxParkWidth")
-                        .HasColumnType("int");
+                    b.Property<decimal>("MaxParkWidth")
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<decimal>("MaxRVLength")
                         .HasColumnType("decimal(65,30)");

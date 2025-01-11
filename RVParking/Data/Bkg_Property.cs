@@ -21,14 +21,17 @@ namespace RVParking.Data
         public decimal PricePerPeriod { get; set; } = 0m;
         public int MaxGuestNbr { get; set; } = 1;
         public decimal MaxRVLength { get; set; } = 8m;
-        public int MaxParkWidth { get; set; } = 04;
-        public int MaxAmp { get; set; } = 10;
-        public bool HasWater { get; set; } = false;
+        public decimal MaxParkWidth { get; set; } = 3.8m;
+
+        public bool HasPottableWater { get; set; } = false;
+        public bool HasGreyWaterWaste { get; set; } = false;
         public bool HasSewer { get; set; } = false;
-        public bool HasElectric { get; set; } = false;
+        public bool HasPower { get; set; } = false;
+        public int MaxAmp { get; set; } = 10;
         public bool HasWifi { get; set; } = false;
         public bool HasEVCharge { get; set; } = false;
         public string EVChargeType { get; set; } = string.Empty;
+        public bool HasEBikeCharge { get; set; } = false;
         public string PetSituation { get; set; } = string.Empty;
         public bool HasBathroom { get; set; } = false;
         public bool HasLaundry { get; set; } = false;
