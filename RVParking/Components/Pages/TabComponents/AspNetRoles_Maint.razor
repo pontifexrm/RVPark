@@ -1,5 +1,129 @@
-﻿<h3>AspNetRoles</h3>
+﻿
+
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.EntityFrameworkCore
+@using RVParking.Data
+
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject NavigationManager NavigationManager
+@inject ApplicationDbContext ApplicationDbContext
+@inject Bkg_UserService Bkg_UserService
+
+<h3>AspNetRoles Maintenance</h3>
+
+<div>
+    <button @onclick="AddRole">Add Role</button>
+</div>
+
+<table class="table" style="max-width: 50%;">
+    <thead>
+        <tr>
+            <th>Role Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    @if (roles == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <tbody  >
+            @foreach (var role in roles)
+            {
+                <tr >
+                    <td >@role.Name</td>
+                    <td>
+                        <button  @onclick="() => EditRole(role)">Edit</button>
+                        <button  @onclick="() => DeleteRole(role)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    }
+
+</table>
+@if (roles == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    @if (isEditing)
+    {
+        <div>
+            <input @bind="currentRole.Name" placeholder="Role Name" />
+            <button @onclick="SaveRole">Save</button>
+            <button @onclick="CancelEdit">Cancel</button>
+        </div>
+    }
+}
 
 @code {
+    private List<IdentityRole> roles;
+    private IdentityRole currentRole;
+    private bool isEditing = false;
+    private bool isNew = false;
 
+    protected override async Task OnInitializedAsync()
+    {
+        roles = await ApplicationDbContext.Roles
+                                .Select(r => new IdentityRole { Id = r.Id, Name = r.Name, ConcurrencyStamp = r.ConcurrencyStamp })
+                                .ToListAsync();
+
+        //roles = await ApplicationDbContext.Roles.ToListAsync();
+    }
+
+    private void AddRole()
+    {
+        currentRole = new IdentityRole();
+        isEditing = true;
+        isNew = true;
+    }
+
+    private void EditRole(IdentityRole role)
+    {
+        currentRole = role;
+        isEditing = true;
+        isNew = false;
+    }
+
+    private async Task SaveRole()
+    {
+    //    if (string.IsNullOrWhiteSpace(currentRole.Id))
+        if (isNew)
+        {
+            ApplicationDbContext.Roles.Add(currentRole);
+        }
+        else
+        {
+            ApplicationDbContext.Roles.Update(currentRole);
+        }
+
+        await ApplicationDbContext.SaveChangesAsync();
+        roles = await ApplicationDbContext.Roles.ToListAsync();
+        isEditing = false;
+    }
+
+    private void CancelEdit()
+    {
+        currentRole = null;
+        isEditing = false;
+    }
+
+    private async Task DeleteRole(IdentityRole role)
+    {
+        ApplicationDbContext.Roles.Remove(role);
+        await ApplicationDbContext.SaveChangesAsync();
+        roles = await ApplicationDbContext.Roles.ToListAsync();
+    }
 }

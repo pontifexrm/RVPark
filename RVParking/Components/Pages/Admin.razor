@@ -24,7 +24,7 @@
     <button class="@(activeTab == "Tab1" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab1"))">New Booking</button>
     <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">Current Bookings</button>
     <button class="@(activeTab == "Tab3" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab3"))">Past Bookings</button>
-    <button class="@(activeTab == "Tab4" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab4"))">New Booking</button>
+    <button class="@(activeTab == "Tab4" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab4"))">Role Maintenance</button>
     <button class="@(activeTab == "Tab5" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab5"))">Property Maintenance</button>
     <button class="@(activeTab == "Tab6" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab6"))">Booking Availability</button>
 
@@ -60,10 +60,7 @@
     <p>****** W. I. P. ******</p>
 </div>
 <div id="Tab4" class="tabcontent" style="@(activeTab == "Tab4" ? "display: block;" : "display: none;")">
-    <h3>Past Bookings</h3>
-
-    <p>Here are the bookings you have had in the past.</p>
-    <p>****** W. I. P. ******</p>
+   <RVParking.Components.Pages.TabComponents.AspNetRoles_Maint />
 </div>
 <div id="Tab5" class="tabcontent" style="@(activeTab == "Tab5" ? "display: block;" : "display: none;")">
 @*     <RVParking.Components.Pages.TabComponents.Bkg_Property_Maint BkgProperties="BkgProperties" />
