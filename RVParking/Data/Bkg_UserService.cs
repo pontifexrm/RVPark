@@ -54,5 +54,35 @@ public class Bkg_UserService
         // TODO: this return true even where there are NO records in the table.
 
     }
+    public async Task<List<string>> GetUserRolesAsync(string userId)
+    {
+        var roles = await (from userRole in _context.UserRoles
+                           join role in _context.Roles on userRole.RoleId equals role.Id
+                           where userRole.UserId == userId
+                           select role.Name).ToListAsync();
 
+        return roles;
+    }
+    public async Task RemoveUserRoleAsync(string userId, string roleId)
+    {
+        var userRole = await _context.UserRoles
+            .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+
+        if (userRole != null)
+        {
+            _context.UserRoles.Remove(userRole);
+            await _context.SaveChangesAsync();
+        }
+    }
+    public async Task AddUserRoleAsync(string userId, string roleId)
+    {
+        var userRole = await _context.UserRoles
+            .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+
+        if (userRole != null)
+        {
+            _context.UserRoles.Remove(userRole);
+            await _context.SaveChangesAsync();
+        }
+    }
 }

@@ -13,5 +13,6 @@ namespace RVParking.Data
         public DbSet<Bkg_User>? bkg_Users { get; set; }
         public DbSet<Bkg_Review>? bkg_Reviews { get; set; }
         public DbSet<Contact>? contacts { get; set; }
+
     }
 }

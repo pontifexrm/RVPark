@@ -1,5 +1,175 @@
-﻿<h3>AspNetUserRoles</h3>
+﻿@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.EntityFrameworkCore
+@using RVParking.Data
+
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject NavigationManager NavigationManager
+@inject ApplicationDbContext ApplicationDbContext
+@inject Bkg_UserService Bkg_UserService
+
+<h3>User - Roles Maintenance</h3>
+
+@if (users == null || roles == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Login</th>
+                <th>Roles</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                    <td>
+                        @foreach (var role in userRoles[user.Id])
+                        {
+                            <span>@role</span>
+                            <button @onclick="() => EditUserRoles(user)">Edit</button>
+                            <button @onclick="() => RemoveUserRole(user.Id, role)">Remove</button>
+                            <button @onclick="() => DeleteUser(user)">Delete</button>
+
+                            <br />
+                        }
+                    </td>
+                    <td>
+                        <button @onclick="() => EditUserRoles(user)">Edit</button>
+                        <button @onclick="() => DeleteUser(user)">Delete Role</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button @onclick="AddUserRole">Add User Role</button>
+
+    @if (isEditing)
+    {
+        <EditForm Model="currentUserRole" OnValidSubmit="SaveUserRole">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div>
+                <label>User</label>
+                <InputSelect @bind-Value="currentUserRole.UserId">
+                    @foreach (var user in users)
+                    {
+                        <option value="@user.Id">@user.UserName</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div>
+                <label>Role</label>
+                <InputSelect @bind-Value="currentUserRole.RoleId">
+                    @foreach (var role in roles)
+                    {
+                        <option value="@role.Id">@role.Name</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <button type="submit">Save</button>
+            <button type="button" @onclick="CancelEdit">Cancel</button>
+        </EditForm>
+    }
+}
 
 @code {
+//    private List<IdentityUser> users;
+    private List<ApplicationUser> users;
+//    private List<IdentityRole> roles;
+    private List<IdentityRole> roles;
+    private Dictionary<string, List<string>> userRoles = new();
+    private bool isEditing = false;
+    private UserRoleModel currentUserRole = new();
 
+    protected override async Task OnInitializedAsync()
+    {
+        //users = await UserManager.Users.ToListAsync();
+        users = await ApplicationDbContext.Users.ToListAsync();
+//        roles = await RoleManager.Roles.ToListAsync();
+        roles = await ApplicationDbContext.Roles
+                                .Select(r => new IdentityRole { Id = r.Id, Name = r.Name, ConcurrencyStamp = r.ConcurrencyStamp })
+                                .ToListAsync();
+        foreach (var user in users)
+        {
+            var rolesForUser = await Bkg_UserService.GetUserRolesAsync(user.Id);
+            userRoles[user.Id] = rolesForUser.ToList();
+        }
+    }
+
+    private void EditUserRoles(IdentityUser user)
+    {
+        currentUserRole.UserId = user.Id;
+        currentUserRole.RoleId = userRoles[user.Id].FirstOrDefault();
+        isEditing = true;
+    }
+    private async Task RemoveUserRole(string userId, string roleId)
+    {
+        await Bkg_UserService.RemoveUserRoleAsync(userId, roleId);
+        userRoles[userId].Remove(roleId);
+    }
+
+    private void DeleteUser(IdentityUser user)
+    {
+        // Implement delete logic here
+    }
+
+    private void AddUserRole()
+    {
+        currentUserRole = new UserRoleModel();
+        isEditing = true;
+    }
+
+    private async Task SaveUserRole()
+    {
+        var user = await UserManager.FindByIdAsync(currentUserRole.UserId);
+    //    var role = await RoleManager.FindByIdAsync(currentUserRole.RoleId);
+        var role = await ApplicationDbContext.Roles.FindAsync(currentUserRole.RoleId);
+
+
+        if (user != null && role != null)
+        {
+            var result = await UserManager.AddToRoleAsync(user, role.Name);
+            if (result.Succeeded)
+            {
+                if (!userRoles.ContainsKey(user.Id))
+                {
+                    userRoles[user.Id] = new List<string>();
+                }
+                userRoles[user.Id].Add(role.Name);
+            }
+        }
+
+        isEditing = false;
+    }
+
+    private void CancelEdit()
+    {
+        isEditing = false;
+    }
+
+    private class UserRoleModel
+    {
+        public string UserId { get; set; }
+        public string RoleId { get; set; }
+    }
 }
