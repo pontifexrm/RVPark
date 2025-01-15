@@ -13,8 +13,8 @@
 @inject IEmailSender<ApplicationUser> EmailSender
 @inject NavigationManager NavigationManager
 @inject ApplicationDbContext ApplicationDbContext
-@inject Bkg_UserService bkg_UserService
-
+@* @inject Bkg_UserService bkg_UserService
+ *@
 
 <h4>Create Update or Delete Bkg_Availability Records</h4>
 @if (BkgPropertiesAvail == null || BkgPropertiesAvail.Count == 0)

@@ -60,7 +60,7 @@
         user = await UserAccessor.GetRequiredUserAsync(HttpContext);
         requirePassword = await UserManager.HasPasswordAsync(user);
 
-        bkg_User = await Bkg_UserService.GetBkgUserByAppUserIdAsync(user.Id);
+        bkg_User = await DbContext.GetBkgUserByAppUserIdAsync(user.Id);
     }
 
     @code {
@@ -75,8 +75,8 @@
            // Check if there are any records in Bkg_Bookings, Bkg_Properties, or Bkg_Reviews for the user  
            if(bkg_User != null)
            {
-               hasBookings = await Bkg_UserService.BookingAnyAsync(bkg_User.UserId);
-               hasReviews = await Bkg_UserService.ReviewAnyAsync(bkg_User.UserId);
+                hasBookings = await DbContext.BookingAnyAsync(bkg_User.UserId);
+                hasReviews = await DbContext.ReviewAnyAsync(bkg_User.UserId);
            }
 
            if (hasBookings || hasReviews)  

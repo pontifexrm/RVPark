@@ -10,15 +10,15 @@ public class Bkg_UserService
         _context = context;
     }
 
-    public async Task<Bkg_User?> GetBkgUserByIdAsync(int userId)
-    {
-        return await _context.bkg_Users.FirstOrDefaultAsync(u => u.UserId == userId);
-    }
+    //public async Task<Bkg_User?> GetBkgUserByIdAsync(int userId)
+    //{
+    //    return await _context.bkg_Users.FirstOrDefaultAsync(u => u.UserId == userId);
+    //}
 
-    public async Task<Bkg_User?> GetBkgUserByAppUserIdAsync(string appUserId)
-    {
-        return await _context.bkg_Users.FirstOrDefaultAsync(u => u.AppUserId == appUserId);
-    }
+    //public async Task<Bkg_User?> GetBkgUserByAppUserIdAsync(string appUserId)
+    //{
+    //    return await _context.bkg_Users.FirstOrDefaultAsync(u => u.AppUserId == appUserId);
+    //}
     //AnyAsync(b => b.UserID == user.Id);  
     public async Task<bool> BookingAnyAsync(int userId)
     {
@@ -54,35 +54,35 @@ public class Bkg_UserService
         // TODO: this return true even where there are NO records in the table.
 
     }
-    public async Task<List<string>> GetUserRolesAsync(string userId)
-    {
-        var roles = await (from userRole in _context.UserRoles
-                           join role in _context.Roles on userRole.RoleId equals role.Id
-                           where userRole.UserId == userId
-                           select role.Name).ToListAsync();
+    //public async Task<List<string>> GetUserRolesAsync(string userId)
+    //{
+    //    var roles = await (from userRole in _context.UserRoles
+    //                       join role in _context.Roles on userRole.RoleId equals role.Id
+    //                       where userRole.UserId == userId
+    //                       select role.Name).ToListAsync();
 
-        return roles;
-    }
-    public async Task RemoveUserRoleAsync(string userId, string roleId)
-    {
-        var userRole = await _context.UserRoles
-            .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+    //    return roles;
+    //}
+    //public async Task RemoveUserRoleAsync(string userId, string roleId)
+    //{
+    //    var userRole = await _context.UserRoles
+    //        .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
 
-        if (userRole != null)
-        {
-            _context.UserRoles.Remove(userRole);
-            await _context.SaveChangesAsync();
-        }
-    }
-    public async Task AddUserRoleAsync(string userId, string roleId)
-    {
-        var userRole = await _context.UserRoles
-            .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+    //    if (userRole != null)
+    //    {
+    //        _context.UserRoles.Remove(userRole);
+    //        await _context.SaveChangesAsync();
+    //    }
+    //}
+    //public async Task AddUserRoleAsync(string userId, string roleId)
+    //{
+    //    var userRole = await _context.UserRoles
+    //        .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
 
-        if (userRole != null)
-        {
-            _context.UserRoles.Remove(userRole);
-            await _context.SaveChangesAsync();
-        }
-    }
+    //    if (userRole != null)
+    //    {
+    //        _context.UserRoles.Remove(userRole);
+    //        await _context.SaveChangesAsync();
+    //    }
+    //}
 }

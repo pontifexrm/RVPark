@@ -9,7 +9,7 @@
 @inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 @inject ApplicationDbContext ApplicationDbContext
-@inject Bkg_UserService Bkg_UserService 
+@* @inject Bkg_UserService Bkg_UserService  *@
 
 
 <PageTitle>Profile</PageTitle>
@@ -103,7 +103,7 @@
         Input.City ??= city;
         Input.Country ??= country;
 
-        bkg_User = await Bkg_UserService.GetBkgUserByAppUserIdAsync(user.Id);
+        bkg_User = await ApplicationDbContext.GetBkgUserByAppUserIdAsync(user.Id);
     }
 
     private async Task OnValidSubmitAsync()

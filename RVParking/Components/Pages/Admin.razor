@@ -23,9 +23,10 @@
 <div class="tabs">
     <button class="@(activeTab == "Tab1" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab1"))">New Booking</button>
     <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">Current Bookings</button>
-    <button class="@(activeTab == "Tab3" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab3"))">User with Role Maintenance</button>
-    <button class="@(activeTab == "Tab4" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab4"))">Role Maintenance</button>
-    <button class="@(activeTab == "Tab5" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab5"))">Property Maintenance</button>
+    <button class="@(activeTab == "Tab7" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab7"))">Past Bookings</button>
+    <button class="@(activeTab == "Tab3" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab3"))">User/Role Maint.</button>
+    <button class="@(activeTab == "Tab4" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab4"))">Role Maint.</button>
+    <button class="@(activeTab == "Tab5" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab5"))">Property Maint.</button>
     <button class="@(activeTab == "Tab6" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab6"))">Booking Availability</button>
 
 </div>
@@ -64,16 +65,18 @@
 @*     <RVParking.Components.Pages.TabComponents.Bkg_Property_Maint BkgProperties="BkgProperties" />
  *@    <RVParking.Components.Pages.TabComponents.Bkg_Property_Maint  />
 </div>
-
-
 <div id="Tab6" class="tabcontent" style="@(activeTab == "Tab6" ? "display: block;" : "display: none;")">
 @*     <RVParking.Components.Pages.TabComponents.Bkg_Availability_Maint BkgPropertiesAvail="BkgProperties" />*@
     <RVParking.Components.Pages.TabComponents.Bkg_Availability_Maint  />
 </div>
-
+<div id="Tab7" class="tabcontent" style="@(activeTab == "Tab7" ? "display: block;" : "display: none;")">
+    <h3>Past Bookings</h3>
+    <p>Here you can see past bookings.</p>
+    <p>****** STILL a  WORK IN PROGRESS SORRY ******</p>
+</div>
 
 @code {
-    private string activeTab = "Tab5";
+    private string activeTab = "Tab3";
     private string BkgType = "RVPark On Fitz";
     private string isAvail = "Yes";
     public DateTime Fmdate { get; set; } = DateTime.Now.Date;

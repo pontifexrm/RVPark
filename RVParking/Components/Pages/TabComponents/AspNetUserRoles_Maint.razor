@@ -13,8 +13,8 @@
 @inject IEmailSender<ApplicationUser> EmailSender
 @inject NavigationManager NavigationManager
 @inject ApplicationDbContext ApplicationDbContext
-@inject Bkg_UserService Bkg_UserService
-
+@* @inject Bkg_UserService Bkg_UserService
+ *@
 <h3>User - Roles Maintenance</h3>
 
 @if (users == null || roles == null)
@@ -111,7 +111,7 @@ else
                                 .ToListAsync();
         foreach (var user in users)
         {
-            var rolesForUser = await Bkg_UserService.GetUserRolesAsync(user.Id);
+            var rolesForUser = await ApplicationDbContext.GetUserRolesAsync(user.Id);
             userRoles[user.Id] = rolesForUser.ToList();
         }
     }
@@ -124,7 +124,7 @@ else
     }
     private async Task RemoveUserRole(string userId, string roleId)
     {
-        await Bkg_UserService.RemoveUserRoleAsync(userId, roleId);
+        await ApplicationDbContext.RemoveUserRoleAsync(userId, roleId);
         userRoles[userId].Remove(roleId);
     }
 
