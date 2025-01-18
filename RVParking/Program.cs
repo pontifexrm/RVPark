@@ -54,7 +54,9 @@ builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, EmailSender>();
 
-
+// Register IHttpContextAccessor and the custom service
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<HttpContextAccessorService>();
 
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));

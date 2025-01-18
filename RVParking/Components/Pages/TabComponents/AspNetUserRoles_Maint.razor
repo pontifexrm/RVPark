@@ -26,10 +26,10 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Login</th>
-                <th>Roles</th>
-                <th>Actions</th>
+                <th>User Name (Login)</th>
+                @* <th>Login</th> *@
+                <th>Roles and Actions</th>
+@*                 <th>Actions</th> *@
             </tr>
         </thead>
         <tbody>
@@ -37,22 +37,23 @@ else
             {
                 <tr>
                     <td>@user.UserName</td>
-                    <td>@user.Email</td>
+                 @*    <td>@user.Email</td> *@
                     <td>
                         @foreach (var role in userRoles[user.Id])
                         {
                             <span>@role</span>
                             <button @onclick="() => EditUserRoles(user)">Edit</button>
-                            <button @onclick="() => RemoveUserRole(user.Id, role)">Remove</button>
-                            <button @onclick="() => DeleteUser(user)">Delete</button>
+                            <button @onclick="() => RemoveUserRole(user.Id, role)">Del.</button> 
+                            @* <button @onclick="() => DeleteUser(user)">Del.</button> *@
 
                             <br />
                         }
+                        <button @onclick="() => AddUserRole(user.Id)">Add User Role</button>
                     </td>
-                    <td>
+@*                     <td>
                         <button @onclick="() => EditUserRoles(user)">Edit</button>
                         <button @onclick="() => DeleteUser(user)">Delete Role</button>
-                    </td>
+                    </td> *@
                 </tr>
             }
         </tbody>
@@ -138,7 +139,11 @@ else
         currentUserRole = new UserRoleModel();
         isEditing = true;
     }
-
+    private void AddUserRole(string userId)
+    {
+        currentUserRole.UserId = userId;
+        isEditing = true;
+    }
     private async Task SaveUserRole()
     {
         var user = await UserManager.FindByIdAsync(currentUserRole.UserId);
