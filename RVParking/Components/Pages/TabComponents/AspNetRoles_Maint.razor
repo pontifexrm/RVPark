@@ -20,14 +20,18 @@
 <h3>AspNetRoles Maintenance</h3>
 
 <div>
-    <button @onclick="AddRole">Add Role</button>
+    <button class="btn btn-primary" @onclick="AddRole">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2" />
+        </svg>Add Role
+    </button>
 </div>
 
-<table class="table" style="max-width: 50%;">
+<table class="table" style="max-width: 80%;">
     <thead>
         <tr>
-            <th>Role Name</th>
-            <th>Actions</th>
+            <th style="width: 70%;">Role Name</th>
+            <th >Actions</th>
         </tr>
     </thead>
 
@@ -41,10 +45,19 @@
             @foreach (var role in roles)
             {
                 <tr >
-                    <td >@role.Name</td>
+                    <td style="width: 70%;">@role.Name</td>
                     <td>
-                        <button  @onclick="() => EditRole(role)">Edit</button>
-                        <button  @onclick="() => DeleteRole(role)">Delete</button>
+                        <button class="btn btn-primary" @onclick="() => EditRole(role)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
+                        <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
+                            </svg>
+                        </button>
+  
+                        <button class="btn btn-primary" @onclick="() => DeleteRole(role)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"  viewBox="0 0 16 16">
+                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                            </svg>
+                        </button>
                     </td>
                 </tr>
             }

@@ -6,15 +6,13 @@
 @using Microsoft.EntityFrameworkCore
 @using RVParking.Data
 
-
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IEmailSender<ApplicationUser> EmailSender
 @inject NavigationManager NavigationManager
 @inject ApplicationDbContext ApplicationDbContext
-@* @inject Bkg_UserService Bkg_UserService
- *@
+
 <h3>User - Roles Maintenance</h3>
 
 @if (users == null || roles == null)
@@ -26,10 +24,9 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>User Name (Login)</th>
-                @* <th>Login</th> *@
-                <th>Roles and Actions</th>
-@*                 <th>Actions</th> *@
+                <th style="width: 40%;">User Name (Login)</th>
+                <th style="width: 30%;">Roles</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -37,29 +34,37 @@ else
             {
                 <tr>
                     <td>@user.UserName</td>
-                 @*    <td>@user.Email</td> *@
                     <td>
                         @foreach (var role in userRoles[user.Id])
                         {
                             <span>@role</span>
-                            <button @onclick="() => EditUserRoles(user)">Edit</button>
-                            <button @onclick="() => RemoveUserRole(user.Id, role)">Del.</button> 
-                            @* <button @onclick="() => DeleteUser(user)">Del.</button> *@
-
-                            <br />
-                        }
-                        <button @onclick="() => AddUserRole(user.Id)">Add User Role</button>
+                        }  
                     </td>
-@*                     <td>
-                        <button @onclick="() => EditUserRoles(user)">Edit</button>
-                        <button @onclick="() => DeleteUser(user)">Delete Role</button>
-                    </td> *@
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => AddUserRole(user.Id)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2" />
+                            </svg>
+                        </button>
+                        @foreach (var role in userRoles[user.Id])
+                        {
+                            <button class="btn btn-primary"  @onclick="() => EditUserRoles(user)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
+                                    <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
+                                </svg>
+                            </button>
+                            <button class="btn btn-primary" @onclick="() => RemoveUserRole(user.Id, role)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                                </svg>
+                            </button>
+                        }
+                    </td> 
                 </tr>
             }
         </tbody>
     </table>
-
-    <button @onclick="AddUserRole">Add User Role</button>
+    <br />
 
     @if (isEditing)
     {
