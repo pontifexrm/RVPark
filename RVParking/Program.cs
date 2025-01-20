@@ -61,6 +61,9 @@ builder.Services.AddScoped<HttpContextAccessorService>();
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
+// Blazor Bootstrap
+builder.Services.AddBlazorBootstrap();
+//builder.Services.AddSyncfusionBlazor();
 
 var app = builder.Build();
 

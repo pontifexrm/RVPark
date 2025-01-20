@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.WebUtilities
 @using Microsoft.EntityFrameworkCore
 @using RVParking.Data
+@using BlazorBootstrap
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
@@ -26,7 +27,8 @@ else
             <tr>
                 <th style="width: 40%;">User Name (Login)</th>
                 <th style="width: 30%;">Roles</th>
-                <th>Actions</th>
+                <th style="width: 20%; max-width: 80px">Edit/Delete</th>
+                <th style="width: 20%; max-width: 40px">Add</th>
             </tr>
         </thead>
         <tbody>
@@ -34,32 +36,42 @@ else
             {
                 <tr>
                     <td>@user.UserName</td>
-                    <td>
+                    <td >
                         @foreach (var role in userRoles[user.Id])
                         {
-                            <span>@role</span>
+                            <span>@role</span> <br />
                         }  
                     </td>
                     <td>
-                        <button class="btn btn-primary" @onclick="() => AddUserRole(user.Id)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2" />
-                            </svg>
-                        </button>
                         @foreach (var role in userRoles[user.Id])
                         {
-                            <button class="btn btn-primary"  @onclick="() => EditUserRoles(user)">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
-                                    <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
-                                </svg>
-                            </button>
-                            <button class="btn btn-primary" @onclick="() => RemoveUserRole(user.Id, role)">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-                                </svg>
-                            </button>
+                            <div class="tab-content" style="display:flex;flex-direction:row;">
+                                <button class="bi form-control" style="width: 40px; height: 32px;" @onclick="() => EditUserRoles(user)">
+                                    @* <i class="bi btn-pen" style="color: white; background: green; block-size:max-content;"></i> *@
+                                    <i class="bi bi-pencil-fill"></i>
+@*                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"  viewBox="0 0 16 16">
+                                        <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
+                                    </svg>  *@
+                                </button>
+                                <button class="bi form-control" style="width: 40px; height: 32px;"  @onclick ="() => RemoveUserRole(user.Id, role)">
+@*                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"  viewBox="0 0 16 16">
+                                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                                    </svg> *@
+                                    <i class="bi bi-trash3" style="block-size:max-content;"></i> 
+                                     @* <i class="bi bi-trash3-nav-menu" style="block-size:max-content;"></i> *@
+                                </button>
+                                <br />
+                            </div>
                         }
-                    </td> 
+                    </td>
+                    <td>
+                        <button class="bi form-control" style="width: 40px; height: 32px;" @onclick="() => AddUserRole(user.Id)">
+@*                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2" />
+                            </svg> *@
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -92,16 +104,14 @@ else
                 </InputSelect>
             </div>
 
-            <button type="submit">Save</button>
-            <button type="button" @onclick="CancelEdit">Cancel</button>
+            <button class="btn-primary" type="submit">Save</button> 
+            <button class="btn-warning" type="button" @onclick="CancelEdit">Cancel</button>
         </EditForm>
     }
 }
 
 @code {
-//    private List<IdentityUser> users;
     private List<ApplicationUser> users;
-//    private List<IdentityRole> roles;
     private List<IdentityRole> roles;
     private Dictionary<string, List<string>> userRoles = new();
     private bool isEditing = false;
@@ -109,9 +119,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        //users = await UserManager.Users.ToListAsync();
         users = await ApplicationDbContext.Users.ToListAsync();
-//        roles = await RoleManager.Roles.ToListAsync();
         roles = await ApplicationDbContext.Roles
                                 .Select(r => new IdentityRole { Id = r.Id, Name = r.Name, ConcurrencyStamp = r.ConcurrencyStamp })
                                 .ToListAsync();
@@ -126,12 +134,23 @@ else
     {
         currentUserRole.UserId = user.Id;
         currentUserRole.RoleId = userRoles[user.Id].FirstOrDefault();
+        if(currentUserRole == null)
+        {
+            var roles = ApplicationDbContext.Roles.ToList();
+            if (roles.Count > 0)
+                currentUserRole.RoleId = roles.FirstOrDefault().Id; 
+        }
+
         isEditing = true;
     }
     private async Task RemoveUserRole(string userId, string roleId)
     {
-        await ApplicationDbContext.RemoveUserRoleAsync(userId, roleId);
-        userRoles[userId].Remove(roleId);
+        var role = await ApplicationDbContext.Roles.FirstOrDefaultAsync(r => r.Name == roleId);
+        if (role != null)
+        {
+            await ApplicationDbContext.RemoveUserRoleAsync(userId, role.Id);
+            userRoles[userId].Remove(roleId);
+        }
     }
 
     private void DeleteUser(IdentityUser user)
@@ -151,23 +170,44 @@ else
     }
     private async Task SaveUserRole()
     {
-        var user = await UserManager.FindByIdAsync(currentUserRole.UserId);
-    //    var role = await RoleManager.FindByIdAsync(currentUserRole.RoleId);
-        var role = await ApplicationDbContext.Roles.FindAsync(currentUserRole.RoleId);
-
-
-        if (user != null && role != null)
+        try
         {
-            var result = await UserManager.AddToRoleAsync(user, role.Name);
-            if (result.Succeeded)
+            var role = await ApplicationDbContext.Roles.FindAsync(currentUserRole.RoleId);
+            var user = await UserManager.FindByIdAsync(currentUserRole.UserId);
+            if (user != null && role != null)
             {
-                if (!userRoles.ContainsKey(user.Id))
+                // Check if the user is already in the role
+                var currentRoles = await UserManager.GetRolesAsync(user);
+                if (currentRoles.Contains(role.Name) && currentRoles.Count > 0)
                 {
-                    userRoles[user.Id] = new List<string>();
+                    // Remove user from all roles
+                    var removeResult = await UserManager.RemoveFromRolesAsync(user, currentRoles);
+                    if (!removeResult.Succeeded)
+                    {
+                        // Handle error
+                        return;
+                    }
                 }
-                userRoles[user.Id].Add(role.Name);
+                // Add user to the new role
+                var addResult = await UserManager.AddToRoleAsync(user, role.Name);
+                if (addResult.Succeeded)
+                {
+                    if (!userRoles.ContainsKey(user.Id))
+                    {
+                        userRoles[user.Id] = new List<string>();
+                    }
+                    //userRoles[user.Id].Clear();
+                    userRoles[user.Id].Add(role.Name);
+                }
+                else
+                {
+                    // Handle error
+                    return;
+                }
             }
+            await ApplicationDbContext.SaveChangesAsync();
         }
+        catch (Exception e) { }
 
         isEditing = false;
     }
