@@ -92,7 +92,7 @@
            }  
            if (bkg_User != null)
            {
-                var result1 = await Bkg_UserService.DeleteBkgUserAsync(bkg_User.UserId);
+                var result1 = await DbContext.DeleteBkgUserAsync(bkg_User.UserId);
                 if (result1 == null)
                 {
                     throw new InvalidOperationException("Unexpected error occurred deleting bkg user.");
