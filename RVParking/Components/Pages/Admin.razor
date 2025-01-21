@@ -23,7 +23,7 @@
 <div class="tabs">
     <button class="@(activeTab == "Tab1" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab1"))">New Booking</button>
     <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">Current Bookings</button>
-    <button class="@(activeTab == "Tab7" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab7"))">Past Bookings</button>
+    <button class="@(activeTab == "Tab7" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab7"))">Booking Users</button>
     <button class="@(activeTab == "Tab3" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab3"))">User/Role Maint.</button>
     <button class="@(activeTab == "Tab4" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab4"))">Role Maint.</button>
     <button class="@(activeTab == "Tab5" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab5"))">Property Maint.</button>
@@ -70,9 +70,7 @@
     <RVParking.Components.Pages.TabComponents.Bkg_Availability_Maint  />
 </div>
 <div id="Tab7" class="tabcontent" style="@(activeTab == "Tab7" ? "display: block;" : "display: none;")">
-    <h3>Past Bookings</h3>
-    <p>Here you can see past bookings.</p>
-    <p>****** STILL a  WORK IN PROGRESS SORRY ******</p>
+    <RVParking.Components.Pages.TabComponents.Bkg_User_Maint />
 </div>
 
 @code {
