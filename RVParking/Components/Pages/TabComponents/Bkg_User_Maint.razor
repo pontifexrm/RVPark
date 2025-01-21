@@ -140,14 +140,34 @@ else
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Error</h5>
+                    <h5 class="modal-title">Issue when trying to SAVE this Booking User</h5>
                     <button type="button" class="btn-close" @onclick="CloseErrorModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>@errorMessage</p> 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseErrorModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@if (showYesErrorModal)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Data Adjustments may be needed before SAVING?</h5>
+                    <button type="button" class="btn-close" @onclick="CloseYesErrorModal"></button>
                 </div>
                 <div class="modal-body">
                     <p>@errorMessage</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseErrorModal">Close</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CloseYesErrorModalYes">YES</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CloseYesErrorModal">Close</button>
                 </div>
             </div>
         </div>
@@ -159,6 +179,7 @@ else
     private Bkg_User currentUser = new Bkg_User();
     private bool isEditing = false;
     private bool showErrorModal = false;
+    private bool showYesErrorModal = false;
     private string errorMessage;
 
     protected override async Task OnInitializedAsync()
@@ -194,6 +215,9 @@ else
                 // need to dispay an error and exit
                 errorMessage = "A user with this username already exists.";
                 showErrorModal = true;
+                // need to dispay a message with a yes option JUST TO TEST
+                // errorMessage = "An Application User with this username already exists. Do you wish to merge the information?";
+                // showYesErrorModal = true;
 
                 return;
             }
@@ -233,5 +257,15 @@ else
     private void CloseErrorModal()
     {
         showErrorModal = false;
+    }
+    private void CloseYesErrorModal()
+    {
+        // Need to do whatever the question asked in the message
+        showYesErrorModal = false;
+    }
+    private void CloseYesErrorModalYes()
+    {
+        // Need to do whatever the question asked in the message
+        showYesErrorModal = false;
     }
 }
