@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RVParking.Data;
 
@@ -11,9 +12,11 @@ using RVParking.Data;
 namespace RVParking.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250121235459_upd-BkgFK")]
+    partial class updBkgFK
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -269,7 +272,7 @@ namespace RVParking.Migrations
                     b.Property<bool>("Available")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("Bkg_PropertyId")
+                    b.Property<int?>("Bkg_PropertyPropertyId")
                         .HasColumnType("int");
 
                     b.Property<int>("BookingId")
@@ -281,9 +284,12 @@ namespace RVParking.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(65,30)");
 
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
                     b.HasKey("AvailabilityId");
 
-                    b.HasIndex("Bkg_PropertyId");
+                    b.HasIndex("Bkg_PropertyPropertyId");
 
                     b.ToTable("bkg_Availabilities");
                 });
@@ -673,13 +679,9 @@ namespace RVParking.Migrations
 
             modelBuilder.Entity("RVParking.Data.Bkg_Availability", b =>
                 {
-                    b.HasOne("RVParking.Data.Bkg_Property", "Bkg_Property")
+                    b.HasOne("RVParking.Data.Bkg_Property", null)
                         .WithMany("Bkg_Availabilities")
-                        .HasForeignKey("Bkg_PropertyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Bkg_Property");
+                        .HasForeignKey("Bkg_PropertyPropertyId");
                 });
 
             modelBuilder.Entity("RVParking.Data.Bkg_Booking", b =>
