@@ -176,6 +176,7 @@ else
             .Where(b => b.BookingStatus != "Closed")
             .ToListAsync() ?? new List<Bkg_Booking>();
     }
+   
     private void EditBooking(Bkg_Booking booking)
     {
         currentBooking = booking;
@@ -259,6 +260,7 @@ else
 
         bookings = await query.ToListAsync();
     }
+    
     private void ClearSearch()
     {
         searchUsername = string.Empty;

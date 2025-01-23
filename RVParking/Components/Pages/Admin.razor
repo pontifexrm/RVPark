@@ -17,7 +17,7 @@
 @inject NavigationManager NavigationManager
 @inject ApplicationDbContext ApplicationDbContext
 @* //@inject Bkg_UserService Bkg_UserService// *@
-<h3>RV Park Booking, Data and User Administration</h3>
+@* <h3>RV Park Booking, Data and User Administration</h3> *@
 
 
 <div class="tabs">
@@ -52,7 +52,7 @@
 </div>
 
 <div id="Tab2" class="tabcontent" style="@(activeTab == "Tab2" ? "display: block;" : "display: none;")">
-    <RVParking.Components.Pages.TabComponents.Bkg_Bookings_Maint />
+    BkgAvail_BulkChange.razor
 </div>
 <div id="Tab3" class="tabcontent" style="@(activeTab == "Tab3" ? "display: block;" : "display: none;")">
     <RVParking.Components.Pages.TabComponents.AspNetUserRoles_Maint />

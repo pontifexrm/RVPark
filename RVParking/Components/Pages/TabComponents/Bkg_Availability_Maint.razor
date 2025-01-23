@@ -13,11 +13,8 @@
 @inject IEmailSender<ApplicationUser> EmailSender
 @inject NavigationManager NavigationManager
 @inject ApplicationDbContext ApplicationDbContext
-@* @inject Bkg_UserService bkg_UserService
- *@
 
 <h4>Create Update or Delete Bkg_Availability Records</h4>
-
 
 
 <div class="search-bar">
@@ -47,6 +44,7 @@
                 <option value="NA">Not Available</option>
                 <option value="Booked">Booked</option>
                 <option value="CLOSED">Closed</option>
+                <option value="Family Here"</option>
             </select>
         </div>
         <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 1%;">
@@ -65,79 +63,89 @@
         @onclick="SearchAvailability">
             <i class="bi bi-search"></i>
         </button>
-@*         <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 1%;">
+        @*         <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 1%;">
             <button class="btn btn-primary" @onclick="SearchAvailability">Search</button>
         </div> *@
     </div>
 </div>
 
+<div class="tab-content" style="border: 1px solid #929292; max-width: 60%; display: flex; justify-content: space-between; align-items: center;">
+    @* Title and Blkchange button *@
+    <h5 sstyle="margin-left: 10px;"> Bulk Change Booking Availability Records</h5>
+    <div style ="display:flex;flex-direction:row; margin-bottom: 2%;">
+        <button class="bi form-control" style="width: 40px; height: 32px;" @onclick="OpenBlkChngModal"><i class="bi bi-door-open"></i></button>
+        <button class="bi form-control" style="width: 40px; height: 32px;" @onclick="CloseBlkChngModal"><i class="bi bi-door-closed"></i></button>
+    </div>
+</div>
 
-
-
-
-@* @if (BkgPropertiesAvail == null || BkgPropertiesAvail.Count == 0)
+@if (isBlkChngModalOpen)
 {
-    <p>Loading...</p>
+    @if (BkgPropertiesAvail == null || BkgPropertiesAvail.Count == 0)
+    {
+        <p>Loading...</p>
+    }
+    else
+    {
+        <div class="form-group" style="border: 1px solid #929292; max-width: 60%;">
+            <div class="form-group" style=" max-width: 80%; display:flex;flex-direction:row; margin-bottom: 1%;">
+                <div class="form-group" style="text-align:center;">
+                    <label for="bkgType">Select Property</label>
+                    <select class="form-control" id="bkgType" @bind="BkgType">
+                        @foreach (var property in BkgPropertiesAvail)
+                        {
+                            <option value="@property.PropertyId">@property.Name</option>
+                        }
+                    </select>
+
+                </div>
+
+
+                <div class="form-group" style="text-align:center; max-width: 60%; margin-left: 1%">
+                    <label for="bkgAvail">Availability</label>
+                    <select class="form-control" id="bkgAvail" @bind="isAvail">
+                        <option style="text-align:center;" value="Yes">Is Available</option>
+                        <option style="text-align:center;" value="No">Not Available</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="max-width: 40%; text-align:center; margin-left: 2%;">
+                    @* <input type="checkbox" @bind="isChecked" /> Check to delete *@
+                    <label for="bkgAvail">To Delete ?</label>
+                    <select class="form-control" id="toDelete" style="color:red;" @bind="toDelete">
+                        <option value="no"></option>
+                        <option value="YES">*DELETE*</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" style="display:flex;flex-direction:row; margin-bottom: 1%">
+                <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 0%">
+                    <label for="fmdate">From Date</label>
+                    <InputDate @bind-Value=Fmdate class="form-control" id="fmdate" />
+                    @* <ValidationMessage For="() => emailMessage.Fmdate" /> *@         
+                </div>
+                <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 1%;">
+                    <label for="todate">To Date</label>
+                    <InputDate @bind-Value=Todate class="form-control" id="todate" />
+                    @* <ValidationMessage For="() => emailMessage.Todate" />  *@
+                </div>
+                <div class="form-group" style="text-align:center; max-width: 60%; margin-left: 1%">
+                    <label for="bkgAvailStatus">Status</label>
+                    <select class="form-control" id="bkgAvailStatus" @bind="status">
+                        <option style="text-align:center;" value=""></option>
+                        <option style="text-align:center;" value="NA">Not Available</option>
+                        <option style="text-align:center;" value="Booked">Booked</option>
+                        <option style="text-align:center;" value="CLOSED">Closed</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <button class="btn btn-primary" style="min-width: 28%; margin-left: 10%; align-content: center;" @onclick="CrudBkBkgAvailablilty">Create Update or Delete Bkg_Availability</button>
+            </div>
+        </div>
+    } 
 }
-else
-{
-    <div class="form-group" style="display:flex;flex-direction:row; margin-bottom: 1%;">
-        <div class="form-group" style="max-width: 60%; text-align:center;">
-            <label for="bkgType">Select Property</label>
-            <select class="form-control" id="bkgType" @bind="BkgType">
-                @foreach (var property in BkgPropertiesAvail)
-                {
-                    <option value="@property.PropertyId">@property.Name</option>
-                }
-            </select>
 
-        </div>
-
-
-        <div class="form-group" style="text-align:center; max-width: 60%; margin-left: 1%">
-            <label for="bkgAvail">Availability</label>
-            <select class="form-control" id="bkgAvail" @bind="isAvail">
-                <option style="text-align:center;" value="Yes">Is Available</option>
-                <option style="text-align:center;" value="No">Not Available</option>
-            </select>
-        </div>
-
-        <div class="form-group" style="max-width: 40%; text-align:center; margin-left: 2%;">
-            @* <input type="checkbox" @bind="isChecked" /> Check to delete *@
-@*            <label for="bkgAvail">To Delete ?</label>
-            <select class="form-control" id="toDelete" style="color:red;" @bind="toDelete">
-                <option value="no"></option>
-                <option value="YES">*DELETE*</option>
-            </select>
-        </div>
-    </div>
-    <div class="form-group" style="display:flex;flex-direction:row; margin-bottom: 1%">
-        <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 0%">
-            <label for="fmdate">From Date</label>
-            <InputDate @bind-Value=Fmdate class="form-control" id="fmdate" />
-            @* <ValidationMessage For="() => emailMessage.Fmdate" /> *@
-@*         </div>
-        <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 1%;">
-            <label for="todate">To Date</label>
-            <InputDate @bind-Value=Todate class="form-control" id="todate" />
- *@            @* <ValidationMessage For="() => emailMessage.Todate" /> 
-        </div>
-        <div class="form-group" style="text-align:center; max-width: 60%; margin-left: 1%">
-            <label for="bkgAvailStatus">Status</label>
-            <select class="form-control" id="bkgAvailStatus" @bind="status">
-                <option style="text-align:center;" value=""></option>
-                <option style="text-align:center;" value="NA">Not Available</option>
-                <option style="text-align:center;" value="Booked">Booked</option>
-                <option style="text-align:center;" value="CLOSED">Closed</option>
-            </select>
-        </div>
-    </div>
-    <div>
-        <button class="btn btn-primary" style="min-width: 28%; align-content: center;" @onclick="CrudBkBkgAvailablilty">Create Update or Delete Bkg_Availability</button>
-    </div>
-} *@
-
-@if (availabilities == null)
+@if (availabilities == null)  // Availability table
 {
     <p><em>Loading...</em></p>
 }
@@ -180,6 +188,53 @@ else
     </table>
 }
 
+@if(isEditing) 
+{
+<div class="modal show" tabindex="-1" style="display: block;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Availability</h5>
+                <button type="button" class="btn-close" @onclick="CancelEdit"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="currbkg_Availability" OnValidSubmit="SaveAvailability">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="form-group">
+                        <label for="property">Property</label>
+                        <InputSelect id="property" @bind-Value="currbkg_Availability.Bkg_PropertyId" class="form-control">
+                            @foreach (var property in BkgPropertiesAvail)
+                            {
+                                <option value="@property.PropertyId">@property.Name</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="form-group">
+                        <label for="dateAvailable">Date Available</label>
+                        <InputDate id="dateAvailable" @bind-Value="currbkg_Availability.DateAvailable" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="available">Available</label>
+                        <InputSelect id="available" @bind-Value="currbkg_Availability.Available" class="form-control">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </InputSelect>
+                    </div>
+                    <div class="form-group">
+                        <label for="availabilityStatus">Availability Status</label>
+                        <InputText id="availabilityStatus" @bind-Value="currbkg_Availability.AvailabilityStatus" class="form-control" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+}
 
 
 
@@ -205,6 +260,14 @@ else
     private DateTime? searchToDate;
     private string searchStatus = string.Empty;
     private string searchIsAvail = string.Empty;
+
+    private bool isBlkChngModalOpen = false;
+    private string modalBlkChngTitle = string.Empty;
+    private string modalMessage = string.Empty; 
+
+    private bool isEditing = false;
+    private bool isNew = false;
+    private Bkg_Availability? currbkg_Availability = new Bkg_Availability();
 
     protected override async Task OnInitializedAsync()
     {
@@ -301,10 +364,21 @@ else
     private void EditBkgAvailablilty(Bkg_Availability availability)
     {
         // Implement the logic to edit the availability record
+        currbkg_Availability = availability;
+        isEditing = true;
+        isNew = false;
     }
-    private void DeleteBkgAvailability(Bkg_Availability availability)
+    private void CancelEdit()
+    {
+        currbkg_Availability = null;
+        isEditing = false;
+    }
+    private async Task DeleteBkgAvailability(Bkg_Availability availability)
     {
         // Implement the logic to delete the availability record
+        ApplicationDbContext.bkg_Availabilities?.Remove(availability);
+        await ApplicationDbContext.SaveChangesAsync();
+        await LoadAvailabilities();
     }
     private void ClearSearchAvailability()
     {
@@ -315,4 +389,49 @@ else
         searchIsAvail = string.Empty;
         SearchAvailability();
     }
+    private void OpenBlkChngModal()
+    {
+        isBlkChngModalOpen = true;
+        // Implement the logic to open the bulk change modal
+    }
+    private void CloseBlkChngModal()
+    {
+        // Implement the logic to close the bulk change modal
+        isBlkChngModalOpen = false;
+    }   
+
+    // edit and delete availability records form table
+    private void EditAvailability(Bkg_Availability availability)
+    {
+        currbkg_Availability = availability;
+        isEditing = true;
+        isNew = false;
+    }
+
+    private async Task SaveAvailability()
+    {
+        if (currbkg_Availability != null)
+        {
+            if (isNew)
+            {
+                ApplicationDbContext.bkg_Availabilities.Add(currbkg_Availability);
+            }
+            else
+            {
+                ApplicationDbContext.bkg_Availabilities.Update(currbkg_Availability);
+            }
+            await ApplicationDbContext.SaveChangesAsync();
+            LoadAvailabilities();
+            isEditing = false;
+        }
+    }
+
+    private async Task DeleteEditAvailability(Bkg_Availability currbkg_Availability)
+    {
+        ApplicationDbContext.bkg_Availabilities?.Remove(currbkg_Availability);
+        await ApplicationDbContext.SaveChangesAsync();
+        LoadAvailabilities();
+    }
+
+
 }
