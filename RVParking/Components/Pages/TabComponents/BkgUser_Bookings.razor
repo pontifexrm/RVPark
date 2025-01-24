@@ -1,0 +1,251 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using RVParking.Data
+@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@inject ApplicationDbContext ApplicationDbContext
+
+<div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
+    <div style="margin-left: 2%">
+        <h4>Add a new booking and see current bookings</h4>
+    </div>
+    @*     <div>
+        <button class="btn btn-primary" @onclick="NewBkgRequest">Add New Booking</button>
+    </div> *@
+</div>
+
+<div class="form-group" style="max-width: 25%;  margin-left: 2%">
+    <select style="margin-left: 4px; width: 400px; height: 30px;" @bind="rqstPropertyId">
+        <label for="">Property or Facility</label>
+        <option value="">Select Property</option>
+        @foreach (var property in BkgProperties)
+        {
+            <option value="@property.PropertyId">@property.Name</option>
+        }
+    </select>
+
+    @* <ValidationMessage For="() => emailMessage.Fmdate" /> *@
+</div>
+<div class="form-group" style="display:flex;flex-direction:row;">
+    <div class="form-group" style="max-width: 25%; text-align:center; margin-left: 2%">
+        <label for="fmdate">Arriving</label>
+        <InputDate @bind-Value=Fmdate class="form-control" id="fmdate" />
+        @* <ValidationMessage For="() => emailMessage.Fmdate" /> *@
+    </div>
+    <div class="form-group" style="max-width: 25%; text-align:center; margin-left: 2%;">
+        <label for="todate">Departing</label>
+        <InputDate @bind-Value=Todate class="form-control" id="todate" />
+        @* <ValidationMessage For="() => emailMessage.Todate" /> *@
+    </div>
+</div>
+<div>
+    <button class="btn btn-primary" style="min-width: 40%; align-content: center;" @onclick="NewBkgRequest">Request Booking</button>
+</div> 
+
+
+@if (bookings == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="border: 1px solid #929292;">Bkg Username</th>
+                <th style="border: 1px solid #929292;">First Name</th>
+                <th style="border: 1px solid #929292;">Last Name</th>
+                <th style="border: 1px solid #929292;">Property Name</th>
+                <th style="border: 1px solid #929292;">Arrival Date</th>
+                <th style="border: 1px solid #929292;">Departure Date</th>
+                <th style="border: 1px solid #929292;">Status</th>
+                <th style="border: 1px solid #929292;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var booking in bookings)
+            {
+                <tr>
+                    <td style="border: 1px solid #929292;">@booking.Bkg_User.UserName</td>
+                    <td style="border: 1px solid #929292;">@booking.Bkg_User.UserFirstName</td>
+                    <td style="border: 1px solid #929292;">@booking.Bkg_User.UserLastName</td>
+                    <td style="border: 1px solid #929292;">@booking.Bkg_Property.Name</td>
+                    <td style="border: 1px solid #929292;">@booking.DateArrive.ToShortDateString()</td>
+                    <td style="border: 1px solid #929292;">@booking.DateDepart.ToShortDateString()</td>
+                    <td style="border: 1px solid #929292;">@booking.BookingStatus</td>
+                    @*                     <td>
+                        <button class="btn btn-primary" @onclick="() => EditBooking(booking)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteBooking(booking.BookingId)">Delete</button>
+                    </td> *@
+                    @* <td style="border: 1px solid #929292;"> *@
+                    <td style="border: 1px solid #929292;">
+                        <div class="tab-content" style="display:flex;flex-direction:row;">
+                            <button class="bi form-control" style="width: 40px; height: 32px;"
+                            @onclick="() => EditBooking(booking)">
+                                <i class="bi bi-pencil-fill"></i>
+                            </button>
+                            <button class="bi form-control" style="width: 40px; height: 32px;"
+                            @onclick="() => DeleteBooking(booking.BookingId)">
+                                <i class="bi bi-trash3" style="block-size:max-content;"></i>
+                            </button>
+                        </div>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private string BkgType = "RVPark On Fitz";
+    private string isAvail = "Yes";
+    public DateTime Fmdate { get; set; } = DateTime.Now.Date;
+    public DateTime Todate { get; set; } = DateTime.Now.Date;
+    private bool allDatesAvailable = false;
+    private string toDelete = "no";
+    private string status = string.Empty;
+    private int? rqstPropertyId;
+    private List<Bkg_Property> BkgProperties = new List<Bkg_Property>();
+    private Bkg_Booking currentBooking = new();
+    private string modalTitle = string.Empty;
+    private string modalMessage = string.Empty;
+
+    private List<Bkg_Booking> bookings = new();
+    private List<Bkg_User> users = new();
+    private Bkg_User currentUser = new();
+
+    private bool showModal = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            var userName = user.Identity.Name;
+            currentUser = await ApplicationDbContext.bkg_Users.FirstOrDefaultAsync(u => u.UserName == userName);
+            // Use the currentUser as needed
+        }
+        BkgProperties = await ApplicationDbContext.bkg_Properties.ToListAsync();
+        await LoadBookings();
+    }
+    private async Task LoadBookings()
+    {
+        bookings = await ApplicationDbContext.bkg_Bookings
+            .Include(b => b.Bkg_User)
+            .Include(b => b.Bkg_Property)
+            .Where(b => b.BookingStatus != "Closed")
+            .ToListAsync() ?? new List<Bkg_Booking>();
+    }
+
+    private void NewBkgRequest()
+    {
+        // assume all ok until not
+        allDatesAvailable = true;
+
+        if (rqstPropertyId == null)
+        {
+            BkgType = "0";
+        }
+        else
+        {
+            BkgType = rqstPropertyId.Value.ToString();
+
+        }
+        if (ApplicationDbContext.bkg_Availabilities == null)
+        {
+            allDatesAvailable = false;
+        }
+        else
+        {
+            // perhaps we wish to update if the record is there otherwise create it but not duplicate it.
+            DateTime dte = Fmdate;
+            while (dte <= Todate)
+            {
+                var existAvail = ApplicationDbContext.bkg_Availabilities
+                                .FirstOrDefault(a => a.Bkg_PropertyId == int.Parse(BkgType) && a.DateAvailable == dte);
+                if (existAvail == null)
+                { 
+                    allDatesAvailable = false;
+                    break;
+                }
+                else if (!existAvail.Available)
+                {
+                    allDatesAvailable = false;
+                    break;
+                }
+                else // is available so we need to update it
+                {
+                    existAvail.Available = false;
+                    existAvail.AvailabilityStatus = "Request";
+                    ApplicationDbContext.bkg_Availabilities.Update(existAvail);
+                }
+                dte = dte.AddDays(1);
+            }
+            var res1 =  ApplicationDbContext.SaveChangesAsync();
+
+        }
+        //at this point we have checked the availability and if all ok we can now create the booking as all the Availitity recvords have been updated
+
+
+    }
+    private void EditBooking(Bkg_Booking booking)
+    {
+        currentBooking = booking;
+        modalTitle = "Edit Booking";
+        modalMessage = "Booking Availablility is NOT checked as a results of changes you may make here. Double Booking Is Possible !!!!";
+        showModal = true;
+    }
+
+    private void OpenAddModal()
+    {
+        currentBooking = new Bkg_Booking();
+        currentBooking.DateArrive = DateTime.Now;
+        currentBooking.DateDepart = DateTime.Now.AddDays(1);
+        //perhaps need to
+
+        modalTitle = "Add New Booking";
+        showModal = true;
+    }
+
+    private async Task SaveBooking()
+    {
+        currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
+        currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
+
+        if (currentBooking.BookingId == 0)
+        {
+            ApplicationDbContext.bkg_Bookings.Add(currentBooking);
+        }
+        else
+        {
+            ApplicationDbContext.bkg_Bookings.Update(currentBooking);
+        }
+        await ApplicationDbContext.SaveChangesAsync();
+        await LoadBookings();
+        showModal = false;
+    }
+
+    private async Task DeleteBooking(int bookingId)
+    {
+        var booking = await ApplicationDbContext.bkg_Bookings.FindAsync(bookingId);
+        if (booking != null)
+        {
+            ApplicationDbContext.bkg_Bookings.Remove(booking);
+            await ApplicationDbContext.SaveChangesAsync();
+            await LoadBookings();
+        }
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+    }
+
+
+}

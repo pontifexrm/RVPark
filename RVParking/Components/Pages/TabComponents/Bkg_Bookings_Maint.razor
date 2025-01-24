@@ -1,6 +1,25 @@
 ﻿@using RVParking.Data
+@using RVParking.Components.Account
+
 @using Microsoft.AspNetCore.Identity.EntityFrameworkCore
 @using Microsoft.EntityFrameworkCore
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+
+
+
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityUserAccessor UserAccessor
+
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 @inject ApplicationDbContext ApplicationDbContext
 
@@ -149,6 +168,8 @@ else
 }
 
 @code {
+    private ApplicationUser user = default!;
+
     private List<Bkg_Booking> bookings = new();
     private List<Bkg_User> users = new();
     private List<Bkg_Property> properties = new();
@@ -160,9 +181,23 @@ else
     private DateTime? searchFromDate;
     private DateTime? searchToDate;
     private int? searchPropertyId;
+    private Bkg_User currentUser = new();
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            var userName = user.Identity.Name;
+            currentUser = await ApplicationDbContext.bkg_Users.FirstOrDefaultAsync(u => u.UserName == userName);
+            // Use the currentUser as needed
+        }
+
         users = await ApplicationDbContext.bkg_Users.ToListAsync() ?? new List<Bkg_User>();
         properties = await ApplicationDbContext.bkg_Properties.ToListAsync() ?? new List<Bkg_Property>();
         await LoadBookings();

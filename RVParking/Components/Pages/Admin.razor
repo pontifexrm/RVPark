@@ -33,22 +33,23 @@
 </div>
 <hr />
 <div id="Tab1" class="tabcontent" style="@(activeTab == "Tab1" ? "display: block;" : "display: none;")">
-    <h4>New Booking for <b>@BkgType</b></h4>
+    <RVParking.Components.Pages.TabComponents.BkgUser_Bookings />
+   @*  <h4>New Booking for <b>@BkgType</b></h4>
     <div class="form-group" style="display:flex;flex-direction:row;">
         <div class="form-group" style="max-width: 25%; text-align:center; margin-left: 2%">
             <label for="fmdate">Arriving</label>
             <InputDate @bind-Value=Fmdate class="form-control" id="fmdate" />
             @* <ValidationMessage For="() => emailMessage.Fmdate" /> *@
-        </div>
+    @*     </div>
         <div class="form-group" style="max-width: 25%; text-align:center; margin-left: 2%;">
             <label for="todate">Departing</label>
             <InputDate @bind-Value=Todate class="form-control" id="todate" />
-            @* <ValidationMessage For="() => emailMessage.Todate" /> *@
+            @* <ValidationMessage For="() => emailMessage.Todate" /> 
         </div>
     </div>
     <div>
         <button class="btn btn-primary" style="min-width: 40%; align-content: center;" @onclick="CheckBkgRequest">Request Booking</button>
-    </div>
+    </div> *@ 
 </div>
 
 <div id="Tab2" class="tabcontent" style="@(activeTab == "Tab2" ? "display: block;" : "display: none;")">
@@ -97,27 +98,6 @@
     }
     private void CheckBkgRequest()
     {
-        // LINQ query to check if all dates in the range are available
-        if (ApplicationDbContext.bkg_Availabilities == null)
-        {
-            allDatesAvailable = false;
-        }
-        else
-        {
-            // perhaps we wish to update if the record is there otherwise create it but not duplicate it.
-            DateTime dte = Fmdate;
-            while (dte <= Todate)
-            {
-                // var bkgAvailability = new Bkg_Availability(){
-                //     DateAvailable = dte,
-                //         Available = true,
-                //         PropertyId = 1
-                // });
-                dte = dte.AddDays(1);
-            }
-            // var res = ApplicationDbContext.bkg_Availabilities.ExecuteUpdateAsync(bkgAvailabilities);
-            // var res1 =  ApplicationDbContext.SaveChangesAsync();
-        }
     }
     // private async Task CrudBkBkgAvailablilty()
     // {
