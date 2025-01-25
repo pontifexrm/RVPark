@@ -9,7 +9,10 @@
 @using Microsoft.AspNetCore.WebUtilities
 @using Microsoft.EntityFrameworkCore
 @using RVParking.Data
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
 
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
@@ -17,83 +20,179 @@
 @inject IEmailSender<ApplicationUser> EmailSender
 @inject NavigationManager NavigationManager
 @inject ApplicationDbContext ApplicationDbContext
-@* @inject Bkg_UserService Bkg_UserService *@
 
 
-<div class="tabs"> 
+@* <div class="tabs"> 
     <button class="@(activeTab == "Tab1" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab1"))">New Booking</button>
     <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">Current Bookings</button>
     <button class="@(activeTab == "Tab3" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab3"))">Past Bookings</button>
 
-</div>
-<div id="Tab1" class="tabcontent" style="@(activeTab == "Tab1" ? "display: block;" : "display: none;")"> 
-    <h4>New Booking for <b>@BkgType</b></h4> 
-    <div class="form-group" style="display:flex;flex-direction:row;">
-        <div class="form-group" style="max-width: 25%; text-align:center; margin-left: 2%">
-            <label for="fmdate">Arriving</label>
-            <InputDate @bind-Value=Fmdate class="form-control" id="fmdate" />
-            @* <ValidationMessage For="() => emailMessage.Fmdate" /> *@
-        </div>
-        <div class="form-group" style="max-width: 25%; text-align:center; margin-left: 2%;">
-            <label for="todate">Departing</label>
-            <InputDate @bind-Value=Todate class="form-control" id="todate" />
-            @* <ValidationMessage For="() => emailMessage.Todate" /> *@
-        </div>
-    </div>
+</div> *@
+@* <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
     <div>
-        <button class="btn btn-primary" style="min-width: 40%; align-content: center;" @onclick="CheckBkgRequest">Request Booking</button>
+        <h4>Add a new Booking.</h4>
     </div>
-</div>
-
-<div id="Tab2" class="tabcontent" style="@(activeTab == "Tab2" ? "display: block;" : "display: none;")">
-    <h3>Existing Bookings</h3> 
-    <p>Here you can see your existing bookings.</p>
-    <p>****** STILL bloody working on it.... a  WORK IN PROGRESS SORRY ******</p>
-</div>
-<div id="Tab2" class="tabcontent" style="@(activeTab == "Tab3" ? "display: block;" : "display: none;")">
-    <h3>Past Bookings</h3>
-    <p>Here are the bookings you have had in the past.</p>
-    <p>****** W. I. P. ******</p>
-</div>
-
-
-
-
-
-@* <div class="card" style="max-width: 500px">
-    <div class="card-sm" style="max-width: 500px; text-align: center;">
-
-        <img src="images/RVParkBlkAA.png" alt="https://via.placeholder.com/100" max-width="300px" ; class="card-sm" />
-        <br />
-        <a href="https://campable.com/locations/5137171604307968" color="white" text-align="center" target="_blank">RVPark On Fitz</a>
-        <p>We manage your bookings through this web site where you can see availablity, make and manage your bookings.</p>
-        <p>****** STILL A WORK IN PROGRESS SORRY ******</p>
+        <div>
+        <button class="btn btn-primary" @onclick="NewBkgRequest">Add New Booking</button>
     </div>
-</div>
-<div class="card" style="max-width: 500px">
-    <div class="card-sm" style="max-width: 500px; text-align: center;">
-        <br />
+</div> *@
+<section class="card-list" >
 
-        <img src="images/NZMCALogoA.png" alt="https://via.placeholder.com/100" class="card-sm" />
-        <p>However if you are a NZMCA Member then please use the <br /> <a href="./ContactUs">"Contact Us"</a> <br />page to arrange your booking with membership discount.</p>
+    <a class="card-body" style="border: 1px solid #929292; margin-left: 1%; text-align:center;">
+        <h4> Add a new Booking.</h4>
+        <div class="form-group" style="display:flex;flex-direction:row; text-align:center;">
+            <div class="form-group" style="text-align:center; margin-left: 1%;">
+                <label>Property</label>
+                <select class="form-control">
+                    <option value="">Select Property</option>
+                    @foreach (var property in BkgProperties)
+                    {
+                        <option value="@property.PropertyId">@property.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group" style=" text-align:center; margin-left: 1%">
+                <label for="fmdate">Arriving</label>
+                <InputDate @bind-Value=Fmdate class="form-control" id="fmdate" />
+            </div>
+            <div class="form-group" style="text-align:center; margin-left: 1%;">
+                <label for="todate">Departing</label>
+                <InputDate @bind-Value=Todate class="form-control" id="todate" />
+            </div>
+        </div>
+        <div>
+            <button class="btn btn-primary" style="min-width: 90%; text-align:center; " @onclick="CheckBkgRequest">Request Booking</button>
+        </div>
+    </a>    
+    <a class="card-body" style="border: 1px solid #929292;margin-left: 1%; text-align:center;">
+        <h4> User Details.</h4>
+        <div class="form-group" style="display:flex;flex-direction:row;">
+            <div class="form-group" style=" text-align:center; margin-left: 1%">
+                <label for="username">User Name</label>
+                <InputText class="form-control" @bind-Value=@currentUser.UserName readonly="true" id="username" />
+            </div>
+            <div class="form-group" style=" text-align:center; margin-left: 1%">
+                <label for="firstname">First Name</label>
+                <InputText class="form-control" @bind-Value=@currentUser.UserFirstName readonly="true" id="firstname" />
+            </div>
+            <div class="form-group" style=" text-align:center; margin-left: 1%">
+                <label for="lastname">Last Name</label>
+                <InputText class="form-control" @bind-Value=@currentUser.UserLastName readonly="true" id="lastname" />
+            </div>
+
+            <div class="form-group" style="text-align:center; margin-left: 2%;">
+                <label for="userphone">Phone</label>
+                <InputText class="form-control" @bind-Value=@currentUser.UserPhone readonly="true" id="userphone" />
+            </div>
+        </div>
+    </a>            
+    </section>
+
+
+<h4>View, Change or Delete Existing Bookings</h4>
+@if (bookings == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="border: 1px solid #929292;">Bkg Username</th>
+                    <th style="border: 1px solid #929292;">First Name</th>
+                    <th style="border: 1px solid #929292;">Last Name</th>
+                    <th style="border: 1px solid #929292;">Property Name</th>
+                    <th style="border: 1px solid #929292;">Arrival Date</th>
+                    <th style="border: 1px solid #929292;">Departure Date</th>
+                    <th style="border: 1px solid #929292;">Status</th>
+                    <th style="border: 1px solid #929292;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var booking in bookings)
+                {
+                    <tr>
+                        <td style="border: 1px solid #929292;">@booking.Bkg_User.UserName</td>
+                        <td style="border: 1px solid #929292;">@booking.Bkg_User.UserFirstName</td>
+                        <td style="border: 1px solid #929292;">@booking.Bkg_User.UserLastName</td>
+                        <td style="border: 1px solid #929292;">@booking.Bkg_Property.Name</td>
+                        <td style="border: 1px solid #929292;">@booking.DateArrive.ToShortDateString()</td>
+                        <td style="border: 1px solid #929292;">@booking.DateDepart.ToShortDateString()</td>
+                        <td style="border: 1px solid #929292;">@booking.BookingStatus</td>
+                        @*                     <td>
+                            <button class="btn btn-primary" @onclick="() => EditBooking(booking)">Edit</button>
+                            <button class="btn btn-danger" @onclick="() => DeleteBooking(booking.BookingId)">Delete</button>
+                        </td> *@
+                        @* <td style="border: 1px solid #929292;"> *@
+                        <td style="border: 1px solid #929292;">
+                            <div class="tab-content" style="display:flex;flex-direction:row;">
+                                <button class="bi form-control" style="width: 40px; height: 32px;"
+                                @onclick="() => EditBooking(booking)">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                                <button class="bi form-control" style="width: 40px; height: 32px;"
+                                @onclick="() => DeleteBooking(booking.BookingId)">
+                                    <i class="bi bi-trash3" style="block-size:max-content;"></i>
+                                </button>
+                            </div>
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
-</div>
- *@
+}
+
 
 
 @code {
-    private string activeTab = "Tab1";
-    private string BkgType = "RVPark On Fitz";
+     private string BkgType = "RVPark On Fitz";
+    private string isAvail = "Yes";
     public DateTime Fmdate { get; set; } = DateTime.Now.Date;
-
     public DateTime Todate { get; set; } = DateTime.Now.Date;
+    private bool allDatesAvailable = false;
+    private string toDelete = "no";
+    private string status = string.Empty;
+    private int? rqstPropertyId;
+    private List<Bkg_Property> BkgProperties = new List<Bkg_Property>();
+    private Bkg_Booking currentBooking = new();
+    private string modalTitle = string.Empty;
+    private string modalMessage = string.Empty;
 
-    private bool allDatesAvailable  = false;
+    private List<Bkg_Booking> bookings = new();
+    private List<Bkg_User> users = new();
+    private Bkg_User currentUser = new();
 
-    private void SetActiveTab(string tabName)
+    private bool showModal = false;
+
+    protected override async Task OnInitializedAsync()
     {
-        activeTab = tabName;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            var userName = user.Identity.Name;
+            currentUser = await ApplicationDbContext.bkg_Users.FirstOrDefaultAsync(u => u.UserName == userName);
+            // Use the currentUser as needed
+        }
+        BkgProperties = await ApplicationDbContext.bkg_Properties.ToListAsync();
+        await LoadBookings();
+        
     }
+    private async Task LoadBookings()
+    {
+        bookings = await ApplicationDbContext.bkg_Bookings
+            .Include(b => b.Bkg_User)
+            .Include(b => b.Bkg_Property)
+            .Where(b => b.BookingStatus != "Closed")
+            .Where(b => b.Bkg_User.UserName.Contains(currentUser.UserName))
+            .ToListAsync();
+    }
+
     private void CheckBkgRequest()
     {
         // LINQ query to check if all dates in the range are available
@@ -125,4 +224,23 @@
    
 
     }
+
+    private void EditBooking(Bkg_Booking booking)
+    {
+        currentBooking = booking;
+        modalTitle = "Edit Booking";
+        modalMessage = "Booking Availablility is NOT checked as a results of changes you may make here. Double Booking Is Possible !!!!";
+        showModal = true;
+    }
+    private async Task DeleteBooking(int bookingId)
+    {
+        var booking = await ApplicationDbContext.bkg_Bookings.FindAsync(bookingId);
+        if (booking != null)
+        {
+            ApplicationDbContext.bkg_Bookings.Remove(booking);
+            await ApplicationDbContext.SaveChangesAsync();
+            await LoadBookings();
+        }
+    }
+
 }
