@@ -21,9 +21,9 @@
 
 
 <div class="tabs">
-    <button class="@(activeTab == "Tab1" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab1"))">New Booking</button>
-    <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">Current Bookings</button>
-    <button class="@(activeTab == "Tab8" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab8"))">Past Bookings</button>
+    <button class="@(activeTab == "Tab1" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab1"))">Booking Admin</button>
+    @* <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">Current Bookings</button> *@
+    @* <button class="@(activeTab == "Tab8" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab8"))">Past Bookings</button> *@
     <button class="@(activeTab == "Tab7" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab7"))">Booking Users</button>
     <button class="@(activeTab == "Tab3" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab3"))">User/Role Maint.</button>
     <button class="@(activeTab == "Tab4" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab4"))">Role Maint.</button>
@@ -33,7 +33,9 @@
 </div>
 <hr />
 <div id="Tab1" class="tabcontent" style="@(activeTab == "Tab1" ? "display: block;" : "display: none;")">
-    <RVParking.Components.Pages.TabComponents.BkgUser_Bookings />
+    <RVParking.Components.Pages.TabComponents.Bkg_Bookings_Maint />
+
+    @* <RVParking.Components.Pages.TabComponents.BkgUser_Bookings /> *@
    @*  <h4>New Booking for <b>@BkgType</b></h4>
     <div class="form-group" style="display:flex;flex-direction:row;">
         <div class="form-group" style="max-width: 25%; text-align:center; margin-left: 2%">

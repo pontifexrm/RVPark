@@ -34,22 +34,23 @@
 
 
 <div class="search-bar" style="display:flex;flex-direction:row;">
-    <input type="text" style="width: 300px;" placeholder="Search by Client" @bind="searchUsername" />
+    <input type="text" style="width: 200px;" placeholder="Search by Client" @bind="searchUsername" />
     <input type="date" style="margin-left: 4px;" @bind="searchFromDate" />
     <input type="date" style="margin-left: 4px;" @bind="searchToDate" />
-    <select style="margin-left: 4px;" @bind="searchPropertyId">
+    <select style="margin-left: 4px; width: 200px;" @bind="searchPropertyId">
         <option value="">Select Property</option>
         @foreach (var property in properties)
         {
             <option value="@property.PropertyId">@property.Name</option>
         }
     </select>
+    <input type="text" style="width: 200px; margin-left: 4px;" placeholder="Search by Status" @bind="searchStatus" />
     <button class="bi form-control" style="width: 40px; height: 32px; margin-left: 4px;"
-        @onclick="ClearSearch">
+    @onclick="ClearSearch">
         <i class="bi bi-x-lg"></i>
     </button>
     <button class="bi form-control" style="width: 40px; height: 32px; margin-left: 4px;"
-           @onclick="SearchBookings">
+    @onclick="SearchBookings">
         <i class="bi bi-search"></i>
     </button>
 </div>
@@ -176,10 +177,13 @@ else
     private List<Bkg_User> users = new();
     private List<Bkg_Property> properties = new();
     private Bkg_Booking currentBooking = new();
+    private Bkg_Booking originalBooking = new();
     private bool showModal = false;
     private string modalTitle = string.Empty;
     private string modalMessage = string.Empty;
     private string searchUsername = string.Empty;
+    private string searchStatus = string.Empty;
+
     private DateTime? searchFromDate;
     private DateTime? searchToDate;
     private int? searchPropertyId;
@@ -213,9 +217,10 @@ else
             .Where(b => b.BookingStatus != "Closed")
             .ToListAsync() ?? new List<Bkg_Booking>();
     }
-   
+
     private void EditBooking(Bkg_Booking booking)
     {
+        originalBooking = booking; // need to process Bkg_Availability on booking change.
         currentBooking = booking;
         modalTitle = "Edit Booking";
         modalMessage = "Booking Availablility is NOT checked as a results of changes you may make here. Double Booking Is Possible !!!!";
@@ -235,6 +240,14 @@ else
 
     private async Task SaveBooking()
     {
+        if (isAvailable())
+        {
+            currentBooking.BookingStatus = "Confirmed";
+        }
+        else
+        {
+            currentBooking.BookingStatus = "Requested";
+        }
         currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
         currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
 
@@ -279,7 +292,10 @@ else
         {
             query = query.Where(b => b.Bkg_User.UserName.Contains(searchUsername));
         }
-
+        if (!string.IsNullOrEmpty(searchStatus))
+        {
+            query = query.Where(b => b.BookingStatus.Contains(searchStatus));
+        }
         if (searchFromDate.HasValue)
         {
             query = query.Where(b => b.DateArrive >= searchFromDate.Value);
@@ -297,12 +313,117 @@ else
 
         bookings = await query.ToListAsync();
     }
-    
+
     private void ClearSearch()
     {
         searchUsername = string.Empty;
+        searchStatus = string.Empty;
         searchFromDate = null;
         searchToDate = null;
         searchPropertyId= null;
+    }
+
+    private bool isAvailable()
+    {
+        bool result = false;
+        if (currentBooking.BookingId == 0)
+        {
+            // a new booking so see if available
+            var dte = currentBooking.DateArrive;
+            while (dte <= currentBooking.DateDepart)
+            {
+                var avail = ApplicationDbContext.bkg_Availabilities
+                    .Where(a => a.Bkg_PropertyId == currentBooking.PropertyId && a.DateAvailable == dte)
+                    .FirstOrDefault();
+                if (avail != null)
+                {
+                    if (avail.Available)
+                    {
+                        result = true;
+                    }
+                    else
+                    {
+                        result = false;
+                        break;
+                    }
+                }
+                else
+                {
+                    result = false;
+                    break;
+                }
+                dte = dte.AddDays(1);
+            }
+        }
+        else
+        {
+            ApplicationDbContext.bkg_Bookings.Update(currentBooking);
+        }
+
+
+
+
+
+
+
+
+
+        var isAvail = false;
+
+        return isAvail;
+    }
+    private bool isAvailable(DateTime fmdte, DateTime todte, int propId)
+    {
+        bool result = false;
+        var dte = fmdte;
+        while (dte <= todte)
+        {
+            var avail = ApplicationDbContext.bkg_Availabilities
+                .Where(a => a.Bkg_PropertyId == propId && a.DateAvailable == dte)
+                .FirstOrDefault();
+            if (avail != null)
+            {
+                if (avail.Available)
+                {
+                    result = true;
+                }
+                else
+                {
+                    result = false;
+                    break;
+                }
+            }
+            else
+            {
+                result = false;
+                break;
+            }
+            dte = dte.AddDays(1);
+        }
+        return result;
+
+    }
+    private bool chngAvailableStatus(DateTime fmdte, DateTime todte, int propId, bool isavail, string status)
+    {
+        bool result = true;
+        DateTime dte = fmdte;
+        while (dte <= todte)
+        {
+            var existingRecord = ApplicationDbContext.bkg_Availabilities
+                .FirstOrDefault(a => a.Bkg_PropertyId == propId && a.DateAvailable == dte);
+
+            if (existingRecord != null)
+            {
+                existingRecord.Available = isavail;
+                existingRecord.AvailabilityStatus = status;
+            }
+            else
+            {
+                result = false;
+                break;
+            }
+            dte = dte.AddDays(1);
+        }
+        return result;
     }
 }

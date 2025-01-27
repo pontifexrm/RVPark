@@ -146,6 +146,61 @@ else
     </div>
 }
 
+<!-- Modal Dialog for Editing/Adding Bookings for current user. -->
+@if (showModal)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@modalTitle</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+
+                </div>
+                <div class="modal-header">@modalMessage</div>
+                <div class="modal-body">
+                    <EditForm Model="currentBooking" OnValidSubmit="SaveBooking">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+@*                         <div class="form-group">
+                            <label>Bkg User</label>
+                            <InputSelect @bind-Value="currentBooking.UserId" class="form-control">
+                                @foreach (var user in users)
+                                {
+                                    <option value="@user.UserId">@user.UserName</option>
+                                }
+                            </InputSelect>
+                        </div> *@
+                        <div class="form-group">
+                            <label>Property</label>
+                            <InputSelect @bind-Value="currentBooking.PropertyId" class="form-control">
+                                @foreach (var property in BkgProperties)
+                                {
+                                    <option value="@property.PropertyId">@property.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="form-group">
+                            <label>Arrival Date</label>
+                            <InputDate @bind-Value="currentBooking.DateArrive" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label>Departure Date</label>
+                            <InputDate @bind-Value="currentBooking.DateDepart" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label>Status <small>(Requested,Confirmed,Paid,Arrived,Closed,Cancelled)</small></label>
+                            <InputText @bind-Value="currentBooking.BookingStatus" class="form-control" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 
 @code {
@@ -243,4 +298,25 @@ else
         }
     }
 
+    private void CloseModal()
+    {
+        showModal = false;
+    }
+    private async Task SaveBooking()
+    {
+        currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
+        currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
+
+        if (currentBooking.BookingId == 0)
+        {
+            ApplicationDbContext.bkg_Bookings.Add(currentBooking);
+        }
+        else
+        {
+            ApplicationDbContext.bkg_Bookings.Update(currentBooking);
+        }
+        ApplicationDbContext.SaveChanges();
+        showModal = false;
+        LoadBookings();
+    }
 }
