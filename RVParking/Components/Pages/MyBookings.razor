@@ -43,13 +43,13 @@
         <div class="form-group" style="display:flex;flex-direction:row; text-align:center;">
             <div class="form-group" style="text-align:center; margin-left: 1%;">
                 <label>Property</label>
-                <select class="form-control">
+                <InputSelect @bind-Value="currentBooking.PropertyId" select class="form-control">
                     <option value="">Select Property</option>
                     @foreach (var property in BkgProperties)
                     {
                         <option value="@property.PropertyId">@property.Name</option>
                     }
-                </select>
+                </InputSelect>
             </div>
             <div class="form-group" style=" text-align:center; margin-left: 1%">
                 <label for="fmdate">Arriving</label>
@@ -86,7 +86,7 @@
             </div>
         </div>
     </a>            
-    </section>
+</section>
 
 
 <h4>View, Change or Delete Existing Bookings</h4>
@@ -157,13 +157,17 @@ else
                     <button type="button" class="btn-close" @onclick="CloseModal"></button>
 
                 </div>
-                <div class="modal-header">@modalMessage</div>
+                @if (!string.IsNullOrEmpty(modalMessage))
+                {
+                    <div class="modal-header">@modalMessage</div>
+                }
+
                 <div class="modal-body">
                     <EditForm Model="currentBooking" OnValidSubmit="SaveBooking">
                         <DataAnnotationsValidator />
                         <ValidationSummary />
 
-@*                         <div class="form-group">
+                        @*                         <div class="form-group">
                             <label>Bkg User</label>
                             <InputSelect @bind-Value="currentBooking.UserId" class="form-control">
                                 @foreach (var user in users)
@@ -189,11 +193,16 @@ else
                             <label>Departure Date</label>
                             <InputDate @bind-Value="currentBooking.DateDepart" class="form-control" />
                         </div>
+
                         <div class="form-group">
                             <label>Status <small>(Requested,Confirmed,Paid,Arrived,Closed,Cancelled)</small></label>
                             <InputText @bind-Value="currentBooking.BookingStatus" class="form-control" />
                         </div>
-                        <button type="submit" class="btn btn-primary">Save</button>
+
+                        @if (allDatesAvailable)
+                        {
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        }
                         <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
                     </EditForm>
                 </div>
@@ -204,7 +213,7 @@ else
 
 
 @code {
-     private string BkgType = "RVPark On Fitz";
+    private string BkgType = "RVPark On Fitz";
     private string isAvail = "Yes";
     public DateTime Fmdate { get; set; } = DateTime.Now.Date;
     public DateTime Todate { get; set; } = DateTime.Now.Date;
@@ -214,17 +223,29 @@ else
     private int? rqstPropertyId;
     private List<Bkg_Property> BkgProperties = new List<Bkg_Property>();
     private Bkg_Booking currentBooking = new();
+    private Bkg_Booking orgnBkg = new();
+    private DateTime orgnArrive;
+    private DateTime orgnDepart;
+    private int orgnPropertyId = 0;
+
+    private Bkg_Booking newBooking = new();
+
     private string modalTitle = string.Empty;
     private string modalMessage = string.Empty;
 
     private List<Bkg_Booking> bookings = new();
     private List<Bkg_User> users = new();
     private Bkg_User currentUser = new();
+    private Bkg_Engine? bkg_Engine;
 
     private bool showModal = false;
 
     protected override async Task OnInitializedAsync()
     {
+        if(bkg_Engine == null)
+        {
+            bkg_Engine = new Bkg_Engine(ApplicationDbContext);
+        }
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
@@ -236,55 +257,58 @@ else
         }
         BkgProperties = await ApplicationDbContext.bkg_Properties.ToListAsync();
         await LoadBookings();
-        
+
     }
-    private async Task LoadBookings()
-    {
-        bookings = await ApplicationDbContext.bkg_Bookings
+    private async Task LoadBookings() => bookings = await ApplicationDbContext.bkg_Bookings
             .Include(b => b.Bkg_User)
             .Include(b => b.Bkg_Property)
             .Where(b => b.BookingStatus != "Closed")
             .Where(b => b.Bkg_User.UserName.Contains(currentUser.UserName))
             .ToListAsync();
-    }
 
     private void CheckBkgRequest()
     {
         // LINQ query to check if all dates in the range are available
         //var result =  Bkg_UserService.Bkg_AvailableAllSync(Fmdate, Todate);
-        if (ApplicationDbContext.bkg_Availabilities == null)
+
+        newBooking = new Bkg_Booking();
+        newBooking.DateArrive = Fmdate; 
+        newBooking.DateDepart = Todate;
+        newBooking.UserId = currentUser.UserId;
+        newBooking.PropertyId = currentBooking.PropertyId;
+        newBooking.BookingStatus = "Requested";
+        newBooking.Bkg_User = currentUser;
+        //        newBooking.Bkg_Property = BkgProperties.FirstOrDefault(p => p.PropertyId == rqstPropertyId);
+        currentBooking = newBooking;  // maybe ???
+
+        var isAvail =  bkg_Engine.RequestBooking(newBooking);
+        if (isAvail)
         {
-            allDatesAvailable = false;
+            modalTitle = "Booking Requested";
+            modalMessage = "Your booking request is AVAILABLE. Please press SAVE to confirm or CANEL to quit.";
+            allDatesAvailable = true;
         }
         else
         {
-            var recordsInRange =  ApplicationDbContext.bkg_Availabilities
-                                .Where(b => b.DateAvailable <= Fmdate && b.DateAvailable <= Todate)
-                                .ToList();
-            if (recordsInRange.Count() == 0)  
-            {
-                allDatesAvailable = false;
-            }
-            else
-            {
-                // check number of records returned is same as number of days in range
-                // see if any are Not available
-                allDatesAvailable = false;
-            }
+            modalTitle = "Booking Request Failed";
+            modalMessage = "Sorry but your booking request is not possible.";
+            allDatesAvailable = false;
         }
-
-      //  var recordsInRange = ApplicationDbContext.bkg_Availabilities.Where(b => b.DateAvailable <= Fmdate && b.DateAvailable <= Todate).ToListAsync();
-
-
-   
+        showModal = true;
 
     }
 
     private void EditBooking(Bkg_Booking booking)
     {
+        orgnBkg = new();
+
+        orgnBkg.DateArrive = booking.DateArrive;
+        orgnBkg.DateDepart = booking.DateDepart;
+        orgnBkg.PropertyId = booking.PropertyId;
         currentBooking = booking;
         modalTitle = "Edit Booking";
-        modalMessage = "Booking Availablility is NOT checked as a results of changes you may make here. Double Booking Is Possible !!!!";
+        modalMessage = "";
+        allDatesAvailable = true;
         showModal = true;
     }
     private async Task DeleteBooking(int bookingId)
@@ -292,9 +316,20 @@ else
         var booking = await ApplicationDbContext.bkg_Bookings.FindAsync(bookingId);
         if (booking != null)
         {
-            ApplicationDbContext.bkg_Bookings.Remove(booking);
-            await ApplicationDbContext.SaveChangesAsync();
-            await LoadBookings();
+            try
+            {
+                await bkg_Engine.DeleteBookingAsync(booking);
+                await LoadBookings();
+            }
+            catch (Exception ex)
+            {
+                modalTitle = "Error found deleting this Booking";
+                modalMessage = ex.ToString();
+                allDatesAvailable = false;
+                showModal = true;
+            }
+
+            // await LoadBookings();
         }
     }
 
@@ -303,20 +338,34 @@ else
         showModal = false;
     }
     private async Task SaveBooking()
-    {
+    { 
         currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
         currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
+        // if a new booking then we need to Create it else Change it.
+        if(currentBooking.BookingId == 0) // A new booking
+        {
+            var savedOK = await bkg_Engine.CreateBookingAsync(currentBooking);
+            if (!savedOK)
+            {
+                modalMessage = "Error found saving this new Booking";
+                allDatesAvailable = false;
+                showModal = true;
+            }
+        }
+        else // editing existing bkg
+        {
+            var savedOK = await bkg_Engine.EditBookingAsync(orgnBkg, currentBooking);
+            if (!savedOK)
+            { 
+                modalMessage = "Error found saving this edited Booking";
+                allDatesAvailable = false;
+                showModal = true;
+            }
 
-        if (currentBooking.BookingId == 0)
-        {
-            ApplicationDbContext.bkg_Bookings.Add(currentBooking);
         }
-        else
-        {
-            ApplicationDbContext.bkg_Bookings.Update(currentBooking);
-        }
-        ApplicationDbContext.SaveChanges();
+
         showModal = false;
-        LoadBookings();
+        await LoadBookings();
+        StateHasChanged();
     }
 }

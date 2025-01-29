@@ -22,13 +22,13 @@
 
 <div class="tabs">
     <button class="@(activeTab == "Tab1" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab1"))">Booking Admin</button>
+    <button class="@(activeTab == "Tab6" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab6"))">Booking Availability</button>
     @* <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">Current Bookings</button> *@
     @* <button class="@(activeTab == "Tab8" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab8"))">Past Bookings</button> *@
     <button class="@(activeTab == "Tab7" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab7"))">Booking Users</button>
     <button class="@(activeTab == "Tab3" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab3"))">User/Role Maint.</button>
     <button class="@(activeTab == "Tab4" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab4"))">Role Maint.</button>
     <button class="@(activeTab == "Tab5" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab5"))">Property Maint.</button>
-    <button class="@(activeTab == "Tab6" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab6"))">Booking Availability</button>
 
 </div>
 <hr />
@@ -79,7 +79,7 @@
 </div>
 
 @code {
-    private string activeTab = "Tab3";
+    private string activeTab = "Tab1";
     private string BkgType = "RVPark On Fitz";
     private string isAvail = "Yes";
     public DateTime Fmdate { get; set; } = DateTime.Now.Date;

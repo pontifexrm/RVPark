@@ -35,7 +35,9 @@ namespace RVParking.Data
         }
         public async Task<Bkg_User?> DeleteBkgUserAsync(int usrId)
         {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var buser = await bkg_Users.FindAsync(usrId);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             if (buser == null)
             {
                 return null;
