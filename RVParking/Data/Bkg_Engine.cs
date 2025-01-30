@@ -120,46 +120,52 @@ namespace RVParking.Data
         public async Task<bool> CreateBookingAsync(Bkg_Booking newBooking)
         {
             bool result = false;
-        using (var transaction = _context.Database.BeginTransaction())
-        {
-            try
+            using (var transaction = _context.Database.BeginTransaction())
             {
-                if (IsAvailable(newBooking))
+                try
                 {
-                    // for each Bkg_availability record that is part of the new booking
-                    // set the availability to false and the status to "Booked" and Stats to string.Empty
-                    var dte = newBooking.DateArrive;
-                    while (dte < newBooking.DateDepart)
+                    if (IsAvailable(newBooking))
                     {
-                        var avail = _context.bkg_Availabilities?
-                            .Where(a => a.Bkg_PropertyId == newBooking.PropertyId && a.DateAvailable == dte)
-                            .FirstOrDefault();
-                        if (avail == null)
+                        // for each Bkg_availability record that is part of the new booking
+                        // set the availability to false and the status to "Booked" and Stats to string.Empty
+                        var dte = newBooking.DateArrive;
+                        while (dte < newBooking.DateDepart)
                         {
-                            throw new InvalidOperationException($"Availability record not found for property {newBooking.PropertyId} on date {dte}");
+                            var avail = _context.bkg_Availabilities?
+                                .Where(a => a.Bkg_PropertyId == newBooking.PropertyId && a.DateAvailable == dte)
+                                .FirstOrDefault();
+                            if (avail == null)
+                            {
+                                throw new InvalidOperationException($"Availability record not found for property {newBooking.PropertyId} on date {dte}");
+                            }
+                            else
+                            {
+                                avail.Available = false;
+                                avail.AvailabilityStatus = "Booked";
+                                //_ = _context.bkg_Availabilities?.Update(avail!);
+                                _context.bkg_Availabilities?.Update(avail);
+                            }
+                            dte = dte.AddDays(1);
                         }
-                        else
-                        {
-                            avail.Available = false;
-                            avail.AvailabilityStatus = "Booked";
-                            //_ = _context.bkg_Availabilities?.Update(avail!);
-                            _context.bkg_Availabilities?.Update(avail);
-                        }
-                        dte = dte.AddDays(1);
+                        // add the booking
+                        newBooking.BookingStatus = "Booked";
+                        _context.bkg_Bookings?.Add(newBooking);
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+                        result = true;
                     }
-                    // add the booking
-                    _context.bkg_Bookings?.Add(newBooking);
-                    await _context.SaveChangesAsync();
-                    transaction.Commit();
-                    result = true;
+                    else
+                    {
+                        transaction.Rollback();
+                        return false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return false;
                 }
             }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
-                return false;
-            }
-        }
             return result;
         }
 

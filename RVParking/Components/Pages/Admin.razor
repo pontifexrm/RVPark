@@ -80,15 +80,15 @@
 
 @code {
     private string activeTab = "Tab1";
-    private string BkgType = "RVPark On Fitz";
-    private string isAvail = "Yes";
-    public DateTime Fmdate { get; set; } = DateTime.Now.Date;
-    public DateTime Todate { get; set; } = DateTime.Now.Date;
-    private bool allDatesAvailable = false;
-    private string toDelete = "no";
-    private string status = string.Empty;
+    // private string BkgType = "RVPark On Fitz";
+    // private string isAvail = "Yes";
+    // public DateTime Fmdate { get; set; } = DateTime.Now.Date;
+    // public DateTime Todate { get; set; } = DateTime.Now.Date;
+    // private bool allDatesAvailable = false;
+    // private string toDelete = "no";
+    // private string status = string.Empty;
 
-    private List<Bkg_Property> BkgProperties = new List<Bkg_Property>();
+    // private List<Bkg_Property> BkgProperties = new List<Bkg_Property>();
     protected override async Task OnInitializedAsync()
     {
 
@@ -98,97 +98,8 @@
     {
         activeTab = tabName;
     }
-    private void CheckBkgRequest()
-    {
-    }
-    // private async Task CrudBkBkgAvailablilty()
-    // {
-    //     if (toDelete == "YES")
-    //     {
-    //         var recordsToDelete = ApplicationDbContext.bkg_Availabilities
-    //             .Where(a => a.PropertyId == int.Parse(BkgType) && a.DateAvailable >= Fmdate && a.DateAvailable <= Todate);
 
-    //         ApplicationDbContext.bkg_Availabilities.RemoveRange(recordsToDelete);
-    //     }
-    //     else
-    //     {
-    //         DateTime dte = Fmdate;
-    //         while (dte <= Todate)
-    //         {
-    //             var existingRecord = ApplicationDbContext.bkg_Availabilities
-    //                 .FirstOrDefault(a => a.PropertyId == int.Parse(BkgType) && a.DateAvailable == dte);
-
-    //             if (existingRecord != null)
-    //             {
-    //                 existingRecord.Available = isAvail == "Yes";
-    //                 existingRecord.AvailabilityStatus = status;
-    //             }
-    //             else
-    //             {
-    //                 var newRecord = new Bkg_Availability
-    //                 {
-    //                     PropertyId = int.Parse(BkgType),
-    //                     DateAvailable = dte,
-    //                     Available = isAvail == "Yes",
-    //                     AvailabilityStatus = status
-    //                 };
-    //                 ApplicationDbContext.bkg_Availabilities.Add(newRecord);
-    //             }
-    //             dte = dte.AddDays(1);
-    //         }
-    //     }
-    //     await ApplicationDbContext.SaveChangesAsync();
-    // }
-    //  Bkg_Property CRUD
-    // private List<Bkg_Property> BkgProperties = new List<Bkg_Property>();
-    // private Bkg_Property currentProperty = new Bkg_Property();
-    // private bool isModalOpen = false;
-    // private string modalTitle = "Add New Property";
-    // private void OpenAddModal()
-    // {
-    //     currentProperty = new Bkg_Property();
-    //     modalTitle = "Add New Property";
-    //     isModalOpen = true;
-    // }
-
-    // private void OpenEditModal(Bkg_Property property)
-    // {
-    //     currentProperty = property;
-    //     modalTitle = "Edit Property";
-    //     isModalOpen = true;
-    // }
-
-    // private void CloseModal()
-    // {
-    //     isModalOpen = false;
-    // }
-
-    // private async Task SaveProperty()
-    // {
-    //     if (currentProperty.PropertyId == 0)
-    //     {
-    //         ApplicationDbContext.bkg_Properties.Add(currentProperty);
-    //     }
-    //     else
-    //     {
-    //         ApplicationDbContext.bkg_Properties.Update(currentProperty);
-    //     }
-    //     await ApplicationDbContext.SaveChangesAsync();
-    //     BkgProperties = await ApplicationDbContext.bkg_Properties.ToListAsync();
-    //     CloseModal();
-    // }
-    // private async Task DeleteProperty(int propertyId)
-    // {
-    //     var property = await ApplicationDbContext.bkg_Properties.FindAsync(propertyId);
-    //     if (property != null)
-    //     {
-    //         ApplicationDbContext.bkg_Properties.Remove(property);
-    //         await ApplicationDbContext.SaveChangesAsync();
-    //         BkgProperties = await ApplicationDbContext.bkg_Properties.ToListAsync();
-    //     }
-    // }
-
-
+   
 }
 
 

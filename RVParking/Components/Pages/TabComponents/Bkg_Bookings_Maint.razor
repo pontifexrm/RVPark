@@ -25,7 +25,7 @@
 
 <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
     <div>
-        <h4>Current Open Bookings</h4>
+        <h4>Current Open Bookings - Add, Edit, and Delete All Bookings</h4>
     </div>
     <div>
         <button class="btn btn-primary" @onclick="OpenAddModal">Add New Booking</button>
@@ -33,23 +33,23 @@
 </div>
 
 
-<div class="search-bar" style="display:flex;flex-direction:row;">
-    <input type="text" style="width: 200px;" placeholder="Search by Client" @bind="searchUsername" />
-    <input type="date" style="margin-left: 4px;" @bind="searchFromDate" />
-    <input type="date" style="margin-left: 4px;" @bind="searchToDate" />
-    <select style="margin-left: 4px; width: 200px;" @bind="searchPropertyId">
+<div class="search-bar" style="display:flex; flex-wrap: wrap; gap: 4px;">
+    <input type="text" style="flex: 1 1 200px;" placeholder="Search by Client" @bind="searchUsername" />
+    <input type="date" style="flex: 1 1 200px;" @bind="searchFromDate" />
+    <input type="date" style="flex: 1 1 200px;" @bind="searchToDate" />
+    <select style="flex: 1 1 200px;" @bind="searchPropertyId">
         <option value="">Select Property</option>
         @foreach (var property in properties)
         {
             <option value="@property.PropertyId">@property.Name</option>
         }
     </select>
-    <input type="text" style="width: 200px; margin-left: 4px;" placeholder="Search by Status" @bind="searchStatus" />
-    <button class="bi form-control" style="width: 40px; height: 32px; margin-left: 4px;"
+    <input type="text" style="flex: 1 1 200px; max-width: 300px" placeholder="Search by Status" @bind="searchStatus" />
+    <button class="bi form-control" style="flex: 0 0 40px; height: 32px; margin-left: 4px;"
     @onclick="ClearSearch">
         <i class="bi bi-x-lg"></i>
     </button>
-    <button class="bi form-control" style="width: 40px; height: 32px; margin-left: 4px;"
+    <button class="bi form-control" style="flex: 0 0 40px; height: 32px; margin-left: 4px;"
     @onclick="SearchBookings">
         <i class="bi bi-search"></i>
     </button>
@@ -125,7 +125,12 @@ else
                     <button type="button" class="btn-close" @onclick="CloseModal"></button>
 
                 </div>
-                <div class="modal-header">@modalMessage</div>
+                @if (!string.IsNullOrEmpty(modalMessage))
+                {
+                    <div class="modal-header" style="color:midnightblue"><small>@modalMessage</small></div>
+                }
+
+                @* <div class="modal-header">@modalMessage</div> *@
                 <div class="modal-body">
                     <EditForm Model="currentBooking" OnValidSubmit="SaveBooking">
                         <DataAnnotationsValidator />
@@ -178,6 +183,11 @@ else
     private List<Bkg_Property> properties = new();
     private Bkg_Booking currentBooking = new();
     private Bkg_Booking originalBooking = new();
+    private Bkg_Booking orgnBkg = new();
+    private DateTime orgnArrive;
+    private DateTime orgnDepart;
+    private int orgnPropertyId = 0;
+
     private bool showModal = false;
     private string modalTitle = string.Empty;
     private string modalMessage = string.Empty;
@@ -188,12 +198,17 @@ else
     private DateTime? searchToDate;
     private int? searchPropertyId;
     private Bkg_User currentUser = new();
+    private Bkg_Engine bkg_Engine;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
+        if(bkg_Engine == null)
+        {
+            bkg_Engine = new Bkg_Engine(ApplicationDbContext);
+        }
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
@@ -220,18 +235,24 @@ else
 
     private void EditBooking(Bkg_Booking booking)
     {
-        originalBooking = booking; // need to process Bkg_Availability on booking change.
         currentBooking = booking;
+        orgnBkg.DateArrive = currentBooking.DateArrive;
+        orgnBkg.DateDepart = currentBooking.DateDepart;
+        orgnBkg.PropertyId = currentBooking.PropertyId;
+        orgnBkg.BookingStatus = currentBooking.BookingStatus;
+        orgnBkg.UserId = currentBooking.UserId;
+        orgnBkg.BookingId = currentBooking.BookingId;
+
         modalTitle = "Edit Booking";
-        modalMessage = "Booking Availablility is NOT checked as a results of changes you may make here. Double Booking Is Possible !!!!";
+        modalMessage = "";
         showModal = true;
     }
 
     private void OpenAddModal()
     {
         currentBooking = new Bkg_Booking();
-        currentBooking.DateArrive = DateTime.Now;
-        currentBooking.DateDepart = DateTime.Now.AddDays(1);
+        currentBooking.DateArrive = DateTime.Now.Date;
+        currentBooking.DateDepart = DateTime.Now.Date.AddDays(1);
         //perhaps need to
 
         modalTitle = "Add New Booking";
@@ -240,28 +261,69 @@ else
 
     private async Task SaveBooking()
     {
-        if (isAvailable())
-        {
-            currentBooking.BookingStatus = "Confirmed";
-        }
-        else
-        {
-            currentBooking.BookingStatus = "Requested";
-        }
         currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
         currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
+        // if a new booking then we need to Create it else Change it.
+        if (currentBooking.BookingId == 0) // A new booking
+        {
+            var savedOK = await bkg_Engine.CreateBookingAsync(currentBooking);
+            if (!savedOK)
+            {
+                modalMessage = "Booking Not possible - Likely date not available!";
+                //allDatesAvailable = false;
+                showModal = true;
+            }
+            else
+            {
+                showModal = false;
+                modalMessage = "";
+            }
+        }
+        else // editing existing bkg
+        {
+            var savedOK = await bkg_Engine.EditBookingAsync(orgnBkg, currentBooking);
+            if (!savedOK)
+            {
+                modalMessage = "Could not save changes to this Booking";
+                // allDatesAvailable = false;
+                showModal = true;
+            }
+            else
+            {
+                showModal = false;
+                modalMessage = "";
+            }
 
-        if (currentBooking.BookingId == 0)
-        {
-            ApplicationDbContext.bkg_Bookings.Add(currentBooking);
         }
-        else
-        {
-            ApplicationDbContext.bkg_Bookings.Update(currentBooking);
-        }
-        await ApplicationDbContext.SaveChangesAsync();
+
+      //  showModal = false;
         await LoadBookings();
-        showModal = false;
+        // StateHasChanged();
+
+
+
+        // if (isAvailable())
+        // {
+        //     currentBooking.BookingStatus = "Confirmed";
+        // }
+        // else
+        // {
+        //     currentBooking.BookingStatus = "Requested";
+        // }
+        // currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
+        // currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
+
+        // if (currentBooking.BookingId == 0)
+        // {
+        //     ApplicationDbContext.bkg_Bookings.Add(currentBooking);
+        // }
+        // else
+        // {
+        //     ApplicationDbContext.bkg_Bookings.Update(currentBooking);
+        // }
+        // await ApplicationDbContext.SaveChangesAsync();
+        // await LoadBookings();
+        // showModal = false;
     }
 
     private async Task DeleteBooking(int bookingId)
@@ -269,10 +331,30 @@ else
         var booking = await ApplicationDbContext.bkg_Bookings.FindAsync(bookingId);
         if (booking != null)
         {
-            ApplicationDbContext.bkg_Bookings.Remove(booking);
-            await ApplicationDbContext.SaveChangesAsync();
-            await LoadBookings();
+            try
+            {
+                await bkg_Engine.DeleteBookingAsync(booking);
+                await LoadBookings();
+            }
+            catch (Exception ex)
+            {
+                modalTitle = "Error found deleting this Booking";
+                modalMessage = ex.ToString();
+                // allDatesAvailable = false;
+                showModal = true;
+            }
+
+            // await LoadBookings();
         }
+
+
+        // var booking = await ApplicationDbContext.bkg_Bookings.FindAsync(bookingId);
+        // if (booking != null)
+        // {
+        //     ApplicationDbContext.bkg_Bookings.Remove(booking);
+        //     await ApplicationDbContext.SaveChangesAsync();
+        //     await LoadBookings();
+        // }
     }
 
     private void CloseModal()
@@ -323,42 +405,42 @@ else
         searchPropertyId= null;
     }
 
-    private bool isAvailable()
-    {
-        bool result = false;
-        if (currentBooking.BookingId == 0)
-        {
-            // a new booking so see if available
-            var dte = currentBooking.DateArrive;
-            while (dte <= currentBooking.DateDepart)
-            {
-                var avail = ApplicationDbContext.bkg_Availabilities
-                    .Where(a => a.Bkg_PropertyId == currentBooking.PropertyId && a.DateAvailable == dte)
-                    .FirstOrDefault();
-                if (avail != null)
-                {
-                    if (avail.Available)
-                    {
-                        result = true;
-                    }
-                    else
-                    {
-                        result = false;
-                        break;
-                    }
-                }
-                else
-                {
-                    result = false;
-                    break;
-                }
-                dte = dte.AddDays(1);
-            }
-        }
-        else
-        {
-            ApplicationDbContext.bkg_Bookings.Update(currentBooking);
-        }
+    // private bool isAvailable()
+    // {
+    //     bool result = false;
+    //     if (currentBooking.BookingId == 0)
+    //     {
+    //         // a new booking so see if available
+    //         var dte = currentBooking.DateArrive;
+    //         while (dte <= currentBooking.DateDepart)
+    //         {
+    //             var avail = ApplicationDbContext.bkg_Availabilities
+    //                 .Where(a => a.Bkg_PropertyId == currentBooking.PropertyId && a.DateAvailable == dte)
+    //                 .FirstOrDefault();
+    //             if (avail != null)
+    //             {
+    //                 if (avail.Available)
+    //                 {
+    //                     result = true;
+    //                 }
+    //                 else
+    //                 {
+    //                     result = false;
+    //                     break;
+    //                 }
+    //             }
+    //             else
+    //             {
+    //                 result = false;
+    //                 break;
+    //             }
+    //             dte = dte.AddDays(1);
+    //         }
+    //     }
+    //     else
+    //     {
+    //         ApplicationDbContext.bkg_Bookings.Update(currentBooking);
+    //     }
 
 
 
@@ -368,62 +450,62 @@ else
 
 
 
-        var isAvail = false;
+    //     var isAvail = false;
 
-        return isAvail;
-    }
-    private bool isAvailable(DateTime fmdte, DateTime todte, int propId)
-    {
-        bool result = false;
-        var dte = fmdte;
-        while (dte <= todte)
-        {
-            var avail = ApplicationDbContext.bkg_Availabilities
-                .Where(a => a.Bkg_PropertyId == propId && a.DateAvailable == dte)
-                .FirstOrDefault();
-            if (avail != null)
-            {
-                if (avail.Available)
-                {
-                    result = true;
-                }
-                else
-                {
-                    result = false;
-                    break;
-                }
-            }
-            else
-            {
-                result = false;
-                break;
-            }
-            dte = dte.AddDays(1);
-        }
-        return result;
+    //     return isAvail;
+    // }
+    // private bool isAvailable(DateTime fmdte, DateTime todte, int propId)
+    // {
+    //     bool result = false;
+    //     var dte = fmdte;
+    //     while (dte <= todte)
+    //     {
+    //         var avail = ApplicationDbContext.bkg_Availabilities
+    //             .Where(a => a.Bkg_PropertyId == propId && a.DateAvailable == dte)
+    //             .FirstOrDefault();
+    //         if (avail != null)
+    //         {
+    //             if (avail.Available)
+    //             {
+    //                 result = true;
+    //             }
+    //             else
+    //             {
+    //                 result = false;
+    //                 break;
+    //             }
+    //         }
+    //         else
+    //         {
+    //             result = false;
+    //             break;
+    //         }
+    //         dte = dte.AddDays(1);
+    //     }
+    //     return result;
 
-    }
-    private bool chngAvailableStatus(DateTime fmdte, DateTime todte, int propId, bool isavail, string status)
-    {
-        bool result = true;
-        DateTime dte = fmdte;
-        while (dte <= todte)
-        {
-            var existingRecord = ApplicationDbContext.bkg_Availabilities
-                .FirstOrDefault(a => a.Bkg_PropertyId == propId && a.DateAvailable == dte);
+    // }
+    // private bool chngAvailableStatus(DateTime fmdte, DateTime todte, int propId, bool isavail, string status)
+    // {
+    //     bool result = true;
+    //     DateTime dte = fmdte;
+    //     while (dte <= todte)
+    //     {
+    //         var existingRecord = ApplicationDbContext.bkg_Availabilities
+    //             .FirstOrDefault(a => a.Bkg_PropertyId == propId && a.DateAvailable == dte);
 
-            if (existingRecord != null)
-            {
-                existingRecord.Available = isavail;
-                existingRecord.AvailabilityStatus = status;
-            }
-            else
-            {
-                result = false;
-                break;
-            }
-            dte = dte.AddDays(1);
-        }
-        return result;
-    }
+    //         if (existingRecord != null)
+    //         {
+    //             existingRecord.Available = isavail;
+    //             existingRecord.AvailabilityStatus = status;
+    //         }
+    //         else
+    //         {
+    //             result = false;
+    //             break;
+    //         }
+    //         dte = dte.AddDays(1);
+    //     }
+    //     return result;
+    // }
 }
