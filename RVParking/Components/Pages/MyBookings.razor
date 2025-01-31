@@ -12,6 +12,11 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity.EntityFrameworkCore
 
+@using TNZAPI.NET;
+@using TNZAPI.NET.Core;
+@using TNZAPI.NET.Api.Addressbook.Contact.Dto;
+
+
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 @inject UserManager<ApplicationUser> UserManager
@@ -21,21 +26,8 @@
 @inject NavigationManager NavigationManager
 @inject ApplicationDbContext ApplicationDbContext
 
+@inject IConfiguration configuration
 
-@* <div class="tabs"> 
-    <button class="@(activeTab == "Tab1" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab1"))">New Booking</button>
-    <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">Current Bookings</button>
-    <button class="@(activeTab == "Tab3" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab3"))">Past Bookings</button>
-
-</div> *@
-@* <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
-    <div>
-        <h4>Add a new Booking.</h4>
-    </div>
-        <div>
-        <button class="btn btn-primary" @onclick="NewBkgRequest">Add New Booking</button>
-    </div>
-</div> *@
 <section class="card-list" >
 
     <a class="card-body" style="border: 1px solid #929292; margin-left: 1%; text-align:center;">
@@ -88,7 +80,6 @@
     </a>            
 </section>
 
-
 <h4>View, Change or Delete Existing Bookings</h4>
 @if (bookings == null)
 {
@@ -106,8 +97,9 @@ else
                     <th style="border: 1px solid #929292;">Property Name</th>
                     <th style="border: 1px solid #929292;">Arrival Date</th>
                     <th style="border: 1px solid #929292;">Departure Date</th>
+                    <th style="border: 1px solid #929292;">Bkg Ref</th>
                     <th style="border: 1px solid #929292;">Status</th>
-                    <th style="border: 1px solid #929292;">Actions</th>
+                    <th style="border: 1px solid #929292;"><small>Edit Delete Confirm</small></th>
                 </tr>
             </thead>
             <tbody>
@@ -120,12 +112,8 @@ else
                         <td style="border: 1px solid #929292;">@booking.Bkg_Property.Name</td>
                         <td style="border: 1px solid #929292;">@booking.DateArrive.ToShortDateString()</td>
                         <td style="border: 1px solid #929292;">@booking.DateDepart.ToShortDateString()</td>
+                        <td style="border: 1px solid #929292;">@booking.BookingId</td>
                         <td style="border: 1px solid #929292;">@booking.BookingStatus</td>
-                        @*                     <td>
-                            <button class="btn btn-primary" @onclick="() => EditBooking(booking)">Edit</button>
-                            <button class="btn btn-danger" @onclick="() => DeleteBooking(booking.BookingId)">Delete</button>
-                        </td> *@
-                        @* <td style="border: 1px solid #929292;"> *@
                         <td style="border: 1px solid #929292;">
                             <div class="tab-content" style="display:flex;flex-direction:row;">
                                 <button class="bi form-control" style="width: 40px; height: 32px;"
@@ -135,6 +123,11 @@ else
                                 <button class="bi form-control" style="width: 40px; height: 32px;"
                                 @onclick="() => DeleteBooking(booking.BookingId)">
                                     <i class="bi bi-trash3" style="block-size:max-content;"></i>
+                                </button>
+                                <button class="bi form-control" style="width: 70px; height: 32px;"
+                                @onclick="() => SendEmailConfirmation(booking.BookingId)">
+                                    <i class="bi bi-chat-text" style="block-size:max-content;"></i>
+                                    <i class="bi bi-envelope-arrow-up" style="block-size:max-content;"></i>
                                 </button>
                             </div>
                         </td>
@@ -167,7 +160,7 @@ else
                         <DataAnnotationsValidator />
                         <ValidationSummary />
 
-                        @*                         <div class="form-group">
+                     @*<div class="form-group">
                             <label>Bkg User</label>
                             <InputSelect @bind-Value="currentBooking.UserId" class="form-control">
                                 @foreach (var user in users)
@@ -211,6 +204,29 @@ else
     </div>
 }
 
+@if (sendConfirmMsg)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm your booking by Txt or Email</h5>
+                    <button type="button" class="btn-close" @onclick="CloseConfirmModal"></button>
+                </div>
+                <div class="modal-header" >
+                    <div class="form-group" style="display: block;">
+                        <label>Confirmation to my Email</label>
+                        <button type="button" class="btn btn-secondary" @onclick="SendEmailConfirmation">Email Confirmation</button>
+                    </div>
+                    <div class="form-group" style="display: block;">
+                        <label>Txt Confirmation to Phone</label>
+                        <button type="button" class="btn btn-secondary" @onclick="SendTxtConfirmation">Txt Confirmation</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
     private string BkgType = "RVPark On Fitz";
@@ -232,13 +248,16 @@ else
 
     private string modalTitle = string.Empty;
     private string modalMessage = string.Empty;
+    private bool sendConfirmMsg = false;
+    private bool showModal = false;
 
     private List<Bkg_Booking> bookings = new();
     private List<Bkg_User> users = new();
     private Bkg_User currentUser = new();
     private Bkg_Engine? bkg_Engine;
 
-    private bool showModal = false;
+    public EmailMessage emailMessage { get; set; } = new EmailMessage();
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -337,6 +356,10 @@ else
     {
         showModal = false;
     }
+    private void CloseConfirmModal()
+    {
+        sendConfirmMsg = false;
+    }
     private async Task SaveBooking()
     { 
         currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
@@ -351,6 +374,11 @@ else
                 allDatesAvailable = false;
                 showModal = true;
             }
+            else
+            {
+                // will send an email confirmation
+                SendEmailConfirmation();
+            }
         }
         else // editing existing bkg
         {
@@ -361,11 +389,69 @@ else
                 allDatesAvailable = false;
                 showModal = true;
             }
+            else
+            {
+                // will send an email confirmation
+                SendEmailConfirmation();
+            }
 
         }
 
         showModal = false;
         await LoadBookings();
         StateHasChanged();
+    }
+    private void SendEmailConfirmation(int bookingId)
+    {
+        currentBooking = bookings.FirstOrDefault(b => b.BookingId == bookingId);
+        sendConfirmMsg = true;
+    }
+    private void SendEmailConfirmation()
+    {
+        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
+            "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentUser);
+
+        emailMessage.Subject = subjectMsg; 
+
+        // Using TNZ
+        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+            {
+                AuthToken = configuration["TNZ:AuthToken"]
+            };
+        var client = new TNZApiClient(apiUser);
+
+        var reponseEmail = client.Messaging.Email.SendMessage(
+            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+            emailSubject: subjectMsg,
+            messagePlain: emailMessage.ConfirmBkgMsg,
+            destination: currentBooking.Bkg_User.UserEmail
+        );
+        sendConfirmMsg = false;
+    }
+    private void SendTxtConfirmation()
+    {
+        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+
+        emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
+            "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentUser);
+
+        emailMessage.Subject = subjectMsg; 
+        string txtrept = emailMessage.Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
+        // Using TNZ
+        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+            {
+                AuthToken = configuration["TNZ:AuthToken"]
+            };
+        var client = new TNZApiClient(apiUser);
+
+        var response = client.Messaging.SMS.SendMessage
+            (
+                destination: txtrept,                    
+                messageText: emailMessage.ConfirmBkgTxtMsg
+            );
+        sendConfirmMsg = false;
     }
 }

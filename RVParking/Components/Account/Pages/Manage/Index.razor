@@ -42,6 +42,11 @@
                 <ValidationMessage For="() => Input.LastName" class="text-danger" />
             </div>
             <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.NZMCA" id="Input.NZMCA" class="form-control" placeholder="Enter your NZMCA# else 'none'" />
+                <label for="Input.NZMCA" class="form-label">NZMCA</label>
+                <ValidationMessage For="() => Input.LastName" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
                 <InputTextArea @bind-Value="Input.Address" id="Input.Address" class="form-control" placeholder="Enter your Address" />
                 <label for="Input.City" class="form-label">Address</label>
                 <ValidationMessage For="() => Input.Address" class="text-danger" />
@@ -73,6 +78,7 @@
     private string? phoneNumber;
     private string? firstnames;
     private string? lastName;
+    private string? nzmca;
     private string? address;
     private string? zip;
     private string? city;
@@ -95,9 +101,11 @@
         city = user.City;
         country = user.Country;
 
+
         Input.PhoneNumber ??= phoneNumber;
         Input.FirstNames ??= firstnames;
         Input.LastName ??= lastName;
+        Input.NZMCA ??= nzmca;
         Input.Address ??= address;
         Input.Zip ??= zip;
         Input.City ??= city;
@@ -119,6 +127,7 @@
         }
         user.FirstNames = Input.FirstNames;
         user.LastName = Input.LastName;
+        user.NZMCA = Input.NZMCA;
         user.UserAddress = Input.Address;
         user.UserZip = Input.Zip;  
         user.City = Input.City;
@@ -142,6 +151,7 @@
             bkg_User.UserCity = user.City;
             bkg_User.UserCountry = user.Country;
             bkg_User.UserPhone = user.PhoneNumber;
+            bkg_User.UserNZMCA = user.NZMCA;
 
             // Save bkg_User to the database  
             await ApplicationDbContext.SaveChangesAsync();
@@ -164,6 +174,9 @@
 
         [Display(Name = "Last Name")]
         public string? LastName { get; set; }
+
+        [Display(Name = "NZMCA")]
+        public string? NZMCA { get; set; }
 
         [Display(Name = "Address")]
         public string? Address { get; set; }

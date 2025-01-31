@@ -26,6 +26,7 @@ else
                 <th style="border: 1px solid #929292;">Last Name</th>
                 <th style="border: 1px solid #929292;">Email</th>
                 <th style="border: 1px solid #929292;">Phone</th>
+                <th style="border: 1px solid #929292;">NZMCA</th>
                 <th style="border: 1px solid #929292;">Address</th>
                 <th style="border: 1px solid #929292;">City</th>
                 <th style="border: 1px solid #929292;">State</th>
@@ -44,6 +45,7 @@ else
                     <td style="border: 1px solid #929292;">@user.UserLastName</td>
                     <td style="border: 1px solid #929292;">@user.UserEmail</td>
                     <td style ="border: 1px solid #929292;">@user.UserPhone</td>
+                    <td style="border: 1px solid #929292;">@user.UserNZMCA</td>
                     <td style="border: 1px solid #929292;">@user.UserAddress</td>
                     <td style="border: 1px solid #929292;">@user.UserCity</td>
                     <td style="border: 1px solid #929292;">@user.UserState</td>
@@ -98,6 +100,10 @@ else
                 <div>
                     <label>Phone Number</label>
                     <InputText @bind-Value="currentUser.UserPhone" class="form-control" />
+                </div>
+                <div>
+                    <label>NZMCA #</label>
+                    <InputText @bind-Value="currentUser.UserNZMCA" class="form-control" />
                 </div>
             </div>
             <div class="form-group" style="display:flex;flex-direction:row; margin-left: 2%">

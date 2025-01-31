@@ -14,6 +14,7 @@ namespace RVParking.Data
         public string UserLastName { get; set; } = string.Empty;
         public string UserEmail { get; set; } = string.Empty;
         public string UserPhone { get; set; } = string.Empty;
+        public string UserNZMCA { get; set; } = string.Empty;
         public string UserAddress { get; set; } = string.Empty;
         public string UserCity { get; set; } = string.Empty;
         public string UserState { get; set; } = string.Empty;

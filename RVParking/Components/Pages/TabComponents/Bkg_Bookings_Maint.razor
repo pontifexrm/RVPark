@@ -34,7 +34,7 @@
 
 
 <div class="search-bar" style="display:flex; flex-wrap: wrap; gap: 4px;">
-    <input type="text" style="flex: 1 1 200px;" placeholder="Search by Client" @bind="searchUsername" />
+    <input type="text" style="flex: 1 1 200px;" placeholder="Search by Client or Bkg Ref:" @bind="searchUsername" />
     <input type="date" style="flex: 1 1 200px;" @bind="searchFromDate" />
     <input type="date" style="flex: 1 1 200px;" @bind="searchToDate" />
     <select style="flex: 1 1 200px;" @bind="searchPropertyId">
@@ -72,6 +72,7 @@ else
                     <th style="border: 1px solid #929292;">Property Name</th>
                     <th style="border: 1px solid #929292;">Arrival Date</th>
                     <th style="border: 1px solid #929292;">Departure Date</th>
+                    <th style="border: 1px solid #929292;">Bkg Ref</th>
                     <th style="border: 1px solid #929292;">Status</th>
                     <th style="border: 1px solid #929292;">Actions</th>
                 </tr>
@@ -86,6 +87,7 @@ else
                         <td style="border: 1px solid #929292;">@booking.Bkg_Property.Name</td>
                         <td style="border: 1px solid #929292;">@booking.DateArrive.ToShortDateString()</td>
                         <td style="border: 1px solid #929292;">@booking.DateDepart.ToShortDateString()</td>
+                        <td style="border: 1px solid #929292;">@booking.BookingId</td>
                         <td style="border: 1px solid #929292;">@booking.BookingStatus</td>
                         @*                     <td>
                             <button class="btn btn-primary" @onclick="() => EditBooking(booking)">Edit</button>
@@ -166,7 +168,12 @@ else
                             <label>Status <small>(Requested,Confirmed,Paid,Arrived,Closed,Cancelled)</small></label>
                             <InputText @bind-Value="currentBooking.BookingStatus" class="form-control" />
                         </div>
-                        <button type="submit" class="btn btn-primary">Save</button>
+                        @if (allDatesAvailable)
+                        {
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        }
+
+                        @* <button type="submit" class="btn btn-primary">Save</button> *@
                         <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
                     </EditForm>
                 </div>
@@ -189,6 +196,7 @@ else
     private int orgnPropertyId = 0;
 
     private bool showModal = false;
+    private bool allDatesAvailable = true;
     private string modalTitle = string.Empty;
     private string modalMessage = string.Empty;
     private string searchUsername = string.Empty;
@@ -270,7 +278,7 @@ else
             if (!savedOK)
             {
                 modalMessage = "Booking Not possible - Likely date not available!";
-                //allDatesAvailable = false;
+                allDatesAvailable = false;
                 showModal = true;
             }
             else
@@ -285,7 +293,7 @@ else
             if (!savedOK)
             {
                 modalMessage = "Could not save changes to this Booking";
-                // allDatesAvailable = false;
+                allDatesAvailable = false;
                 showModal = true;
             }
             else
@@ -372,7 +380,14 @@ else
 
         if (!string.IsNullOrEmpty(searchUsername))
         {
-            query = query.Where(b => b.Bkg_User.UserName.Contains(searchUsername));
+            // if numeric then is Bkg Ref else User name
+            if (IsNumeric(searchUsername)){
+                query = query.Where(b => b.BookingId == int.Parse(searchUsername));
+            }
+            else{
+                query = query.Where(b => b.Bkg_User.UserName.Contains(searchUsername));
+            }
+            // query = query.Where(b => b.Bkg_User.UserName.Contains(searchUsername));
         }
         if (!string.IsNullOrEmpty(searchStatus))
         {
@@ -404,7 +419,10 @@ else
         searchToDate = null;
         searchPropertyId= null;
     }
-
+    public static bool IsNumeric(string value)
+    {
+        return double.TryParse(value, out _);
+    }
     // private bool isAvailable()
     // {
     //     bool result = false;
