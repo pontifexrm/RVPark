@@ -26,7 +26,7 @@
 @inject ApplicationDbContext ApplicationDbContext
 
 @inject IConfiguration configuration
-
+<!-- Page header with title and button to add a new Booking -->
 <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
     <div>
         <h4>Current Open Bookings - Add, Edit, and Delete All Bookings</h4>
@@ -36,7 +36,7 @@
     </div>
 </div>
 
-
+<!-- Search Bar -->
 <div class="search-bar" style="display:flex; flex-wrap: wrap; gap: 4px;">
     <input type="text" style="flex: 1 1 200px;" placeholder="Search by Client or Bkg Ref:" @bind="searchUsername" />
     <input type="date" style="flex: 1 1 200px;" @bind="searchFromDate" />
@@ -60,6 +60,7 @@
 </div>
 <br />
 
+<!-- Load Table of all open bookings Bookings -->
 @if (bookings == null)
 {
     <p><em>Loading...</em></p>
@@ -109,7 +110,7 @@ else
                                     <i class="bi bi-trash3" style="block-size:max-content;"></i>
                                 </button>
                                 <button class="bi form-control" style="width: 70px; height: 32px;"
-                                @onclick="() => SendEmailConfirmation(booking.BookingId)">
+                                @onclick="() => SendConfirmationModal(booking.BookingId)">
                                     <i class="bi bi-chat-text" style="block-size:max-content;"></i>
                                     <i class="bi bi-envelope-arrow-up" style="block-size:max-content;"></i>
                                 </button>
@@ -122,8 +123,6 @@ else
         </table>
     </div>
 }
-
-@* <button class="btn btn-primary" @onclick="OpenAddModal">Add New Booking</button> *@
 
 <!-- Modal Dialog for Editing/Adding Bookings -->
 @if (showModal)
@@ -191,6 +190,39 @@ else
     </div>
 }
 
+<!-- Modal Dialog for Sending Email Confirmation -->
+@if (sendConfirmMsg)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog" stype=" width: 900px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm booking by Txt or Email</h5>
+                    @* <small>Normally to the Bkg User but can email to the logged in user or txt or email to another that you enter.</small> *@
+                    <button type="button" class="btn-close" @onclick="CloseConfirmModal"></button>
+                </div>
+                <div class="modal-header" style="color:midnightblue"><small>Sent normally to the Bkg User but you can email to yourself (enter 'Me') or email/txt another by entering their email or phone number.</small></div>
+                <div class="modal-header">
+                    <div class="form-group" style="display: block;">
+                        <label>Email Confirm to Me or Other</label>
+                        <input type="text" style="flex: 1 1 200px; max-width: 200px" placeholder="Me or Other Txt/Email" @bind="adhocConfirm" />
+                        <button type="button" class="btn btn-secondary" @onclick="SendAdhocConfirmation">Adhoc Confirm</button>
+                    </div>
+                    <div class="form-group" style="display: block;">
+                        <label>Email Confirm to Client</label>
+                        <button type="button" class="btn btn-secondary" @onclick="SendEmailConfirmation">Email Confirm</button>
+                    </div>
+                    <div class="form-group" style="display: block;">
+                        <label>Txt Confirm to Client</label>
+                        <button type="button" class="btn btn-secondary" @onclick="SendTxtConfirmation">Txt Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
 @code {
     private ApplicationUser user = default!;
 
@@ -211,10 +243,13 @@ else
     private string modalMessage = string.Empty;
     private string searchUsername = string.Empty;
     private string searchStatus = string.Empty;
-
     private DateTime? searchFromDate;
     private DateTime? searchToDate;
     private int? searchPropertyId;
+    private string adhocConfirm = string.Empty;
+
+
+
     private Bkg_User currentUser = new();
     private Bkg_Engine bkg_Engine;
 
@@ -317,7 +352,7 @@ else
 
         }
 
-      //  showModal = false;
+        //  showModal = false;
         await LoadBookings();
         // StateHasChanged();
 
@@ -381,6 +416,10 @@ else
     private void CloseModal()
     {
         showModal = false;
+    }
+    private void CloseConfirmModal()
+    {
+        sendConfirmMsg = false;
     }
 
     private async Task SearchBookings()
@@ -540,20 +579,71 @@ else
     //     return result;
     // }
 
-    private void SendEmailConfirmation(int bookingId)
+    private void SendConfirmationModal(int bookingId)
     {
         currentBooking = bookings.FirstOrDefault(b => b.BookingId == bookingId);
         sendConfirmMsg = true;
     }
+
     private void SendEmailConfirmation()
     {
+        string destination = currentBooking.Bkg_User.UserEmail;
+        SendEmailConfirmation(destination);
+    }
+    private void SendTxtConfirmation()
+    {
+        string txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
+        SendTxtConfirmation(txtrept);
+    }
+    private void SendAdhocConfirmation()
+    {
+        bool isEmail = true; 
+        string sendtoWho = string.Empty;
+        // if Me then send to the logged in user
+        if (adhocConfirm.ToLower() == "me" || adhocConfirm.Length == 0)
+        {
+            adhocConfirm = currentUser.UserEmail;
+            isEmail = true;
+        }
+        else if (IsNumeric(adhocConfirm))
+        {
+            adhocConfirm = Chk_E_164_Phone(adhocConfirm);
+            isEmail = false;
+        }
+        else
+        {
+            if (!emailMessage.IsValidEmail(adhocConfirm))
+            {
+                modalMessage = "Invalid Email or Phone Number";
+                //                showModal = true;
+                adhocConfirm = string.Empty;
+                sendConfirmMsg = false;
+                return; // do nothing and say nothing
+            }
+            isEmail = true;
+        }
+        if (isEmail)
+        {
+            SendEmailConfirmation(adhocConfirm);
+        }
+        else
+        {
+            SendTxtConfirmation(adhocConfirm);
+        }
+
+        adhocConfirm = string.Empty;
+        sendConfirmMsg = false;
+
+    }
+    private void SendEmailConfirmation(string emailTo)
+    {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
-        emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
-            "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentUser);
+    " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        // emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
+        //     "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentBooking.Bkg_User);
 
-        emailMessage.Subject = subjectMsg;
-
+        // emailMessage.Subject = subjectMsg;
+#if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
             {
@@ -564,22 +654,23 @@ else
         var reponseEmail = client.Messaging.Email.SendMessage(
             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
             emailSubject: subjectMsg,
-            messagePlain: emailMessage.ConfirmBkgMsg,
-            destination: currentBooking.Bkg_User.UserEmail
+            messagePlain: ConfirmBkgMsg(),
+            destination: emailTo
         );
+#endif
         sendConfirmMsg = false;
     }
-    private void SendTxtConfirmation()
+    private void SendTxtConfirmation(string txtrept)
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
 
-        emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
-            "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentUser);
+        // emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
+        //     "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentBooking.Bkg_User);
 
-        emailMessage.Subject = subjectMsg;
-        string txtrept = emailMessage.Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
+        // emailMessage.Subject = subjectMsg;
         // Using TNZ
+#if !DEBUG
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
             {
                 AuthToken = configuration["TNZ:AuthToken"]
@@ -589,9 +680,58 @@ else
         var response = client.Messaging.SMS.SendMessage
             (
                 destination: txtrept,
-                messageText: emailMessage.ConfirmBkgTxtMsg
+                messageText: ConfirmBkgMsg()
             );
+#endif
         sendConfirmMsg = false;
+    }
+    private string ConfirmBkgMsg()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("Kia ora ");
+        sb.Append(currentUser.UserFirstName);
+        sb.Append(" ");
+        sb.Append(currentUser.UserLastName);
+        sb.Append("\n\n");
+        sb.Append("Your booking has been confirmed for ");
+        sb.Append(currentBooking.Bkg_Property.Name);
+        sb.Append(" arriving after mid-day ");
+        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(" departing before mid-day");
+        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append("\n\n");
+        sb.Append("Address is\r\n" +
+                 "        22 Fitzpatrick St\r\n" +
+                 "        Newlands\r\n" +
+                 "        Wellington 6037\r\n" +
+                 "Access is best from Stewart Drive.Either from the north where you would exit SH1 at Johnsonville or from the South turning into Newlands. Turn into Fitzpatrick St from Stewart Drive is best as other routes(courtesy of the map apps) send you around a very narrow road.We are on the left corner of the 2nd street on the left going up Fitzpatrick St.\r\n" +
+                 "Payment is $30 for the night with NZMCA Memebrship {3}, payable in advance please to our bank account.\r\n" +
+                 "        RM and LM PONTIFEX\r\n" +
+                 "        03 0525 0253043 000\r\n" +
+                 "(We have Wise Card if that suits you better.)\r\n\r\n" +
+                 "Please text us on arrival and we shall come out to meets you etc.\r\n" +
+                 "Again many thanks\r\n" +
+                 "Ron Pontifex\r\n" +
+                 "WELLINGTON New Zealand\r\n" +
+                 "Ph 027 304 2002\r\n" +
+                 "E - Mail : rvpark@pontifex.nz\r\n");
+        return sb.ToString();
+    }
+    private string Chk_E_164_Phone(string phne)
+    {
+        string srtn = string.Empty;
+        if (phne.Length > 0)
+        {
+            if (phne.StartsWith("+")) // then likely in the corect format already
+            {
+                srtn = phne.Trim();
+            }
+            else if (phne.StartsWith("0"))// then likely miss country code so remove the "0" and add "+64"
+            {
+                srtn = string.Concat("+64" + phne[1..]); // this prefix should be a configurable for the ountry the app is being run in.
+            }
+        }
+        return srtn;
     }
 
 }

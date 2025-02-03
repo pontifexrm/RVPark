@@ -1,27 +1,42 @@
 ﻿@page "/contactus"
+@rendermode InteractiveServer
 
-@using Microsoft.AspNetCore.Components.Forms
-@using RVParking.Data
+
 @using System.ComponentModel.DataAnnotations
-@using System.ComponentModel
 @using System.Text
 @using System.Text.Encodings.Web
-@using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.EntityFrameworkCore
+@using RVParking.Data
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
+
+@using Microsoft.AspNetCore.Components.Forms
+@using System.ComponentModel
+@using Microsoft.AspNetCore.Components
+
 @using TNZAPI.NET;
 @using TNZAPI.NET.Core;
 @using TNZAPI.NET.Api.Addressbook.Contact.Dto;
 
 
 @* @inject IEmailSender EmailSender *@
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IEmailSender<ApplicationUser> EmailSender
+
 @inject NavigationManager Navigation
+@inject ApplicationDbContext ApplicationDbContext
+
 @inject IConfiguration configuration
 @inject HttpContextAccessorService httpContextAccessorService
 
 <PageTitle>RV Park Contact Us</PageTitle>
 
-<h2>Contact Us</h2><br />
+<h2>Contact Us</h2>
+<br />
 
 @if (@emailMessage is null)
 {
@@ -29,7 +44,7 @@
 }
 else
 {
-    <EditForm Model=@emailMessage OnValidSubmit=@ValidFormSubmitted method="post" FormName="ContactUs" >
+    <EditForm Model=@emailMessage OnValidSubmit=@ValidFormSubmitted method="post" FormName="ContactUs">
         <DataAnnotationsValidator />
         <ValidationSummary />
 
@@ -54,24 +69,24 @@ else
 
         <div class="form-group" style="max-width: 75%;width: 500px; margin-left: 2%">
             <label for="subject">Subject</label>
-            <InputText @bind-Value=emailMessage.Subject class="form-control" id="subject" />
+            <InputText @bind-Value="emailMessage.Subject" class="form-control" id="subject" />
             <ValidationMessage For="() => emailMessage.Subject" />
         </div>
         <div class="form-group" style="max-width: 25%;width: 300px;  margin-left: 2%">
             <label for="nzmca">NZMCA ID</label>
-            <InputText @bind-Value=emailMessage.Nzmca  class="form-control" id="nzmca" />
+            <InputText @bind-Value="emailMessage.Nzmca" class="form-control" id="nzmca" />
             <ValidationMessage For="() => emailMessage.Nzmca" />
         </div>
         <div class="form-group" style="display:flex;flex-direction:row;">
             <div class="form-group" style="max-width: 25%;  margin-left: 2%">
                 <label for="fmdate">From</label>
                 <InputDate @bind-Value=emailMessage.Fmdate class="form-control" id="fmdate" />
-                @* <ValidationMessage For="() => emailMessage.Fmdate" /> *@
+                <ValidationMessage For="() => emailMessage.Fmdate" />
             </div>
             <div class="form-group" style="max-width: 25%;  margin-left: 2%">
                 <label for="todate">To</label>
                 <InputDate @bind-Value=emailMessage.Todate class="form-control" id="todate" />
-                @* <ValidationMessage For="() => emailMessage.Todate" /> *@
+                <ValidationMessage For="() => emailMessage.Todate" />
             </div>
 
         </div>
@@ -79,7 +94,7 @@ else
 
         <div class="form-group" style="max-width: 75%;width:500px;  margin-left: 2%">
             <label for="message">Message</label>
-            <InputTextArea @bind-Value=emailMessage.Message class="form-control" id="message" />
+            <InputTextArea @bind-Value="emailMessage.Message" class="form-control" id="message" />
             @* <ValidationMessage For="() => emailMessage.Message" /> *@
         </div>
 
@@ -94,26 +109,60 @@ else
 
 }
 
+<!-- Modal Dialog for Sending Email Confirmation -->
+@if (sendConfirmMsg)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmation</h5>
+                    <button type="button" class="btn-close" @onclick="confirmMsg"></button>
+                </div>
+                <div class="modal-header" style="color:midnightblue">
+                    <small>@dialogMessage</small>
+                    <div class="form-group" style="display: block;">
+                        <button type="button" class="btn btn-secondary" @onclick="confirmMsg">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 
 
 
 @code {
+    private bool sendConfirmMsg = false;
+    private string dialogMessage = string.Empty;
     bool isSubmitting;
     private string result = string.Empty;
     [SupplyParameterFromForm]
     public EmailMessage emailMessage { get; set; } = new EmailMessage();
 
-    private string userIpAddress = string.Empty; 
-    protected override void OnInitialized() 
-    { 
-        userIpAddress = httpContextAccessorService.GetUserIpAddress(); 
-        // var context = httpContextAccessorService.HttpContext; 
+    private string userIpAddress = string.Empty;
+
+    private void confirmMsg()
+    {
+        sendConfirmMsg = true;
+        Navigation.NavigateTo("/", forceLoad: true); // does not work if in the try catch block further work needed.
+    }
+    private void AckMsg()
+    {
+        sendConfirmMsg = false;
+        // Navigation.NavigateTo("/", forceLoad: true); // does not work if in the try catch block further work needed.
+    }
+    protected override void OnInitialized()
+    {
+        userIpAddress = httpContextAccessorService.GetUserIpAddress();
+        // var context = httpContextAccessorService.HttpContext;
         // publicIpAddress = context?.Request?.Headers["X-Real-IP"] ?? "Unknown"
     }
     private async Task ValidFormSubmitted()
     {
-        if (isSubmitting) 
+        // var etst = emailMessage.Name;
+        if (isSubmitting)
             return;
         if (emailMessage.HasValidMxRecord(emailMessage.Email) == false)  // checked to see if a valid email address
         {
@@ -136,12 +185,12 @@ else
         //     isSubmitting = false;
         // }
         #endregion
-
+#if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-        {
-            AuthToken = configuration["TNZ:AuthToken"]
-        };
+            {
+                AuthToken = configuration["TNZ:AuthToken"]
+            };
         var client = new TNZApiClient(apiUser);
 
         var reponseEmail = client.Messaging.Email.SendMessage(
@@ -159,17 +208,17 @@ else
 
         // next send an SMS to admin to say we have a contact.
         // emailMessage.Phone = "";
-         string rept = configuration["TNZ:SMSrept"]; //"+64273042002";    // this shoild come from configuration injection
-                                                           //const string txtmsg = "From RVPark using TNZ API out of Blazor";
+        string rept = configuration["TNZ:SMSrept"]; //"+64273042002";    // this shoild come from configuration injection
+                                                    //const string txtmsg = "From RVPark using TNZ API out of Blazor";
         var response = client.Messaging.SMS.SendMessage
                     (
                         destination: rept,                     // Recipient
                         messageText: emailMessage.smsMsg + " " + userIpAddress      // SMS Message
-                                                                  //sendMode: Enums.SendModeType.Test           // TEST Mode - Remove this to send live traffic
+                                                                                    //sendMode: Enums.SendModeType.Test           // TEST Mode - Remove this to send live traffic
                     );
-
-
-        Navigation.NavigateTo("/", forceLoad: true); // does not work if in the try catch block further work needed.
+#endif
+        dialogMessage = "Thanks we have your message and we'll be in contact very soon. Meantime you will recieve an email copy of your message.";
+        sendConfirmMsg = true;
     }
 
 

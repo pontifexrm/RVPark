@@ -160,7 +160,7 @@ else
                         <DataAnnotationsValidator />
                         <ValidationSummary />
 
-                     @*<div class="form-group">
+                        @*<div class="form-group">
                             <label>Bkg User</label>
                             <InputSelect @bind-Value="currentBooking.UserId" class="form-control">
                                 @foreach (var user in users)
@@ -256,7 +256,8 @@ else
     private Bkg_User currentUser = new();
     private Bkg_Engine? bkg_Engine;
 
-    public EmailMessage emailMessage { get; set; } = new EmailMessage();
+    //    public EmailMessage emailMessage { get; set; } = new EmailMessage();
+//    public EmailMessage emailMessage  = new ();
 
 
     protected override async Task OnInitializedAsync()
@@ -410,11 +411,7 @@ else
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
-        emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
-            "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentUser);
-
-        emailMessage.Subject = subjectMsg; 
-
+#if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
             {
@@ -425,9 +422,10 @@ else
         var reponseEmail = client.Messaging.Email.SendMessage(
             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
             emailSubject: subjectMsg,
-            messagePlain: emailMessage.ConfirmBkgMsg,
+            messagePlain: ConfirmBkgMsg(),
             destination: currentBooking.Bkg_User.UserEmail
         );
+#endif
         sendConfirmMsg = false;
     }
     private void SendTxtConfirmation()
@@ -435,12 +433,9 @@ else
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
 
-        emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
-            "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentUser);
-
-        emailMessage.Subject = subjectMsg; 
-        string txtrept = emailMessage.Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
+        string txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
         // Using TNZ
+#if !DEBUG
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
             {
                 AuthToken = configuration["TNZ:AuthToken"]
@@ -450,8 +445,57 @@ else
         var response = client.Messaging.SMS.SendMessage
             (
                 destination: txtrept,                    
-                messageText: emailMessage.ConfirmBkgTxtMsg
+                messageText: ConfirmBkgMsg()
             );
+#endif
         sendConfirmMsg = false;
+    }
+    private string ConfirmBkgMsg()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("Kia ora ");
+        sb.Append(currentUser.UserFirstName);
+        sb.Append(" ");
+        sb.Append(currentUser.UserLastName);
+        sb.Append("\n\n");
+        sb.Append("Your booking has been confirmed for ");
+        sb.Append(currentBooking.Bkg_Property.Name);
+        sb.Append(" arriving after mid-day ");
+        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(" departing before mid-day");
+        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append("\n\n");
+        sb.Append("Address is\r\n" +
+                 "        22 Fitzpatrick St\r\n" +
+                 "        Newlands\r\n" +
+                 "        Wellington 6037\r\n" +
+                 "Access is best from Stewart Drive.Either from the north where you would exit SH1 at Johnsonville or from the South turning into Newlands. Turn into Fitzpatrick St from Stewart Drive is best as other routes(courtesy of the map apps) send you around a very narrow road.We are on the left corner of the 2nd street on the left going up Fitzpatrick St.\r\n" +
+                 "Payment is $30 for the night with NZMCA Memebrship {3}, payable in advance please to our bank account.\r\n" +
+                 "        RM and LM PONTIFEX\r\n" +
+                 "        03 0525 0253043 000\r\n" +
+                 "(We have Wise Card if that suits you better.)\r\n\r\n" +
+                 "Please text us on arrival and we shall come out to meets you etc.\r\n" +
+                 "Again many thanks\r\n" +
+                 "Ron Pontifex\r\n" +
+                 "WELLINGTON New Zealand\r\n" +
+                 "Ph 027 304 2002\r\n" +
+                 "E - Mail : rvpark@pontifex.nz\r\n" );
+        return sb.ToString();
+    }
+    private string Chk_E_164_Phone(string phne)
+    {
+        string srtn = string.Empty;
+        if (phne.Length > 0)
+        {
+            if (phne.StartsWith("+")) // then likely in the corect format already
+            {
+                srtn = phne.Trim();
+            }
+            else if (phne.StartsWith("0"))// then likely miss country code so remove the "0" and add "+64"
+            {
+                srtn = string.Concat("+64" + phne[1..]); // this prefix should be a configurable for the ountry the app is being run in.
+            }
+        }
+        return srtn;
     }
 }

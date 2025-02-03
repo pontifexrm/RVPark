@@ -21,45 +21,6 @@ public class EmailMessage
     public EmailMessage()
     {
     }
-    public EmailMessage(string email, string subject, string message)
-    {
-        Email = email;
-        Subject = subject;
-        Message = message;
-    }
-    public EmailMessage(string email, string subject, string message, DateTime fmdate, DateTime todate, Bkg_User Bkg_User)
-    {
-        bkg_User = new Bkg_User();
-        bkg_User.UserFirstName = Bkg_User.UserFirstName;
-        bkg_User.UserLastName = Bkg_User.UserLastName;
-        bkg_User.UserAddress = Bkg_User.UserAddress;
-        bkg_User.UserCity = Bkg_User.UserCity;
-        bkg_User.UserZip = Bkg_User.UserZip;
-        bkg_User.UserCountry = Bkg_User.UserCountry;
-        bkg_User.UserNZMCA = Bkg_User.UserNZMCA;
-        bkg_User.UserState = Bkg_User.UserState;
-        bkg_User.UserName = Bkg_User.UserName;
-        bkg_User.UserEmail = Bkg_User.UserEmail;    
-        bkg_User.UserPhone = Bkg_User.UserPhone;    
-        bkg_User.UserStatus = Bkg_User.UserStatus;
-        bkg_User.UserPassword = Bkg_User.UserPassword;
-        bkg_User.AppUserId = Bkg_User.AppUserId;
-        bkg_User.UserId = Bkg_User.UserId;
-        bkg_User.Bkg_Properties = Bkg_User.Bkg_Properties;
-        bkg_User.Bkg_Bookings = Bkg_User.Bkg_Bookings;
-        bkg_User.Bkg_Reviews = Bkg_User.Bkg_Reviews;
-        bkg_User.Bkg_Payments = Bkg_User.Bkg_Payments;
-        bkg_User.AppUserId = Bkg_User.AppUserId;    
-
-
-
-
-        Email = email;
-        Subject = subject;
-        Message = message;
-        Fmdate = fmdate;
-        Todate = todate;
-    }
 
     [Required, EmailAddress,MaxLength(48)]
     public string Email { get; set; } = string.Empty;
@@ -259,6 +220,25 @@ public class EmailMessage
             this.Message, this.Subject, DateTime.Now.ToString("g"));
             return sRtn;
         }
+    }
+
+    public bool IsValidEmail(string Email)
+    {
+        bool rtn = false;
+        try
+        {
+            MailAddress m = new MailAddress(Email);
+            rtn = true;
+        }
+        catch (FormatException)
+        {
+            rtn  = false;
+        }
+        if (rtn)
+        {
+            rtn = HasValidMxRecord(Email);
+        }
+        return rtn;
     }
     public bool HasValidMxRecord(string email)
     {

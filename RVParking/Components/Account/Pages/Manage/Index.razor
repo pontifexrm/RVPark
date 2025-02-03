@@ -95,13 +95,16 @@
         user = await UserAccessor.GetRequiredUserAsync(HttpContext);
         username = await UserManager.GetUserNameAsync(user);
         phoneNumber = await UserManager.GetPhoneNumberAsync(user);
-        
+        bkg_User = await ApplicationDbContext.GetBkgUserByAppUserIdAsync(user.Id);
+
         firstnames = user.FirstNames;
         lastName = user.LastName;
         city = user.City;
         country = user.Country;
-
-
+        nzmca = bkg_User?.UserNZMCA;
+        address = bkg_User?.UserAddress;
+        zip = bkg_User?.UserZip;
+        
         Input.PhoneNumber ??= phoneNumber;
         Input.FirstNames ??= firstnames;
         Input.LastName ??= lastName;
