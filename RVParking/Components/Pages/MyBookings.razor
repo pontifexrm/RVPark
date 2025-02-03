@@ -35,7 +35,8 @@
         <div class="form-group" style="display:flex;flex-direction:row; text-align:center;">
             <div class="form-group" style="text-align:center; margin-left: 1%;">
                 <label>Property</label>
-                <InputSelect @bind-Value="currentBooking.PropertyId" select class="form-control">
+                @* @bind-Value="@currentBooking.PropertyId" *@
+                <InputSelect select class="form-control" @bind-Value="@currentBooking.PropertyId">
                     <option value="">Select Property</option>
                     @foreach (var property in BkgProperties)
                     {
@@ -45,39 +46,46 @@
             </div>
             <div class="form-group" style=" text-align:center; margin-left: 1%">
                 <label for="fmdate">Arriving</label>
-                <InputDate @bind-Value=Fmdate class="form-control" id="fmdate" />
+                <InputDate @bind-Value="Fmdate" class="form-control" id="fmdate" />
             </div>
             <div class="form-group" style="text-align:center; margin-left: 1%;">
                 <label for="todate">Departing</label>
-                <InputDate @bind-Value=Todate class="form-control" id="todate" />
+                <InputDate @bind-Value=@Todate class="form-control" id="todate" />
             </div>
         </div>
         <div>
             <button class="btn btn-primary" style="min-width: 90%; text-align:center; " @onclick="CheckBkgRequest">Request Booking</button>
         </div>
     </a>    
-    <a class="card-body" style="border: 1px solid #929292;margin-left: 1%; text-align:center;">
-        <h4> User Details.</h4>
-        <div class="form-group" style="display:flex;flex-direction:row;">
-            <div class="form-group" style=" text-align:center; margin-left: 1%">
-                <label for="username">User Name</label>
-                <InputText class="form-control" @bind-Value=@currentUser.UserName readonly="true" id="username" />
-            </div>
-            <div class="form-group" style=" text-align:center; margin-left: 1%">
-                <label for="firstname">First Name</label>
-                <InputText class="form-control" @bind-Value=@currentUser.UserFirstName readonly="true" id="firstname" />
-            </div>
-            <div class="form-group" style=" text-align:center; margin-left: 1%">
-                <label for="lastname">Last Name</label>
-                <InputText class="form-control" @bind-Value=@currentUser.UserLastName readonly="true" id="lastname" />
-            </div>
+    @if(currentUser == null)
+        {
+        <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <a class="card-body" style="border: 1px solid #929292;margin-left: 1%; text-align:center;">
+            <h4> User Details.</h4>
+            <div class="form-group" style="display:flex;flex-direction:row;">
+                <div class="form-group" style=" text-align:center; margin-left: 1%">
+                    <label for="username">User Name</label>
+                    <InputText class="form-control" @bind-Value="currentUser.UserName" readonly="true" id="username" />
+                </div>
+                <div class="form-group" style=" text-align:center; margin-left: 1%">
+                    <label for="firstname">First Name</label>
+                    <InputText class="form-control" @bind-Value=@currentUser.UserFirstName readonly="true" id="firstname" />
+                </div>
+                <div class="form-group" style=" text-align:center; margin-left: 1%">
+                    <label for="lastname">Last Name</label>
+                    <InputText class="form-control" @bind-Value=@currentUser.UserLastName readonly="true" id="lastname" />
+                </div>
 
-            <div class="form-group" style="text-align:center; margin-left: 2%;">
-                <label for="userphone">Phone</label>
-                <InputText class="form-control" @bind-Value=@currentUser.UserPhone readonly="true" id="userphone" />
+                <div class="form-group" style="text-align:center; margin-left: 2%;">
+                    <label for="userphone">Phone</label>
+                    <InputText class="form-control" @bind-Value=@currentUser.UserPhone readonly="true" id="userphone" />
+                </div>
             </div>
-        </div>
-    </a>            
+        </a>
+        }
 </section>
 
 <h4>View, Change or Delete Existing Bookings</h4>
@@ -171,7 +179,7 @@ else
                         </div> *@
                         <div class="form-group">
                             <label>Property</label>
-                            <InputSelect @bind-Value="currentBooking.PropertyId" class="form-control">
+                            <InputSelect @bind-Value=currentBooking.PropertyId class="form-control">
                                 @foreach (var property in BkgProperties)
                                 {
                                     <option value="@property.PropertyId">@property.Name</option>
