@@ -1,0 +1,41 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using RVParking.Data
+@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@inject ApplicationDbContext ApplicationDbContext
+<h6>Table Name</h6>
+<ul class="nav nav-pills flex-column">
+    <li class="nav-item">
+        @foreach (var tblnme in entityNames)
+        {
+            <NavLink class="nav-link" href="@($"/DynamicCRUD/{tblnme}")">@tblnme</NavLink>
+        }
+    </li>
+  
+</ul>
+
+
+@code {
+    public object entityType { get; set; } = null;
+    public List<Type> entityTypes { get; set; } = new List<Type>();
+
+    public List<string> entityNames = new List<string>();  
+
+    protected override async Task OnInitializedAsync()
+    {
+        entityTypes = typeof(ApplicationDbContext)
+       .GetProperties()
+       .Where(p => p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>))
+       .Select(p => p.PropertyType.GetGenericArguments()[0])
+       .ToList();
+
+        foreach (var et in entityTypes)
+        {
+            entityNames.Add(et.Name);
+        }
+
+    }
+}
