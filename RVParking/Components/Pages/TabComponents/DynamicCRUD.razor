@@ -29,7 +29,7 @@ else
                     {
                         <th style="border: 1px solid #929292;">@property.Name</th>
                     }
-                    <th>Actions</th>
+                    <th style="border: 1px solid #929292;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -43,11 +43,11 @@ else
                         <td style="border: 1px solid #929292;">
                             <div class="tab-content" style="display:flex;flex-direction:row;">
                                 <button class="bi form-control" style="width: 40px; height: 32px;"
-                                        @onclick="() => Edit((int)keyProperty.GetValue(item))">
+                                @onclick="() => Edit((int)keyProperty.GetValue(item))">
                                     <i class="bi bi-pencil-fill"></i>
                                 </button>
                                 <button class="bi form-control" style="width: 40px; height: 32px;"
-                                        @onclick="() => Delete((int)keyProperty.GetValue(item))">
+                                @onclick="() => Delete((int)keyProperty.GetValue(item))">
                                     <i class="bi bi-trash3" style="block-size:max-content;"></i>
                                 </button>
                                 @* <button class="btn btn-primary" @onclick="() => Edit((int)keyProperty.GetValue(item))">Edit</button>  
@@ -61,9 +61,9 @@ else
     </div>
 }
 
-    @code {
-        [Parameter]
-        public string entityName { get; set; }
+@code {
+    [Parameter]
+    public string entityName { get; set; }
 
     private Type entityType;
     private PropertyInfo[] properties;
@@ -72,34 +72,36 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        entityType = Type.GetType($"RVParking.Data.{entityName}, RVParking");
-        @if (entityType != null)
+        @if (entityName.Contains("Identity"))  // still not able to get the Identityclasses Properties
         {
-            properties = entityType.GetProperties();
-            keyProperty = properties.FirstOrDefault(p => p.Name.Contains("Id")) ?? throw new InvalidOperationException("Key property not found.");
-
-            var setMethod = typeof(ApplicationDbContext).GetMethod("Set", Type.EmptyTypes)?.MakeGenericMethod(entityType);
-            if (setMethod == null)
+            var identityUserType = Type.GetType("Microsoft.AspNetCore.Identity.User");
+            // string stmp = entityName.Replace("Identity", "");
+            // var identityAssembly = typeof(IdentityDbContext).Assembly;
+            // entityType = identityAssembly.GetType(stmp);
+            properties = identityUserType.GetProperties();
+        }
+        else
+        {
+            entityType = Type.GetType($"RVParking.Data.{entityName}, RVParking");
+            @if (entityType != null)
             {
-                throw new InvalidOperationException("Set method not found.");
+                properties = entityType.GetProperties();
+                keyProperty = properties.FirstOrDefault(p => p.Name.Contains("Id")) ?? throw new InvalidOperationException("Key property not found.");
+
+                var setMethod = typeof(ApplicationDbContext).GetMethod("Set", Type.EmptyTypes)?.MakeGenericMethod(entityType);
+                if (setMethod == null)
+                {
+                    throw new InvalidOperationException("Set method not found.");
+                }
+
+                var dbSet = setMethod.Invoke(_context, null);
+                if (dbSet == null)
+                {
+                    throw new InvalidOperationException("DbSet is null.");
+                }
+
+                items = (IEnumerable<object>)await ((IQueryable<object>)dbSet).ToListAsync();
             }
-
-            var dbSet = setMethod.Invoke(_context, null);
-            if (dbSet == null)
-            {
-                throw new InvalidOperationException("DbSet is null.");
-            }
-
-            items = (IEnumerable<object>)await ((IQueryable<object>)dbSet).ToListAsync();
-
-
-
-        // @if (entityType != null)
-        // {
-        //     properties = entityType.GetProperties();
-        //     keyProperty = properties.FirstOrDefault(p => p.Name.Contains("Id")) ?? throw new InvalidOperationException("Key property not found.");
-        //     var setMethod = typeof(ApplicationDbContext).GetMethod("Set").MakeGenericMethod(entityType);
-        //     items = (IEnumerable<object>)await ((IQueryable<object>)setMethod.Invoke(_context, null)).ToListAsync();
         }
     }
 

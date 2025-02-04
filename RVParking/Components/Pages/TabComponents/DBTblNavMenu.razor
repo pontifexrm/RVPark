@@ -14,7 +14,7 @@
             <NavLink class="nav-link" href="@($"/DynamicCRUD/{tblnme}")">@tblnme</NavLink>
         }
     </li>
-  
+
 </ul>
 
 
@@ -34,7 +34,20 @@
 
         foreach (var et in entityTypes)
         {
-            entityNames.Add(et.Name);
+            string stmp = "";
+            stmp = et.Name.ToString();
+            if (stmp.Contains("`1"))
+            {
+                stmp = stmp.Replace("`1", "");
+            }
+            // if (stmp.Contains("Identity"))
+            // {
+            //     stmp = stmp.Replace("Identity", "");
+            // }
+            if (!entityNames.Contains(stmp))
+            {
+                entityNames.Add(stmp);
+            }
         }
 
     }

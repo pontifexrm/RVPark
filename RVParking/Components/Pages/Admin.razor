@@ -23,12 +23,14 @@
 <div class="tabs">
     <button class="@(activeTab == "Tab1" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab1"))">Booking Admin</button>
     <button class="@(activeTab == "Tab6" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab6"))">Booking Availability</button>
-    @* <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">Current Bookings</button> *@
     <button class="@(activeTab == "Tab7" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab7"))">Booking Users</button>
+    <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">ApplicationUser</button>
     <button class="@(activeTab == "Tab3" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab3"))">User/Role Maint.</button>
     <button class="@(activeTab == "Tab4" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab4"))">Role Maint.</button>
     <button class="@(activeTab == "Tab5" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab5"))">Property Maint.</button>
-    <button class="@(activeTab == "Tab8" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab8"))">DB Maint.</button>
+    @* <button class="@(activeTab == "Tab9" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab9"))">Application User</button> *@
+    @* <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">Current Bookings</button> *@
+    @* <button class="@(activeTab == "Tab8" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab8"))">DB Maint.</button> *@
 
 </div>
 <hr />
@@ -55,7 +57,8 @@
 </div>
 
 <div id="Tab2" class="tabcontent" style="@(activeTab == "Tab2" ? "display: block;" : "display: none;")">
-    BkgAvail_BulkChange.razor
+    <RVParking.Components.Pages.TabComponents.AspNetUser_Maint />
+    @* BkgAvail_BulkChange.razor *@
 </div>
 <div id="Tab3" class="tabcontent" style="@(activeTab == "Tab3" ? "display: block;" : "display: none;")">
     <RVParking.Components.Pages.TabComponents.AspNetUserRoles_Maint />
@@ -76,6 +79,9 @@
 </div>
 <div id="Tab8" class="tabcontent" style="@(activeTab == "Tab8" ? "display: block;" : "display: none;")">
     <RVParking.Components.Pages.TabComponents.DB_Maint />
+</div>
+<div id="Tab9" class="tabcontent" style="@(activeTab == "Tab9" ? "display: block;" : "display: none;")">
+    <RVParking.Components.Pages.TabComponents.AspNetUser_Maint />
 </div>
 
 @code {
