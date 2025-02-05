@@ -68,11 +68,37 @@
 
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
+    private IdentityUser? User { get; set; }
+    //private List<IdentityRole> roles { get; set; }
+    private List<IdentityRole> roles;
+    private IdentityRole? role { get; set; }
 
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
     public async Task RegisterUser(EditContext editContext)
     {
+        // see if this is the first User and if so perhaps role = Admin needs to be added if it is not there so the Admin and setup features will be available to the first confirmed user.
+        var userCount = await ApplicationDbContext.GetIdentityUserCountAsync();
+        if (userCount == 0)
+        {
+            role = await ApplicationDbContext.Roles.FindAsync("Admin");
+            if (role == null)
+            {
+                role = new IdentityRole();
+                if (role != null)
+                {
+                    role.Name = "Admin";
+                    role.NormalizedName = role.Name.ToUpper();
+                    await ApplicationDbContext.Roles.AddAsync(role);
+                    await ApplicationDbContext.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new Exception("Role Admin not created");
+                }
+            }
+        }
+
         var user = CreateUser();
 
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
@@ -87,16 +113,15 @@
         }
         // Populate the Bkg_User object and save it.
         var bkg_User = new Bkg_User
-            {
-                UserEmail = user.Email,
-                UserName = user.Email,
-                AppUserId = user.Id
-            };
+        {
+            UserEmail = user.Email,
+            UserName = user.Email,
+            AppUserId = user.Id
+        };
 
         // Save bkg_User to the database
         await ApplicationDbContext.bkg_Users.AddAsync(bkg_User);
         await ApplicationDbContext.SaveChangesAsync();
-
 
         Logger.LogInformation("User created a new account with password.");
 

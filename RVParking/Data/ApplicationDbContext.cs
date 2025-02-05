@@ -94,6 +94,17 @@ namespace RVParking.Data
                 await SaveChangesAsync();
             }
         }
-
+        public async Task<int> GetUserCountAsync()
+        {
+            return await (bkg_Users?.CountAsync() ?? Task.FromResult(0));
+        }
+        public async Task<int> GetIdentityUserCountAsync()
+        {
+            return await (ApplicationUsers?.CountAsync() ?? Task.FromResult(0));
+        }
+        public async Task<int> CountUserConfirmedAsync()
+        {
+            return await (ApplicationUsers?.CountAsync(u => u.EmailConfirmed) ?? Task.FromResult(0));
+        }   
     }
 }

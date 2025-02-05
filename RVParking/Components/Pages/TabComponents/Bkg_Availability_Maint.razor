@@ -190,50 +190,50 @@ else
 
 @if(isEditing) 
 {
-<div class="modal show" tabindex="-1" style="display: block;">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Edit Availability</h5>
-                <button type="button" class="btn-close" @onclick="CancelEdit"></button>
-            </div>
-            <div class="modal-body">
-                <EditForm Model="currbkg_Availability" OnValidSubmit="SaveAvailability">
-                    <DataAnnotationsValidator />
-                    <ValidationSummary />
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Availability</h5>
+                    <button type="button" class="btn-close" @onclick="CancelEdit"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="currbkg_Availability" OnValidSubmit="SaveAvailability">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
 
-                    <div class="form-group">
-                        <label for="property">Property</label>
-                        <InputSelect id="property" @bind-Value="currbkg_Availability.Bkg_PropertyId" class="form-control">
-                            @foreach (var property in BkgPropertiesAvail)
-                            {
-                                <option value="@property.PropertyId">@property.Name</option>
-                            }
-                        </InputSelect>
-                    </div>
-                    <div class="form-group">
-                        <label for="dateAvailable">Date Available</label>
-                        <InputDate id="dateAvailable" @bind-Value="currbkg_Availability.DateAvailable" class="form-control" />
-                    </div>
-                    <div class="form-group">
-                        <label for="available">Available</label>
-                        <InputSelect id="available" @bind-Value="currbkg_Availability.Available" class="form-control">
-                            <option value="true">Yes</option>
-                            <option value="false">No</option>
-                        </InputSelect>
-                    </div>
-                    <div class="form-group">
-                        <label for="availabilityStatus">Availability Status</label>
-                        <InputText id="availabilityStatus" @bind-Value="currbkg_Availability.AvailabilityStatus" class="form-control" />
-                    </div>
+                        <div class="form-group">
+                            <label for="property">Property</label>
+                            <InputSelect id="property" @bind-Value="currbkg_Availability.Bkg_PropertyId" class="form-control">
+                                @foreach (var property in BkgPropertiesAvail)
+                                {
+                                    <option value="@property.PropertyId">@property.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="form-group">
+                            <label for="dateAvailable">Date Available</label>
+                            <InputDate id="dateAvailable" @bind-Value="currbkg_Availability.DateAvailable" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="available">Available</label>
+                            <InputSelect id="available" @bind-Value="currbkg_Availability.Available" class="form-control">
+                                <option value="true">Yes</option>
+                                <option value="false">No</option>
+                            </InputSelect>
+                        </div>
+                        <div class="form-group">
+                            <label for="availabilityStatus">Availability Status</label>
+                            <InputText id="availabilityStatus" @bind-Value="currbkg_Availability.AvailabilityStatus" class="form-control" />
+                        </div>
 
-                    <button type="submit" class="btn btn-primary">Save</button>
-                    <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
-                </EditForm>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+                    </EditForm>
+                </div>
             </div>
         </div>
     </div>
-</div>
 }
 
 
@@ -241,7 +241,9 @@ else
 
 
 @code {
-    // [Parameter]
+    [Parameter]
+    public EventCallback RefreshChildAvailCallback { get; set; }
+
     // public List<Bkg_Property> BkgPropertiesAvail { get; set; }
     private string BkgType = "RVPark On Fitz";
     private string isAvail = "Yes";
@@ -276,6 +278,14 @@ else
         BkgType = "1"; 
         await LoadAvailabilities();
     }
+    protected override async Task OnParametersSetAsync()
+    {
+        if ( RefreshChildAvailCallback.HasDelegate)
+        {
+            //await RefreshChildAvailCallback.InvokeAsync();
+            await LoadAvailabilities();
+        }
+    }
     private async Task LoadAvailabilities()
     {
         var query = ApplicationDbContext.bkg_Availabilities
@@ -308,7 +318,7 @@ else
             query = query.Where(a => a.Available == isAvailable);
         }
 
-        availabilities = await query.ToListAsync();
+        availabilities = await query.AsNoTracking().ToListAsync();
         StateHasChanged();  
     }
 

@@ -38,7 +38,7 @@
     <RVParking.Components.Pages.TabComponents.Bkg_Bookings_Maint />
 
     @* <RVParking.Components.Pages.TabComponents.BkgUser_Bookings /> *@
-   @*  <h4>New Booking for <b>@BkgType</b></h4>
+    @*  <h4>New Booking for <b>@BkgType</b></h4>
     <div class="form-group" style="display:flex;flex-direction:row;">
         <div class="form-group" style="max-width: 25%; text-align:center; margin-left: 2%">
             <label for="fmdate">Arriving</label>
@@ -64,15 +64,15 @@
     <RVParking.Components.Pages.TabComponents.AspNetUserRoles_Maint />
 </div>
 <div id="Tab4" class="tabcontent" style="@(activeTab == "Tab4" ? "display: block;" : "display: none;")">
-   <RVParking.Components.Pages.TabComponents.AspNetRoles_Maint />
+    <RVParking.Components.Pages.TabComponents.AspNetRoles_Maint />
 </div>
 <div id="Tab5" class="tabcontent" style="@(activeTab == "Tab5" ? "display: block;" : "display: none;")">
-@*     <RVParking.Components.Pages.TabComponents.Bkg_Property_Maint BkgProperties="BkgProperties" />
+    @*     <RVParking.Components.Pages.TabComponents.Bkg_Property_Maint BkgProperties="BkgProperties" />
  *@    <RVParking.Components.Pages.TabComponents.Bkg_Property_Maint  />
 </div>
 <div id="Tab6" class="tabcontent" style="@(activeTab == "Tab6" ? "display: block;" : "display: none;")">
-@*     <RVParking.Components.Pages.TabComponents.Bkg_Availability_Maint BkgPropertiesAvail="BkgProperties" />*@
-    <RVParking.Components.Pages.TabComponents.Bkg_Availability_Maint  />
+    @*     <RVParking.Components.Pages.TabComponents.Bkg_Availability_Maint BkgPropertiesAvail="BkgProperties" />*@
+    <RVParking.Components.Pages.TabComponents.Bkg_Availability_Maint RefreshChildAvailCallback="@RefreshChildAvail"></RVParking.Components.Pages.TabComponents.Bkg_Availability_Maint> />
 </div>
 <div id="Tab7" class="tabcontent" style="@(activeTab == "Tab7" ? "display: block;" : "display: none;")">
     <RVParking.Components.Pages.TabComponents.Bkg_User_Maint />
@@ -86,6 +86,9 @@
 
 @code {
     private string activeTab = "Tab1";
+    [Parameter]
+    public EventCallback RefreshChildAvailCallback { get; set; }
+
     // private string BkgType = "RVPark On Fitz";
     // private string isAvail = "Yes";
     // public DateTime Fmdate { get; set; } = DateTime.Now.Date;
@@ -103,8 +106,16 @@
     private void SetActiveTab(string tabName)
     {
         activeTab = tabName;
+        // if (activeTab == "Tab6")
+        // {
+        //     await RefreshChildAvail();
+        // }
     }
-
+    private async Task RefreshChildAvail()
+    {
+        await RefreshChildAvailCallback.InvokeAsync(null);
+        StateHasChanged();
+    }
    
 }
 

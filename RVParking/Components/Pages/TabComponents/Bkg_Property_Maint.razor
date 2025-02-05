@@ -19,6 +19,7 @@
 <h3>Property Maintenance</h3>
 @if (BkgProperties == null || BkgProperties.Count == 0)
 {
+    <button class="btn btn-primary" @onclick="OpenAddModal">Add New Property</button>
     <p>Loading...</p>
 }
 else
@@ -88,7 +89,9 @@ else
             </div>
         }
     </div>
-    <!-- Modal for Add/Edit Property -->
+    }
+@if(isModalOpen)
+{    <!-- Modal for Add/Edit Property -->
     <div class="modal fade @(isModalOpen ? "show d-block" : "")" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">

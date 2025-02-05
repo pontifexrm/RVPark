@@ -320,6 +320,7 @@ else
         currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
         currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
         // if a new booking then we need to Create it else Change it.
+        Bkg_Engine bkg_Engine = new Bkg_Engine(ApplicationDbContext);
         if (currentBooking.BookingId == 0) // A new booking
         {
             var savedOK = await bkg_Engine.CreateBookingAsync(currentBooking);
@@ -329,7 +330,7 @@ else
                 allDatesAvailable = false;
                 showModal = true;
             }
-            else
+            else  
             {
                 showModal = false;
                 modalMessage = "";
@@ -341,6 +342,12 @@ else
             if (!savedOK)
             {
                 modalMessage = "Could not save changes to this Booking";
+                // need to return the currentBooking to the orgnBkg.
+                currentBooking.DateArrive = orgnBkg.DateArrive;
+                currentBooking.DateDepart = orgnBkg.DateDepart;
+                currentBooking.PropertyId = orgnBkg.PropertyId;
+                currentBooking.BookingStatus = orgnBkg.BookingStatus;
+                currentBooking.UserId = orgnBkg.UserId;
                 allDatesAvailable = false;
                 showModal = true;
             }
@@ -415,6 +422,8 @@ else
 
     private void CloseModal()
     {
+        modalMessage = "";
+        allDatesAvailable = true; //for next time it is opened
         showModal = false;
     }
     private void CloseConfirmModal()
