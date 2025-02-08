@@ -49,20 +49,20 @@
             // If this is the first time a user has confirmed their email, this user may need to be added as to the Admin Role.
             // See if there are any other users that have email confirmed and if not add this user to the Admin Role.
             var userCount = await _context.CountUserConfirmedAsync();
-            if (userCount == 0) // then this is the first confirming user so add this user to this role. 
+            if (userCount <= 1) // then this is the first confirming user so add this user to this role. Might also see if any other user has Admin
             {
                 var role = await RoleManager.FindByNameAsync("Admin");
                 if (role != null)
                 {
                     var addResult = await UserManager.AddToRoleAsync(user, role.Name);
-                    if (!addResult.Succeeded)
+                    if (addResult.Succeeded)
                     {
                         statusGood += " Also you have been made Administrator for this App.";
                     }
                 }
                 await _context.SaveChangesAsync();
             }
-                statusMessage = result.Succeeded ? statusGood : "Error confirming your email.";
+            statusMessage = result.Succeeded ? statusGood : "Error confirming your email.";
         }
     }
 }
