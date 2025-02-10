@@ -33,6 +33,7 @@ else
                 <th style="border: 1px solid #929292;">Zip</th>
                 <th style="border: 1px solid #929292;">Country</th>
                 <th style="border: 1px solid #929292;">Status</th>
+                <th style="border: 1px solid #929292;">Comments</th>
                 <th style="border: 1px solid #929292;">Actions</th>
             </tr>
         </thead>
@@ -52,6 +53,7 @@ else
                     <td style="border: 1px solid #929292;">@user.UserZip</td>
                     <td style="border: 1px solid #929292;">@user.UserCountry</td>
                     <td style="border: 1px solid #929292;">@user.UserStatus</td>
+                    <td style="border: 1px solid #929292;">@user.UserComments</td>
                     <td style="border: 1px solid #929292;">
                         <div class="tab-content" style="display:flex;flex-direction:row;">
                             <button class="bi form-control" style="width: 40px; height: 32px;" 
@@ -130,6 +132,13 @@ else
                     <InputText @bind-Value="currentUser.UserCountry" class="form-control" />
                 </div>
             </div>
+            <div class="form-group" style="display:flex;flex-direction:row; margin-left: 2%">
+                <div style="max-width: 80%; width: 660px">
+                    <label>Comments</label>
+                    <InputTextArea @bind-Value="currentUser.UserComments" class="form-control" />
+                </div>
+            </div>
+
 
             <div style="margin-left: 2%;">
                 <button type="submit" class="btn btn-primary">Save</button>

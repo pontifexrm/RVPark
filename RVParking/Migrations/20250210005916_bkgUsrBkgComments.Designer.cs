@@ -12,8 +12,8 @@ using RVParking.Data;
 namespace RVParking.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250208060459_initialcreate")]
-    partial class initialcreate
+    [Migration("20250210005916_bkgUsrBkgComments")]
+    partial class bkgUsrBkgComments
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -309,6 +309,10 @@ namespace RVParking.Migrations
                     b.Property<int>("Bkg_UserUserId")
                         .HasColumnType("int");
 
+                    b.Property<string>("BookingComments")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<string>("BookingStatus")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -553,6 +557,10 @@ namespace RVParking.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("UserCity")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserComments")
                         .IsRequired()
                         .HasColumnType("longtext");
 

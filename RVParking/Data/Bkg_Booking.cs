@@ -16,6 +16,7 @@ namespace RVParking.Data
         public decimal TotalPrice { get; set; } = 0m;
         public bool Paid { get; set; } = false;
         public string   BookingStatus { get; set; } = string.Empty;
+        public string BookingComments { get; set; } = string.Empty;
 
         // Navigation properties
         public Bkg_User Bkg_User { get; set; }

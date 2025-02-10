@@ -306,6 +306,10 @@ namespace RVParking.Migrations
                     b.Property<int>("Bkg_UserUserId")
                         .HasColumnType("int");
 
+                    b.Property<string>("BookingComments")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<string>("BookingStatus")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -550,6 +554,10 @@ namespace RVParking.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("UserCity")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserComments")
                         .IsRequired()
                         .HasColumnType("longtext");
 

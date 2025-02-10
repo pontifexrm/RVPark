@@ -22,6 +22,7 @@ namespace RVParking.Data
         public string UserCountry { get; set; } = string.Empty;
         public string UserStatus { get; set; } = string.Empty;
         public string UserPassword { get; set; } = string.Empty;
+        public string UserComments { get; set; } = string.Empty;
 
         public ICollection<Bkg_Property> Bkg_Properties { get; set; }
         public ICollection<Bkg_Booking> Bkg_Bookings { get; set; }

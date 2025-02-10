@@ -35,7 +35,6 @@
         <div class="form-group" style="display:flex;flex-direction:row; text-align:center;">
             <div class="form-group" style="text-align:center; margin-left: 1%;">
                 <label>Property</label>
-                @* @bind-Value="@currentBooking.PropertyId" *@
                 <InputSelect select class="form-control" @bind-Value="@currentBooking.PropertyId">
                     <option value="">Select Property</option>
                     @foreach (var property in BkgProperties)
@@ -46,11 +45,11 @@
             </div>
             <div class="form-group" style=" text-align:center; margin-left: 1%">
                 <label for="fmdate">Arriving</label>
-                <InputDate @bind-Value="Fmdate" class="form-control" id="fmdate" />
+                <InputDate @bind-Value=Fmdate @onchange=DteAriveChnge class="form-control" id="fmdate" />
             </div>
             <div class="form-group" style="text-align:center; margin-left: 1%;">
                 <label for="todate">Departing</label>
-                <InputDate @bind-Value=@Todate class="form-control" id="todate" />
+                <InputDate @bind-Value=Todate class="form-control" id="todate" />
             </div>
         </div>
         <div>
@@ -107,6 +106,7 @@ else
                     <th style="border: 1px solid #929292;">Departure Date</th>
                     <th style="border: 1px solid #929292;">Bkg Ref</th>
                     <th style="border: 1px solid #929292;">Status</th>
+                    <th style="border: 1px solid #929292;">Comments</th>
                     <th style="border: 1px solid #929292;"><small>Edit Delete Confirm</small></th>
                 </tr>
             </thead>
@@ -122,6 +122,7 @@ else
                         <td style="border: 1px solid #929292;">@booking.DateDepart.ToShortDateString()</td>
                         <td style="border: 1px solid #929292;">@booking.BookingId</td>
                         <td style="border: 1px solid #929292;">@booking.BookingStatus</td>
+                        <td style="border: 1px solid #929292;">@booking.BookingComments</td>
                         <td style="border: 1px solid #929292;">
                             <div class="tab-content" style="display:flex;flex-direction:row;">
                                 <button class="bi form-control" style="width: 40px; height: 32px;"
@@ -188,7 +189,7 @@ else
                         </div>
                         <div class="form-group">
                             <label>Arrival Date</label>
-                            <InputDate @bind-Value="currentBooking.DateArrive" class="form-control" />
+                            <InputDate @bind-Value="currentBooking.DateArrive" onchange="DteAriveChnge" class="form-control" />
                         </div>
                         <div class="form-group">
                             <label>Departure Date</label>
@@ -198,6 +199,10 @@ else
                         <div class="form-group">
                             <label>Status <small>(Requested,Confirmed,Paid,Arrived,Closed,Cancelled)</small></label>
                             <InputText @bind-Value="currentBooking.BookingStatus" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label>Comments</label>
+                            <InputTextArea @bind-Value="currentBooking.BookingComments" class="form-control" />
                         </div>
 
                         @if (allDatesAvailable)
@@ -287,12 +292,32 @@ else
         await LoadBookings();
 
     }
-    private async Task LoadBookings() => bookings = await ApplicationDbContext.bkg_Bookings
+    private async Task LoadBookings() 
+    {
+        var query = ApplicationDbContext.bkg_Bookings
             .Include(b => b.Bkg_User)
             .Include(b => b.Bkg_Property)
             .Where(b => b.BookingStatus != "Closed")
             .Where(b => b.Bkg_User.UserName.Contains(currentUser.UserName))
-            .ToListAsync();
+            .AsQueryable();
+
+        // Order by a specific field, for example, DateArrive
+        query = query.OrderBy(b => b.DateArrive);
+        bookings = await query.ToListAsync();
+
+    }
+    private DateTime AddOneDay(DateTime date)
+    {
+        return date.AddDays(1);
+    }
+
+    private void DteAriveChnge(ChangeEventArgs e)
+    {
+        if (Todate <= Fmdate)
+        {
+            Fmdate = AddOneDay(Todate);
+        }
+    }
 
     private void CheckBkgRequest()
     {

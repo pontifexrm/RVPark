@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RVParking.Migrations
 {
     /// <inheritdoc />
-    public partial class initialcreate : Migration
+    public partial class bkgUsrBkgComments : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -122,6 +122,8 @@ namespace RVParking.Migrations
                     UserStatus = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     UserPassword = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UserComments = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -430,6 +432,8 @@ namespace RVParking.Migrations
                     TotalPrice = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
                     Paid = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     BookingStatus = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    BookingComments = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Bkg_UserUserId = table.Column<int>(type: "int", nullable: false),
                     Bkg_PropertyPropertyId = table.Column<int>(type: "int", nullable: false)

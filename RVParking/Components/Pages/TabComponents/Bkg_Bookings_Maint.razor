@@ -79,6 +79,7 @@ else
                     <th style="border: 1px solid #929292;">Departure Date</th>
                     <th style="border: 1px solid #929292;">Bkg Ref</th>
                     <th style="border: 1px solid #929292;">Status</th>
+                    <th style="border: 1px solid #929292;">Comments</th>
                     <th style="border: 1px solid #929292;"><small>Edit Delete Confirm</small></th>
                 </tr>
             </thead>
@@ -94,6 +95,7 @@ else
                         <td style="border: 1px solid #929292;">@booking.DateDepart.ToShortDateString()</td>
                         <td style="border: 1px solid #929292;">@booking.BookingId</td>
                         <td style="border: 1px solid #929292;">@booking.BookingStatus</td>
+                        <td style="border: 1px solid #929292;">@booking.BookingComments</td>
                         @*                     <td>
                             <button class="btn btn-primary" @onclick="() => EditBooking(booking)">Edit</button>
                             <button class="btn btn-danger" @onclick="() => DeleteBooking(booking.BookingId)">Delete</button>
@@ -171,6 +173,10 @@ else
                         <div class="form-group">
                             <label>Departure Date</label>
                             <InputDate @bind-Value="currentBooking.DateDepart" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label>Comments</label>
+                            <InputTextArea @bind-Value="currentBooking.BookingComments" class="form-control" />
                         </div>
                         <div class="form-group">
                             <label>Status <small>(Requested,Confirmed,Paid,Arrived,Closed,Cancelled)</small></label>
@@ -282,12 +288,23 @@ else
 
     private async Task LoadBookings()
     {
-        bookings = await ApplicationDbContext.bkg_Bookings
-            .Include(b => b.Bkg_User)
-            .Include(b => b.Bkg_Property)
-            .Where(b => b.BookingStatus != "Closed")
-            .ToListAsync() ?? new List<Bkg_Booking>();
+        var query = ApplicationDbContext.bkg_Bookings
+                    .Include(b => b.Bkg_User)
+                    .Include(b => b.Bkg_Property)
+                    .Where(b => b.BookingStatus != "Closed")
+                    .AsQueryable();
+    
+        // Order by a specific field, for example, DateArrive
+        query = query.OrderBy(b => b.DateArrive);
+        bookings = await query.ToListAsync();
+
+        // bookings = await ApplicationDbContext.bkg_Bookings
+        //     .Include(b => b.Bkg_User)
+        //     .Include(b => b.Bkg_Property)
+        //     .Where(b => b.BookingStatus != "Closed")
+        //     .ToListAsync() ?? new List<Bkg_Booking>();
     }
+    
 
     private void EditBooking(Bkg_Booking booking)
     {
@@ -298,6 +315,7 @@ else
         orgnBkg.BookingStatus = currentBooking.BookingStatus;
         orgnBkg.UserId = currentBooking.UserId;
         orgnBkg.BookingId = currentBooking.BookingId;
+        orgnBkg.BookingComments = currentBooking.BookingComments;
 
         modalTitle = "Edit Booking";
         modalMessage = "";
@@ -347,6 +365,7 @@ else
                 currentBooking.DateDepart = orgnBkg.DateDepart;
                 currentBooking.PropertyId = orgnBkg.PropertyId;
                 currentBooking.BookingStatus = orgnBkg.BookingStatus;
+                currentBooking.BookingComments = orgnBkg.BookingComments;
                 currentBooking.UserId = orgnBkg.UserId;
                 allDatesAvailable = false;
                 showModal = true;
@@ -468,10 +487,53 @@ else
         {
             query = query.Where(b => b.PropertyId == searchPropertyId.Value);
         }
+        // Order by a specific field, for example, DateArrive
+        query = query.OrderBy(b => b.DateArrive);
+        bookings = await query.ToListAsync();
+    }
+    private async Task SearchBookingsA()
+    {
+        var query = ApplicationDbContext.bkg_Bookings
+            .Include(b => b.Bkg_User)
+            .Include(b => b.Bkg_Property)
+            .Where(b => b.BookingStatus != "Closed")
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(searchUsername))
+        {
+            if (IsNumeric(searchUsername))
+            {
+                query = query.Where(b => b.BookingId == int.Parse(searchUsername));
+            }
+            else
+            {
+                query = query.Where(b => b.Bkg_User.UserName.Contains(searchUsername));
+            }
+        }
+        if (!string.IsNullOrEmpty(searchStatus))
+        {
+            query = query.Where(b => b.BookingStatus.Contains(searchStatus));
+        }
+        if (searchFromDate.HasValue)
+        {
+            query = query.Where(b => b.DateArrive >= searchFromDate.Value);
+        }
+
+        if (searchToDate.HasValue)
+        {
+            query = query.Where(b => b.DateDepart <= searchToDate.Value);
+        }
+
+        if (searchPropertyId.HasValue)
+        {
+            query = query.Where(b => b.PropertyId == searchPropertyId.Value);
+        }
+
+        // Order by a specific field, for example, DateArrive
+        query = query.OrderBy(b => b.DateArrive);
 
         bookings = await query.ToListAsync();
     }
-
     private void ClearSearch()
     {
         searchUsername = string.Empty;
