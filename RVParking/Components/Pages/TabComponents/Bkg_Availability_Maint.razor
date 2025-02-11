@@ -120,12 +120,13 @@
             <div class="form-group" style="display:flex;flex-direction:row; margin-bottom: 1%">
                 <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 2%">
                     <label for="fmdate">From Date</label>
-                    <InputDate @bind-Value=Fmdate class="form-control" id="fmdate" style="margin-left: 2px;" />
-                    @* <ValidationMessage For="() => emailMessage.Fmdate" /> *@         
+                    <SfDatePicker class="form-group" TValue="DateTime?" Value="@Fmdate" Placeholder='Choose a Date' ID="fmdate"> </SfDatePicker>
+@*                     <InputDate @bind-Value=Fmdate class="form-control" id="fmdate" style="margin-left: 2px;" />
+ *@                    @* <ValidationMessage For="() => emailMessage.Fmdate" /> *@         
                 </div>
                 <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 2%;">
                     <label for="todate">To Date</label>
-                    <InputDate @bind-Value=Todate class="form-control" id="todate" />
+                    <SfDatePicker class="form-control" TValue="DateTime?" Value="@Todate" Placeholder='Choose a Date' ID="todate"> </SfDatePicker>
                     @* <ValidationMessage For="() => emailMessage.Todate" />  *@
                 </div>
                 <div class="form-group" style="text-align:center; max-width: 60%; margin-left: 1%">
@@ -213,6 +214,8 @@ else
                         </div>
                         <div class="form-group">
                             <label for="dateAvailable">Date Available</label>
+                            @* <SfDatePicker class="form-group" TValue="DateTime?" Value="@currbkg_Availability.DateAvailable" Placeholder='Choose a Date' ID="dateAvailable"> </SfDatePicker> *@
+
                             <InputDate id="dateAvailable" @bind-Value="currbkg_Availability.DateAvailable" class="form-control" />
                         </div>
                         <div class="form-group">
