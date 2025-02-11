@@ -11,6 +11,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.DependencyInjection;
+using Syncfusion.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -71,9 +72,9 @@ builder.Services.AddScoped<HttpContextAccessorService>();
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
-// Blazor Bootstrap
-builder.Services.AddBlazorBootstrap();
-//builder.Services.AddSyncfusionBlazor();
+// Blazor Syncfusion
+builder.Services.AddSyncfusionBlazor(options => { });
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MzY4MDQ1MkAzMjM4MmUzMDJlMzBDUHhySWJRUXNxcEdLWjN4MER0UTFBL05uRnRJZ0VQTlNEVnpSWnkxanh3PQ==");
 
 var app = builder.Build();
 

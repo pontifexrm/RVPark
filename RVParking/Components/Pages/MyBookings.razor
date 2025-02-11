@@ -43,14 +43,29 @@
                     }
                 </InputSelect>
             </div>
-            <div class="form-group" style=" text-align:center; margin-left: 1%">
+            <div class="form-group" style=" text-align:center; width: 120px; margin-left: 1%">
+                <label for="fmdate">Arriving</label>
+                <SfDatePicker TValue="DateTime?" Value="@Fmdate" Placeholder='Choose a Date' ID="fmdate">
+                    <DatePickerEvents TValue="DateTime?" ValueChange="DteAriveChnge"></DatePickerEvents>
+                </SfDatePicker>
+            </div>
+
+            <div class="form-group" style=" text-align:center; width: 120px; margin-left: 1%">
+                <label for="tmdate">Departing</label>
+                <SfDatePicker TValue="DateTime?" Value="@Todate" Placeholder='Choose a Date' ID="todate">
+                    <DatePickerEvents TValue="DateTime?" ValueChange="DteDepartChnge"></DatePickerEvents>
+                </SfDatePicker>
+            </div>
+
+
+@*             <div class="form-group" style=" text-align:center; margin-left: 1%">
                 <label for="fmdate">Arriving</label>
                 <InputDate @bind-Value=Fmdate @onchange=DteAriveChnge class="form-control" id="fmdate" />
             </div>
             <div class="form-group" style="text-align:center; margin-left: 1%;">
                 <label for="todate">Departing</label>
                 <InputDate @bind-Value=Todate class="form-control" id="todate" />
-            </div>
+            </div> *@
         </div>
         <div>
             <button class="btn btn-primary" style="min-width: 90%; text-align:center; " @onclick="CheckBkgRequest">Request Booking</button>
@@ -187,7 +202,24 @@ else
                                 }
                             </InputSelect>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" style="display:flex;flex-direction:row;">
+                            <div class="form-group" style=" text-align:center; width: 160px; margin-left: 1%">
+                                <label for="fmdate">Arriving</label>
+                                <SfDatePicker TValue="DateTime?" Value="@Fmdate" Placeholder='Choose a Date' ID="fmdate">
+                                    <DatePickerEvents TValue="DateTime?" ValueChange="DteAriveChnge"></DatePickerEvents>
+                                </SfDatePicker>
+                            </div>
+
+                            <div class="form-group" style=" text-align:center; width: 160px; margin-left: 1%">
+                                <label for="tmdate">Departing</label>
+                                <SfDatePicker TValue="DateTime?" Value="@Todate" Placeholder='Choose a Date' ID="todate">
+                                    <DatePickerEvents TValue="DateTime?" ValueChange="DteDepartChnge"></DatePickerEvents>
+                                </SfDatePicker>
+                            </div>
+                        </div>
+
+
+@*                         <div class="form-group">
                             <label>Arrival Date</label>
                             <InputDate @bind-Value="currentBooking.DateArrive" onchange="DteAriveChnge" class="form-control" />
                         </div>
@@ -195,7 +227,7 @@ else
                             <label>Departure Date</label>
                             <InputDate @bind-Value="currentBooking.DateDepart" class="form-control" />
                         </div>
-
+ *@
                         <div class="form-group">
                             <label>Status <small>(Requested,Confirmed,Paid,Arrived,Closed,Cancelled)</small></label>
                             <InputText @bind-Value="currentBooking.BookingStatus" class="form-control" />
@@ -310,12 +342,27 @@ else
     {
         return date.AddDays(1);
     }
-
-    private void DteAriveChnge(ChangeEventArgs e)
+    private DateTime SubOneDay(DateTime date)
     {
+        return date.AddDays(-1);
+    }
+
+    private void DteAriveChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
+    {
+        Fmdate = args.Value ?? DateTime.Now.Date;
         if (Todate <= Fmdate)
         {
-            Fmdate = AddOneDay(Todate);
+            Todate = AddOneDay(Fmdate);
+        }
+    }
+    private void DteDepartChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
+    {
+        Todate = args.Value ?? DateTime.Now.Date;
+        if (Todate <= Fmdate)
+        {
+
+            Fmdate = SubOneDay(Todate);
+            StateHasChanged();
         }
     }
 
