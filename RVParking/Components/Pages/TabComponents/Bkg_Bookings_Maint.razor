@@ -78,6 +78,7 @@ else
                     <th style="border: 1px solid #929292;">Arrival Date</th>
                     <th style="border: 1px solid #929292;">Departure Date</th>
                     <th style="border: 1px solid #929292;">Bkg Ref</th>
+                    <th style="border: 1px solid #929292;">Paid</th>
                     <th style="border: 1px solid #929292;">Status</th>
                     <th style="border: 1px solid #929292;">Comments</th>
                     <th style="border: 1px solid #929292;"><small>Edit Delete Confirm</small></th>
@@ -94,6 +95,7 @@ else
                         <td style="border: 1px solid #929292;">@booking.DateArrive.ToShortDateString()</td>
                         <td style="border: 1px solid #929292;">@booking.DateDepart.ToShortDateString()</td>
                         <td style="border: 1px solid #929292;">@booking.BookingId</td>
+                        <td style="border: 1px solid #929292;">@booking.Paid</td>
                         <td style="border: 1px solid #929292;">@booking.BookingStatus</td>
                         <td style="border: 1px solid #929292;">@booking.BookingComments</td>
                         @*                     <td>
@@ -190,6 +192,10 @@ else
                             <label>Departure Date</label>
                             <InputDate @bind-Value="currentBooking.DateDepart" class="form-control" />
                         </div> *@
+                        <div class="form-group">
+                            <label>Has Paid </label>
+                            <InputCheckbox @bind-Value="currentBooking.Paid"  />
+                        </div>
                         <div class="form-group">
                             <label>Comments</label>
                             <InputTextArea @bind-Value="currentBooking.BookingComments" class="form-control" />
