@@ -58,7 +58,7 @@
             </div>
 
 
-@*             <div class="form-group" style=" text-align:center; margin-left: 1%">
+            @*             <div class="form-group" style=" text-align:center; margin-left: 1%">
                 <label for="fmdate">Arriving</label>
                 <InputDate @bind-Value=Fmdate @onchange=DteAriveChnge class="form-control" id="fmdate" />
             </div>
@@ -72,12 +72,12 @@
         </div>
     </a>    
     @if(currentUser == null)
-        {
+    {
         <p><em>Loading...</em></p>
-        }
-        else
-        {
-            <a class="card-body" style="border: 1px solid #929292;margin-left: 1%; text-align:center;">
+    }
+    else
+    {
+        <a class="card-body" style="border: 1px solid #929292;margin-left: 1%; text-align:center;">
             <h4> User Details.</h4>
             <div class="form-group" style="display:flex;flex-direction:row;">
                 <div class="form-group" style=" text-align:center; margin-left: 1%">
@@ -99,7 +99,7 @@
                 </div>
             </div>
         </a>
-        }
+    }
 </section>
 
 <h4>View, Change or Delete Existing Bookings</h4>
@@ -219,7 +219,7 @@ else
                         </div>
 
 
-@*                         <div class="form-group">
+                        @*                         <div class="form-group">
                             <label>Arrival Date</label>
                             <InputDate @bind-Value="currentBooking.DateArrive" onchange="DteAriveChnge" class="form-control" />
                         </div>
@@ -302,7 +302,7 @@ else
     private Bkg_Engine? bkg_Engine;
 
     //    public EmailMessage emailMessage { get; set; } = new EmailMessage();
-//    public EmailMessage emailMessage  = new ();
+    //    public EmailMessage emailMessage  = new ();
 
 
     protected override async Task OnInitializedAsync()
@@ -420,6 +420,9 @@ else
             {
                 await bkg_Engine.DeleteBookingAsync(booking);
                 await LoadBookings();
+                string s = configuration["TNZ:SMSrept"];
+                string txtrept = Chk_E_164_Phone(s);
+                SendTxtConfirmation(txtrept, "WARNING");
             }
             catch (Exception ex)
             {
@@ -445,6 +448,8 @@ else
     { 
         currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
         currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
+        string s = configuration["TNZ:SMSrept"];
+        string txtrept = Chk_E_164_Phone(s);
         // if a new booking then we need to Create it else Change it.
         if(currentBooking.BookingId == 0) // A new booking
         {
@@ -459,6 +464,7 @@ else
             {
                 // will send an email confirmation
                 SendEmailConfirmation();
+                SendTxtConfirmation(txtrept); //send a txt to System Admin
             }
         }
         else // editing existing bkg
@@ -474,6 +480,7 @@ else
             {
                 // will send an email confirmation
                 SendEmailConfirmation();
+                SendTxtConfirmation(txtrept); //send a txt to System Admin
             }
 
         }
@@ -491,7 +498,7 @@ else
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
-#if !DEBUG
+//#if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
             {
@@ -505,17 +512,49 @@ else
             messagePlain: ConfirmBkgMsg(),
             destination: currentBooking.Bkg_User.UserEmail
         );
-#endif
+//#endif
         sendConfirmMsg = false;
     }
     private void SendTxtConfirmation()
     {
+        SendTxtConfirmation("");
+    }
+    private void SendTxtConfirmation(string txtrept, string DeleteMsg)
+    {
+        string subjectMsg = string.Concat(DeleteMsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED");
+
+        if (txtrept.Length == 0)
+        {
+            txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
+        }
+        // Using TNZ
+        //#if !DEBUG
+        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+            {
+                AuthToken = configuration["TNZ:AuthToken"]
+            };
+        var client = new TNZApiClient(apiUser);
+
+        var response = client.Messaging.SMS.SendMessage
+            (
+                destination: txtrept,
+                messageText: subjectMsg
+            );
+        //#endif
+        sendConfirmMsg = false;
+    }
+    private void SendTxtConfirmation(string txtrept)
+    {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
 
-        string txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
+        if (txtrept.Length == 0)
+        {
+            txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
+        }
         // Using TNZ
-#if !DEBUG
+//#if !DEBUG
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
             {
                 AuthToken = configuration["TNZ:AuthToken"]
@@ -527,7 +566,7 @@ else
                 destination: txtrept,                    
                 messageText: ConfirmBkgMsg()
             );
-#endif
+//#endif
         sendConfirmMsg = false;
     }
     private string ConfirmBkgMsg()
