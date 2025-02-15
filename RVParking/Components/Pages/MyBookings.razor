@@ -353,6 +353,9 @@ else
         if (Todate <= Fmdate)
         {
             Todate = AddOneDay(Fmdate);
+            currentBooking.DateArrive = Fmdate;
+            currentBooking.DateDepart = Todate;
+            StateHasChanged();
         }
     }
     private void DteDepartChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
@@ -362,6 +365,9 @@ else
         {
 
             Fmdate = SubOneDay(Todate);
+            currentBooking.DateArrive = Fmdate;
+            currentBooking.DateDepart = Todate;
+
             StateHasChanged();
         }
     }
