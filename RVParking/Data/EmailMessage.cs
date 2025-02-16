@@ -136,7 +136,7 @@ public class EmailMessage
             "        Wellington 6037\r\n" +
             "Access is best from Stewart Drive.Either from the north where you would exit SH1 at Johnsonville or from the South turning into Newlands. Turn into Fitzpatrick St from Stewart Drive is best as other routes(courtesy of the map apps) send you around a very narrow road.We are on the left corner of the 2nd street on the left going up Fitzpatrick St.\r\n" +
             "Payment is $30 for the night with NZMCA Memebrship {3}, payable in advance please to our bank account.\r\n" +
-            "        RM and LM PONTIFEX\r\n" +
+            "        Ronald Pontifex\r\n" +
             "        03 0525 0253043 000\r\n" +
             "(We have Wise Card if that suits you better.)\r\n\r\n" +
             "Please text us on arrival and we shall come out to meets you etc.\r\n" +
@@ -165,7 +165,7 @@ public class EmailMessage
             "  Wellington 6037\r\n" +
             "Access is best from Stewart Drive.Either from the north where you would exit SH1 at Johnsonville or from the South turning into Newlands. Turn into Fitzpatrick St from Stewart Drive is best as other routes(courtesy of the map apps) send you around a very narrow road.We are on the left corner of the 2nd street on the left going up Fitzpatrick St.\r\n" +
             "Payment is $30 for the night with NZMCA Memebrship {3}, payable in advance please to our bank account.\r\n" +
-            "        RM and LM PONTIFEX\r\n" +
+            "        Ronald Pontifex\r\n" +
             "        03 0525 0253043 000\r\n" +
             "(We have Wise Card if that suits you better.)\r\n\r\n" +
             "Please txt on arrival\r\n" +
@@ -206,7 +206,7 @@ public class EmailMessage
             "Access from Stewart Drive is also possible via Quigley St which is at the crest of the hill. Quigley St flows around until it comes to a T-intersection with Fitzpatrick St and we are on that corner.\r\n\r\n" +
 
             "Payment is $30 for the night (for NZMCA members), payable in advance please to our bank account.\r\n" +
-            "        RM and LM PONTIFEX\r\n" +
+            "        Ronald Pontifex\r\n" +
             "        03 0525 0253043 000\r\n\r\n" +
             "(We have Wise Card if that suits you better.)\r\n\r\n" +
             "Please text us on arrival and we shall come out to meets you etc.\r\n\r\n" +
