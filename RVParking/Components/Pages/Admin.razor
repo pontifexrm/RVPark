@@ -21,7 +21,7 @@
 
 
 <div class="tabs">
-    <button class="@(activeTab == "Tab1" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab1"))">Booking Admin</button>
+    @* <button class="@(activeTab == "Tab1" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab1"))">Booking Admin</button> *@
     <button class="@(activeTab == "Tab6" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab6"))">Booking Availability</button>
     <button class="@(activeTab == "Tab7" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab7"))">Booking Users</button>
     <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">ApplicationUser</button>
@@ -34,8 +34,8 @@
 
 </div>
 <hr />
-<div id="Tab1" class="tabcontent" style="@(activeTab == "Tab1" ? "display: block;" : "display: none;")">
-    <RVParking.Components.Pages.TabComponents.Bkg_Bookings_Maint />
+@* <div id="Tab1" class="tabcontent" style="@(activeTab == "Tab1" ? "display: block;" : "display: none;")"> *@
+    @* <RVParking.Components.Pages.TabComponents.Bkg_Bookings_Maint /> *@
 
     @* <RVParking.Components.Pages.TabComponents.BkgUser_Bookings /> *@
     @*  <h4>New Booking for <b>@BkgType</b></h4>
@@ -54,7 +54,7 @@
     <div>
         <button class="btn btn-primary" style="min-width: 40%; align-content: center;" @onclick="CheckBkgRequest">Request Booking</button>
     </div> *@ 
-</div>
+@* </div> *@
 
 <div id="Tab2" class="tabcontent" style="@(activeTab == "Tab2" ? "display: block;" : "display: none;")">
     <RVParking.Components.Pages.TabComponents.AspNetUser_Maint />
@@ -85,7 +85,7 @@
 </div>
 
 @code {
-    private string activeTab = "Tab1";
+    private string activeTab = "Tab6";
     [Parameter]
     public EventCallback RefreshChildAvailCallback { get; set; }
 
