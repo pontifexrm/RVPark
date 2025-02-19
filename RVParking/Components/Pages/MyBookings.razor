@@ -119,6 +119,7 @@ else
                     <th style="border: 1px solid #929292;">Property Name</th>
                     <th style="border: 1px solid #929292;">Departure Date</th>
                     <th style="border: 1px solid #929292;">Bkg Ref</th>
+                    <th style="border: 1px solid #929292;">Paid</th>
                     <th style="border: 1px solid #929292;">Status</th>
                     <th style="border: 1px solid #929292;">Comments</th>
                     <th style="border: 1px solid #929292;">Bkg Username</th>
@@ -135,6 +136,7 @@ else
                         <td style="border: 1px solid #929292;">@booking.Bkg_Property.Name</td>
                         <td style="border: 1px solid #929292;">@booking.DateDepart.ToShortDateString()</td>
                         <td style="border: 1px solid #929292;">@booking.BookingId</td>
+                        <td style="border: 1px solid #929292;">@(booking.Paid ? "Y" : "N")</td>
                         <td style="border: 1px solid #929292;">@booking.BookingStatus</td>
                         <td style="border: 1px solid #929292;">@booking.BookingComments</td>
                         <td style="border: 1px solid #929292;">@booking.Bkg_User.UserName</td>

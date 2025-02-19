@@ -169,12 +169,19 @@ else
                         <div class="form-group" style="display:flex;flex-direction:row;">
                             <div class="form-group" style=" text-align:center; width: 160px; margin-left: 1%">
                                 <label for="fmdate">Arriving</label>
-                                <SfDatePicker TValue="DateTime?" Value="@currentBooking.DateArrive" Placeholder='Choose a Date' ID="fmdate"> </SfDatePicker>
+                                <SfDatePicker TValue="DateTime?" Value="@Fmdate" Placeholder='Choose a Date' ID="fmdate">
+                                    <DatePickerEvents TValue="DateTime?" ValueChange="DteAriveChnge"></DatePickerEvents>
+                                </SfDatePicker>
+
+                                @* <SfDatePicker TValue="DateTime?" Value="@currentBooking.DateArrive" Placeholder='Choose a Date' ID="fmdate"> </SfDatePicker> *@
                             </div>
 
                             <div class="form-group" style=" text-align:center; width: 160px; margin-left: 1%">
                                 <label for="tmdate">Departing</label>
-                                <SfDatePicker TValue="DateTime?" Value="@currentBooking.DateDepart" Placeholder='Choose a Date' ID="todate"></SfDatePicker>
+                                <SfDatePicker TValue="DateTime?" Value="@Todate" Placeholder='Choose a Date' ID="todate">
+                                    <DatePickerEvents TValue="DateTime?" ValueChange="DteDepartChnge"></DatePickerEvents>
+                                </SfDatePicker>
+                                @* <SfDatePicker TValue="DateTime?" Value="@currentBooking.DateDepart" Placeholder='Choose a Date' ID="todate"></SfDatePicker> *@
                             </div>
                         </div>
 
@@ -250,6 +257,9 @@ else
 
 
 @code {
+    public DateTime Fmdate { get; set; } = DateTime.Now.Date;
+    public DateTime Todate { get; set; } = DateTime.Now.Date;
+
     private ApplicationUser user = default!;
 
     private List<Bkg_Booking> bookings = new();
@@ -324,13 +334,48 @@ else
         //     .Where(b => b.BookingStatus != "Closed")
         //     .ToListAsync() ?? new List<Bkg_Booking>();
     }
+    private DateTime AddOneDay(DateTime date)
+    {
+        return date.AddDays(1);
+    }
+    private DateTime SubOneDay(DateTime date)
+    {
+        return date.AddDays(-1);
+    }
+
+    private void DteAriveChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
+    {
+        Fmdate = args.Value ?? DateTime.Now.Date;
+        if (Todate <= Fmdate)
+        {
+            Todate = AddOneDay(Fmdate);
+            currentBooking.DateArrive = Fmdate;
+            currentBooking.DateDepart = Todate;
+            StateHasChanged();
+        }
+    }
+    private void DteDepartChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
+    {
+        Todate = args.Value ?? DateTime.Now.Date;
+        if (Todate <= Fmdate)
+        {
+
+            Fmdate = SubOneDay(Todate);
+            currentBooking.DateArrive = Fmdate;
+            currentBooking.DateDepart = Todate;
+
+            StateHasChanged();
+        }
+    }
 
 
     private void EditBooking(Bkg_Booking booking)
     {
+        orgnBkg = new();
+
         currentBooking = booking;
-        orgnBkg.DateArrive = currentBooking.DateArrive;
-        orgnBkg.DateDepart = currentBooking.DateDepart;
+        orgnBkg.DateArrive = currentBooking.DateArrive; Fmdate = booking.DateArrive;
+        orgnBkg.DateDepart = currentBooking.DateDepart; Todate = booking.DateDepart;
         orgnBkg.PropertyId = currentBooking.PropertyId;
         orgnBkg.BookingStatus = currentBooking.BookingStatus;
         orgnBkg.UserId = currentBooking.UserId;
@@ -357,6 +402,10 @@ else
     {
         currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
         currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
+        currentBooking.DateArrive = Fmdate; currentBooking.DateDepart = Todate;
+
+
+
         // if a new booking then we need to Create it else Change it.
         Bkg_Engine bkg_Engine = new Bkg_Engine(ApplicationDbContext);
 
