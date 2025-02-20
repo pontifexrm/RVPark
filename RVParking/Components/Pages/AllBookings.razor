@@ -76,12 +76,11 @@ else
         <table class="table">
             <thead>
                 <tr>
-                    <th style="border: 1px solid #929292;">Arrival Date</th>
+                    <th style="border: 1px solid #929292;">Fm - To Dates</th>
                     <th style="border: 1px solid #929292;">First Name</th>
                     <th style="border: 1px solid #929292;">Last Name</th>
                     <th style="border: 1px solid #929292;">Phone</th>
                     <th style="border: 1px solid #929292;">Property Name</th>
-                    <th style="border: 1px solid #929292;">Departure Date</th>
                     <th style="border: 1px solid #929292;">Bkg Ref</th>
                     <th style="border: 1px solid #929292;">Paid</th>
                     <th style="border: 1px solid #929292;">Status</th>
@@ -94,12 +93,11 @@ else
                 @foreach (var booking in bookings)
                 {
                     <tr>
-                        <td style="border: 1px solid #929292;">@booking.DateArrive.ToShortDateString()</td>
+                        <td style="border: 1px solid #929292;">@booking.DateArrive.ToShortDateString() to @booking.DateDepart.ToShortDateString()</td>
                         <td style="border: 1px solid #929292;">@booking.Bkg_User.UserFirstName</td>
                         <td style="border: 1px solid #929292;">@booking.Bkg_User.UserLastName</td>
                         <td style="border: 1px solid #929292;">@booking.Bkg_User.UserPhone</td>
                         <td style="border: 1px solid #929292;">@booking.Bkg_Property.Name</td>
-                        <td style="border: 1px solid #929292;">@booking.DateDepart.ToShortDateString()</td>
                         <td style="border: 1px solid #929292;">@booking.BookingId</td>
                         <td style="border: 1px solid #929292;">@(booking.Paid ? "Y" : "N")</td>
                         <td style="border: 1px solid #929292;">@booking.BookingStatus</td>
