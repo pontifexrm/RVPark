@@ -17,7 +17,8 @@
     <p><em>Loading...</em></p>
 }
 else
-{    @if (isEditing)
+{   
+    @if (isEditing)
     {
         <h5 style="margin-left: 2%">Editing Booking User</h5>
         <EditForm Model="currentUser" OnValidSubmit="SaveUser">
@@ -93,59 +94,61 @@ else
             </div>
         </EditForm>
     }
-
-    <table class="table">
-        <thead>
-            <tr>
-                <th style="border: 1px solid #929292;">User Name</th>
-                <th style="border: 1px solid #929292;">First Name</th>
-                <th style="border: 1px solid #929292;">Last Name</th>
-                <th style="border: 1px solid #929292;">Email</th>
-                <th style="border: 1px solid #929292;">Phone</th>
-                <th style="border: 1px solid #929292;">NZMCA</th>
-                <th style="border: 1px solid #929292;">Address</th>
-                <th style="border: 1px solid #929292;">City</th>
-                <th style="border: 1px solid #929292;">State</th>
-                <th style="border: 1px solid #929292;">Zip</th>
-                <th style="border: 1px solid #929292;">Country</th>
-                <th style="border: 1px solid #929292;">Status</th>
-                <th style="border: 1px solid #929292;">Comments</th>
-                <th style="border: 1px solid #929292;">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in users)
-            {
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
                 <tr>
-                    <td style="border: 1px solid #929292;">@user.UserName</td>
-                    <td style="border: 1px solid #929292;">@user.UserFirstName</td>
-                    <td style="border: 1px solid #929292;">@user.UserLastName</td>
-                    <td style="border: 1px solid #929292;">@user.UserEmail</td>
-                    <td style ="border: 1px solid #929292;">@user.UserPhone</td>
-                    <td style="border: 1px solid #929292;">@user.UserNZMCA</td>
-                    <td style="border: 1px solid #929292;">@user.UserAddress</td>
-                    <td style="border: 1px solid #929292;">@user.UserCity</td>
-                    <td style="border: 1px solid #929292;">@user.UserState</td>
-                    <td style="border: 1px solid #929292;">@user.UserZip</td>
-                    <td style="border: 1px solid #929292;">@user.UserCountry</td>
-                    <td style="border: 1px solid #929292;">@user.UserStatus</td>
-                    <td style="border: 1px solid #929292;">@user.UserComments</td>
-                    <td style="border: 1px solid #929292;">
-                        <div class="tab-content" style="display:flex;flex-direction:row;">
-                            <button class="bi form-control" style="width: 40px; height: 32px;" 
-                            @onclick="() => EditUser(user)">
-                                <i class="bi bi-pencil-fill"></i>
-                            </button>
-                            <button class="bi form-control" style="width: 40px; height: 32px;"
-                            @onclick="() => DeleteUser(user.UserId)">
-                                <i class="bi bi-trash3" style="block-size:max-content;"></i>
-                            </button>
-                        </div>
-                    </td>
+                    <th style="border: 1px solid #929292;">User Name</th>
+                    <th style="border: 1px solid #929292;">First Name</th>
+                    <th style="border: 1px solid #929292;">Last Name</th>
+                    <th style="border: 1px solid #929292;">Email</th>
+                    <th style="border: 1px solid #929292;">Phone</th>
+                    <th style="border: 1px solid #929292;">NZMCA</th>
+                    <th style="border: 1px solid #929292;">Address</th>
+                    <th style="border: 1px solid #929292;">City</th>
+                    <th style="border: 1px solid #929292;">State</th>
+                    <th style="border: 1px solid #929292;">Zip</th>
+                    <th style="border: 1px solid #929292;">Country</th>
+                    <th style="border: 1px solid #929292;">Status</th>
+                    <th style="border: 1px solid #929292;">Comments</th>
+                    <th style="border: 1px solid #929292;">Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var user in users)
+                {
+                    <tr>
+                        <td style="border: 1px solid #929292;">@user.UserName</td>
+                        <td style="border: 1px solid #929292;">@user.UserFirstName</td>
+                        <td style="border: 1px solid #929292;">@user.UserLastName</td>
+                        <td style="border: 1px solid #929292;">@user.UserEmail</td>
+                        <td style="border: 1px solid #929292;">@user.UserPhone</td>
+                        <td style="border: 1px solid #929292;">@user.UserNZMCA</td>
+                        <td style="border: 1px solid #929292;">@user.UserAddress</td>
+                        <td style="border: 1px solid #929292;">@user.UserCity</td>
+                        <td style="border: 1px solid #929292;">@user.UserState</td>
+                        <td style="border: 1px solid #929292;">@user.UserZip</td>
+                        <td style="border: 1px solid #929292;">@user.UserCountry</td>
+                        <td style="border: 1px solid #929292;">@user.UserStatus</td>
+                        <td style="border: 1px solid #929292;">@user.UserComments</td>
+                        <td style="border: 1px solid #929292;">
+                            <div class="tab-content" style="display:flex;flex-direction:row;">
+                                <button class="bi form-control" style="width: 40px; height: 32px;" 
+                                @onclick="() => EditUser(user)">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                                <button class="bi form-control" style="width: 40px; height: 32px;"
+                                @onclick="() => DeleteUser(user.UserId)">
+                                    <i class="bi bi-trash3" style="block-size:max-content;"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
 }
 
 <!-- Modal Dialog for Error Messages -->
