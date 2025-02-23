@@ -152,41 +152,43 @@
 }
 else
 {
-    <table class="table" style="max-width: 60%;">
-        <thead>
-            <tr>
-                <th style="border: 1px solid #929292;">Date</th>
-                <th style="border: 1px solid #929292;">Property Name</th>
-                <th style="border: 1px solid #929292;">Availability</th>
-                <th style="border: 1px solid #929292;">Availability Status</th>
-                <th style="border: 1px solid #929292;">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var availability in availabilities)
-            {
+    <div class="table-responsive">
+        <table class="table" style="max-width: 60%;">
+            <thead>
                 <tr>
-                    <td style="border: 1px solid #929292;">@availability.DateAvailable.ToShortDateString()</td>
-                    <td style="border: 1px solid #929292;">@availability.Bkg_Property?.Name</td>
-                    <td style="border: 1px solid #929292;">@(availability.Available ? "Y" : "N")</td>
-                    <td style="border: 1px solid #929292;">@availability.AvailabilityStatus</td>
-                    <td style="border: 1px solid #929292;">
-                        <div class="tab-content" style="display:flex;flex-direction:row;">
-                            <button class="bi form-control" style="width: 40px; height: 32px;"
-                            @onclick="() => EditBkgAvailablilty(availability)">
-                                <i class="bi bi-pencil-fill"></i>
-                            </button>
-                            <button class="bi form-control" style="width: 40px; height: 32px;"
-                            @onclick="() => DeleteBkgAvailability(availability)">
-                                <i class="bi bi-trash3" style="block-size:max-content;"></i>
-                            </button>
-                        </div>
-                    </td>
-
+                    <th style="border: 1px solid #929292;">Date</th>
+                    <th style="border: 1px solid #929292;">Property Name</th>
+                    <th style="border: 1px solid #929292;">Availability</th>
+                    <th style="border: 1px solid #929292;">Availability Status</th>
+                    <th style="border: 1px solid #929292;">Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var availability in availabilities)
+                {
+                    <tr>
+                        <td style="border: 1px solid #929292;">@availability.DateAvailable.ToShortDateString()</td>
+                        <td style="border: 1px solid #929292;">@availability.Bkg_Property?.Name</td>
+                        <td style="border: 1px solid #929292;">@(availability.Available ? "Y" : "N")</td>
+                        <td style="border: 1px solid #929292;">@availability.AvailabilityStatus</td>
+                        <td style="border: 1px solid #929292;">
+                            <div class="tab-content" style="display:flex;flex-direction:row;">
+                                <button class="bi form-control" style="width: 40px; height: 32px;"
+                                @onclick="() => EditBkgAvailablilty(availability)">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                                <button class="bi form-control" style="width: 40px; height: 32px;"
+                                @onclick="() => DeleteBkgAvailability(availability)">
+                                    <i class="bi bi-trash3" style="block-size:max-content;"></i>
+                                </button>
+                            </div>
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
 @if(isEditing) 
@@ -244,8 +246,8 @@ else
 
 
 @code {
-    [Parameter]
-    public EventCallback RefreshChildAvailCallback { get; set; }
+    // [Parameter]
+    // public EventCallback RefreshChildAvailCallback { get; set; }
 
     // public List<Bkg_Property> BkgPropertiesAvail { get; set; }
     private string BkgType = "RVPark On Fitz";
@@ -281,14 +283,14 @@ else
         BkgType = "1"; 
         await LoadAvailabilities();
     }
-    protected override async Task OnParametersSetAsync()
-    {
-        if ( RefreshChildAvailCallback.HasDelegate)
-        {
-            //await RefreshChildAvailCallback.InvokeAsync();
-            await LoadAvailabilities();
-        }
-    }
+    // protected override async Task OnParametersSetAsync()
+    // {
+    //     if ( RefreshChildAvailCallback.HasDelegate)
+    //     {
+    //         //await RefreshChildAvailCallback.InvokeAsync();
+    //         await LoadAvailabilities();
+    //     }
+    // }
     private async Task LoadAvailabilities()
     {
         var query = ApplicationDbContext.bkg_Availabilities

@@ -15,6 +15,9 @@
   <ItemGroup>
     <Content Remove="Components\Layout\BkgMmtMainLayout.razor" />
     <Content Remove="Components\Layout\BkgMmtNavMenu.razor" />
+    <Content Remove="Components\Pages\TabComponents\DBTblNavMenu.razor" />
+    <Content Remove="Components\Pages\TabComponents\DB_Maint.razor" />
+    <Content Remove="Components\Pages\TabComponents\DynamicCRUD.razor" />
     <Content Remove="libman.json" />
     <Content Remove="wwwroot\images\bethanylogo.png" />
     <Content Remove="wwwroot\images\GettyImages-954695858.jpg" />

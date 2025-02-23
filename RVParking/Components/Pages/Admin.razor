@@ -72,22 +72,24 @@
 </div>
 <div id="Tab6" class="tabcontent" style="@(activeTab == "Tab6" ? "display: block;" : "display: none;")">
     @*     <RVParking.Components.Pages.TabComponents.Bkg_Availability_Maint BkgPropertiesAvail="BkgProperties" />*@
-    <RVParking.Components.Pages.TabComponents.Bkg_Availability_Maint RefreshChildAvailCallback="@RefreshChildAvail"></RVParking.Components.Pages.TabComponents.Bkg_Availability_Maint> />
+    <RVParking.Components.Pages.TabComponents.Bkg_Availability_Maint />
 </div>
+
+
 <div id="Tab7" class="tabcontent" style="@(activeTab == "Tab7" ? "display: block;" : "display: none;")">
     <RVParking.Components.Pages.TabComponents.Bkg_User_Maint />
 </div>
-<div id="Tab8" class="tabcontent" style="@(activeTab == "Tab8" ? "display: block;" : "display: none;")">
+@* <div id="Tab8" class="tabcontent" style="@(activeTab == "Tab8" ? "display: block;" : "display: none;")">
     <RVParking.Components.Pages.TabComponents.DB_Maint />
-</div>
+</div> *@
 <div id="Tab9" class="tabcontent" style="@(activeTab == "Tab9" ? "display: block;" : "display: none;")">
     <RVParking.Components.Pages.TabComponents.AspNetUser_Maint />
 </div>
 
 @code {
-    private string activeTab = "Tab6";
-    [Parameter]
-    public EventCallback RefreshChildAvailCallback { get; set; }
+    private string activeTab = "Tab7";
+    // [Parameter]
+    // public EventCallback RefreshChildAvailCallback { get; set; }
 
     // private string BkgType = "RVPark On Fitz";
     // private string isAvail = "Yes";
@@ -111,11 +113,11 @@
         //     await RefreshChildAvail();
         // }
     }
-    private async Task RefreshChildAvail()
-    {
-        await RefreshChildAvailCallback.InvokeAsync(null);
-        StateHasChanged();
-    }
+    // private async Task RefreshChildAvail()
+    // {
+    //     await RefreshChildAvailCallback.InvokeAsync(null);
+    //     StateHasChanged();
+    // }
    
 }
 
