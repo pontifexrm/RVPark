@@ -185,7 +185,7 @@ else
         //     isSubmitting = false;
         // }
         #endregion
-#if !DEBUG
+//#if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
             {
@@ -201,7 +201,7 @@ else
         );
         var reponseEmailcc = client.Messaging.Email.SendMessage(
             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-            emailSubject: emailMessage.Subject,
+            emailSubject: "cc'd msg re: " + emailMessage.Email + "|" + emailMessage.Subject,
             messagePlain: emailMessage.ChkMsg + " " + userIpAddress,
             destination: configuration["TNZ:CCemail"]
         );
@@ -216,7 +216,7 @@ else
                         messageText: emailMessage.smsMsg + " " + userIpAddress      // SMS Message
                                                                                     //sendMode: Enums.SendModeType.Test           // TEST Mode - Remove this to send live traffic
                     );
-#endif
+//#endif
         dialogMessage = "Thanks we have your message and we'll be in contact very soon. Meantime you will recieve an email copy of your message.";
         sendConfirmMsg = true;
     }
