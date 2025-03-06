@@ -120,13 +120,19 @@
             <div class="form-group" style="display:flex;flex-direction:row; margin-bottom: 1%">
                 <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 2%">
                     <label for="fmdate">From Date</label>
-                    <SfDatePicker class="form-group" TValue="DateTime?" Value="@Fmdate" Placeholder='Choose a Date' ID="fmdate"> </SfDatePicker>
+                    <SfDatePicker class="form-group" TValue="DateTime?" Value="@Fmdate" Placeholder='Choose a Date' ID="fmdate">
+                        <DatePickerEvents TValue="DateTime?" ValueChange="DteFmChnge"></DatePickerEvents>
+
+                    </SfDatePicker>
 @*                     <InputDate @bind-Value=Fmdate class="form-control" id="fmdate" style="margin-left: 2px;" />
  *@                    @* <ValidationMessage For="() => emailMessage.Fmdate" /> *@         
                 </div>
                 <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 2%;">
                     <label for="todate">To Date</label>
-                    <SfDatePicker class="form-control" TValue="DateTime?" Value="@Todate" Placeholder='Choose a Date' ID="todate"> </SfDatePicker>
+                    <SfDatePicker class="form-control" TValue="DateTime?" Value="@Todate" Placeholder='Choose a Date' ID="todate">
+                        <DatePickerEvents TValue="DateTime?" ValueChange="DteToChnge"></DatePickerEvents>
+
+                    </SfDatePicker>
                     @* <ValidationMessage For="() => emailMessage.Todate" />  *@
                 </div>
                 <div class="form-group" style="text-align:center; max-width: 60%; margin-left: 1%">
@@ -252,8 +258,10 @@ else
     // public List<Bkg_Property> BkgPropertiesAvail { get; set; }
     private string BkgType = "RVPark On Fitz";
     private string isAvail = "Yes";
-    public DateTime Fmdate { get; set; } = DateTime.Now.Date;
-    public DateTime Todate { get; set; } = DateTime.Now.Date;
+    // public DateTime Fmdate { get; set; } = DateTime.Now.Date;
+    // public DateTime Todate { get; set; } = DateTime.Now.Date;
+    public DateTime? Fmdate;
+    public DateTime? Todate;
     private bool allDatesAvailable = false;
     private string toDelete = "no";
     private string status = string.Empty;
@@ -349,8 +357,9 @@ else
         }
         else
         {
-            DateTime dte = Fmdate;
-            while (dte <= Todate)
+            DateTime? dte = Fmdate != null ? Fmdate : DateTime.Now.Date;
+            DateTime? dteTo = Todate != null ? Todate : DateTime.Now.Date;
+            while (dte <= dteTo)
             {
                 var existingRecord = ApplicationDbContext.bkg_Availabilities
                     .FirstOrDefault(a => a.Bkg_PropertyId == int.Parse(BkgType) && a.DateAvailable == dte);
@@ -362,16 +371,18 @@ else
                 }
                 else
                 {
-                    var newRecord = new Bkg_Availability
-                        {
-                            Bkg_PropertyId = int.Parse(BkgType),
-                            DateAvailable = dte,
-                            Available = isAvail == "Yes",
-                            AvailabilityStatus = status
-                        };
+                    if(dte !=null)
+{                        var newRecord = new Bkg_Availability
+                            {
+                                Bkg_PropertyId = int.Parse(BkgType),
+                                DateAvailable = (DateTime)dte,
+                                Available = isAvail == "Yes",
+                                AvailabilityStatus = status
+                            };
                     ApplicationDbContext.bkg_Availabilities.Add(newRecord);
+                    }
                 }
-                dte = dte.AddDays(1);
+                dte = dte?.AddDays(1);
             }
         }
         await ApplicationDbContext.SaveChangesAsync();
@@ -449,5 +460,29 @@ else
         LoadAvailabilities();
     }
 
+    private void DteFmChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
+    {
+        Fmdate = args.Value ?? DateTime.Now.Date;
+        if (Todate <= Fmdate)
+        {
+        //     Todate = AddOneDay(Fmdate);
+        //     currentBooking.DateArrive = Fmdate;
+        //     currentBooking.DateDepart = Todate;
+            StateHasChanged();
+        }
+    }
+    private void DteToChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
+    {
+        Todate = args.Value ?? DateTime.Now.Date;
+        if (Todate <= Fmdate)
+        {
+
+            // Fmdate = SubOneDay(Todate);
+            // currentBooking.DateArrive = Fmdate;
+            // currentBooking.DateDepart = Todate;
+
+            StateHasChanged();
+        }
+    }
 
 }
