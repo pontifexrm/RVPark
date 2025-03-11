@@ -73,11 +73,11 @@
             </select>
         </div>
         <button class="bi form-control" style="margin-top: 28px; width: 40px; height: 32px; margin-left: 4px;"
-                @onclick="ClearSearchAvailability">
+        @onclick="ClearSearchAvailability">
             <i class="bi bi-x-lg"></i>
         </button>
         <button class="bi form-control" style="margin-top: 28px; width: 40px; height: 32px; margin-left: 4px;"
-                @onclick="SearchAvailability">
+        @onclick="SearchAvailability">
             <i class="bi bi-search"></i>
         </button>
         @*         <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 1%;">
@@ -143,7 +143,7 @@
                     </SfDatePicker>
                     @*                     <InputDate @bind-Value=Fmdate class="form-control" id="fmdate" style="margin-left: 2px;" />
  *@                    @* <ValidationMessage For="() => emailMessage.Fmdate" /> *@         
-                        </div>
+                </div>
                 <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 2%;">
                     <label for="todate">To Date</label>
                     <SfDatePicker class="form-control" TValue="DateTime?" Value="@Todate" Placeholder='Choose a Date' ID="todate">
@@ -197,11 +197,11 @@ else
                         <td style="border: 1px solid #929292;">
                             <div class="tab-content" style="display:flex;flex-direction:row;">
                                 <button class="bi form-control" style="width: 40px; height: 32px;"
-                                        @onclick="() => EditBkgAvailablilty(availability)">
+                                @onclick="() => EditBkgAvailablilty(availability)">
                                     <i class="bi bi-pencil-fill"></i>
                                 </button>
                                 <button class="bi form-control" style="width: 40px; height: 32px;"
-                                        @onclick="() => DeleteBkgAvailability(availability)">
+                                @onclick="() => DeleteBkgAvailability(availability)">
                                     <i class="bi bi-trash3" style="block-size:max-content;"></i>
                                 </button>
                             </div>
@@ -298,12 +298,17 @@ else
     private bool isNew = false;
     private Bkg_Availability? currbkg_Availability = new Bkg_Availability();
 
+    private bool _isDataLoaded = false;
+
     protected override async Task OnInitializedAsync()
     {
-
-        BkgPropertiesAvail = await ApplicationDbContext.bkg_Properties.ToListAsync();
-        BkgType = "1";
-        await LoadAvailabilities();
+        if (!_isDataLoaded)
+        {
+            BkgPropertiesAvail = await ApplicationDbContext.bkg_Properties.AsNoTracking().ToListAsync();
+            BkgType = "1";
+            await LoadAvailabilities();
+            _isDataLoaded = true;
+        }
     }
     // protected override async Task OnParametersSetAsync()
     // {
@@ -344,7 +349,7 @@ else
             bool isAvailable = searchIsAvail == "Yes";
             query = query.Where(a => a.Available == isAvailable);
         }
-
+        query = query.OrderBy(a => a.DateAvailable);
         availabilities = await query.AsNoTracking().ToListAsync();
         StateHasChanged();
     }
@@ -468,12 +473,12 @@ else
         }
     }
 
-    private async Task DeleteEditAvailability(Bkg_Availability currbkg_Availability)
-    {
-        ApplicationDbContext.bkg_Availabilities?.Remove(currbkg_Availability);
-        await ApplicationDbContext.SaveChangesAsync();
-        LoadAvailabilities();
-    }
+    // private async Task DeleteEditAvailability(Bkg_Availability currbkg_Availability)
+    // {
+    //     ApplicationDbContext.bkg_Availabilities?.Remove(currbkg_Availability);
+    //     await ApplicationDbContext.SaveChangesAsync();
+    //     LoadAvailabilities();
+    // }
 
     private void DteFmChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {

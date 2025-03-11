@@ -50,7 +50,8 @@ builder.Configuration
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql((connectionString), new MySqlServerVersion(new Version(8, 0, 40))),ServiceLifetime.Transient);
+    options.UseMySql((connectionString), new MySqlServerVersion(new Version(8, 0, 40))), ServiceLifetime.Transient);
+
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
