@@ -506,7 +506,7 @@ else
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
-#if !DEBUG
+//#if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
             {
@@ -520,7 +520,7 @@ else
             messagePlain: ConfirmBkgMsg(),
             destination: currentBooking.Bkg_User.UserEmail
         );
-#endif
+//#endif
         sendConfirmMsg = false;
     }
     private void SendTxtConfirmation()
@@ -537,7 +537,7 @@ else
             txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
         }
         // Using TNZ
-        #if !DEBUG
+     //   #if !DEBUG
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
             {
                 AuthToken = configuration["TNZ:AuthToken"]
@@ -549,7 +549,7 @@ else
                 destination: txtrept,
                 messageText: subjectMsg
             );
-        #endif
+       // #endif
         sendConfirmMsg = false;
     }
     private void SendTxtConfirmation(string txtrept)
@@ -562,7 +562,7 @@ else
             txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
         }
         // Using TNZ
-#if !DEBUG
+//#if !DEBUG
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
             {
                 AuthToken = configuration["TNZ:AuthToken"]
@@ -574,7 +574,7 @@ else
                 destination: txtrept,                    
                 messageText: ConfirmBkgMsg()
             );
-#endif
+//#endif
         sendConfirmMsg = false;
     }
     private string ConfirmBkgMsg()
@@ -597,7 +597,7 @@ else
                  "        Newlands\r\n" +
                  "        Wellington 6037\r\n" +
                  "Access is best from Stewart Drive. Either from the north where you would exit SH1 at Johnsonville or from the South turning into Newlands. Turn into Fitzpatrick St from Stewart Drive is best as other routes(courtesy of the map apps) send you around a very narrow road.We are on the left corner of the 2nd street on the left going up Fitzpatrick St.\r\n" +
-                 "Payment is $30 for the night with NZMCA Memebrship {3}, payable in advance please to our bank account.\r\n" +
+                 "Payment is $30 for the night with NZMCA Memebrship $45 otherwise, payable in advance please to our bank account.\r\n" +
                  "        Ronald Pontifex\r\n" +
                  "        03 0525 0253043 000\r\n" +
                  "(We have Wise Card if that suits you better.)\r\n\r\n" +
