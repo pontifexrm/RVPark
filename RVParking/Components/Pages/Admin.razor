@@ -20,31 +20,34 @@
 @* <h3>RV Park Booking, Data and User Administration</h3> *@
 
 
-<div class="tabs">
-    @* <button class="@(activeTab == "Tab1" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab1"))">Booking Admin</button> *@
-    @* <button class="@(activeTab == "Tab6" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab6"))">Booking Availability</button> *@
-    <button class="@(activeTab == "Tab7" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab7"))">Booking Users</button>
-    <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">ApplicationUser</button>
-    <button class="@(activeTab == "Tab3" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab3"))">User/Role Maint.</button>
-    <button class="@(activeTab == "Tab4" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab4"))">Role Maint.</button>
-    <button class="@(activeTab == "Tab5" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab5"))">Property Maint.</button>
-    @* <button class="@(activeTab == "Tab9" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab9"))">Application User</button> *@
-    @* <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">Current Bookings</button> *@
-    @* <button class="@(activeTab == "Tab8" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab8"))">DB Maint.</button> *@
 
-</div>
-<hr />
-@* <div id="Tab1" class="tabcontent" style="@(activeTab == "Tab1" ? "display: block;" : "display: none;")"> *@
-    @* <RVParking.Components.Pages.TabComponents.Bkg_Bookings_Maint /> *@
+<AuthorizeView> 
+    <Authorized>
+        <div class="tabs">
+            @* <button class="@(activeTab == "Tab1" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab1"))">Booking Admin</button> *@
+            @* <button class="@(activeTab == "Tab6" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab6"))">Booking Availability</button> *@
+            <button class="@(activeTab == "Tab7" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab7"))">Booking Users</button>
+            <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">ApplicationUser</button>
+            <button class="@(activeTab == "Tab3" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab3"))">User/Role Maint.</button>
+            <button class="@(activeTab == "Tab4" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab4"))">Role Maint.</button>
+            <button class="@(activeTab == "Tab5" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab5"))">Property Maint.</button>
+            @* <button class="@(activeTab == "Tab9" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab9"))">Application User</button> *@
+            @* <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">Current Bookings</button> *@
+            @* <button class="@(activeTab == "Tab8" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab8"))">DB Maint.</button> *@
 
-    @* <RVParking.Components.Pages.TabComponents.BkgUser_Bookings /> *@
-    @*  <h4>New Booking for <b>@BkgType</b></h4>
+        </div>
+        <hr />
+        @* <div id="Tab1" class="tabcontent" style="@(activeTab == "Tab1" ? "display: block;" : "display: none;")"> *@
+        @* <RVParking.Components.Pages.TabComponents.Bkg_Bookings_Maint /> *@
+
+        @* <RVParking.Components.Pages.TabComponents.BkgUser_Bookings /> *@
+        @*  <h4>New Booking for <b>@BkgType</b></h4>
     <div class="form-group" style="display:flex;flex-direction:row;">
         <div class="form-group" style="max-width: 25%; text-align:center; margin-left: 2%">
             <label for="fmdate">Arriving</label>
             <InputDate @bind-Value=Fmdate class="form-control" id="fmdate" />
             @* <ValidationMessage For="() => emailMessage.Fmdate" /> *@
-    @*     </div>
+        @*     </div>
         <div class="form-group" style="max-width: 25%; text-align:center; margin-left: 2%;">
             <label for="todate">Departing</label>
             <InputDate @bind-Value=Todate class="form-control" id="todate" />
@@ -54,37 +57,45 @@
     <div>
         <button class="btn btn-primary" style="min-width: 40%; align-content: center;" @onclick="CheckBkgRequest">Request Booking</button>
     </div> *@ 
-@* </div> *@
+        @* </div> *@
 
-<div id="Tab2" class="tabcontent" style="@(activeTab == "Tab2" ? "display: block;" : "display: none;")">
-    <RVParking.Components.Pages.TabComponents.AspNetUser_Maint />
-    @* BkgAvail_BulkChange.razor *@
-</div>
-<div id="Tab3" class="tabcontent" style="@(activeTab == "Tab3" ? "display: block;" : "display: none;")">
-    <RVParking.Components.Pages.TabComponents.AspNetUserRoles_Maint />
-</div>
-<div id="Tab4" class="tabcontent" style="@(activeTab == "Tab4" ? "display: block;" : "display: none;")">
-    <RVParking.Components.Pages.TabComponents.AspNetRoles_Maint />
-</div>
-<div id="Tab5" class="tabcontent" style="@(activeTab == "Tab5" ? "display: block;" : "display: none;")">
-    @*     <RVParking.Components.Pages.TabComponents.Bkg_Property_Maint BkgProperties="BkgProperties" />
- *@    <RVParking.Components.Pages.TabComponents.Bkg_Property_Maint  />
-</div>
-@* <div id="Tab6" class="tabcontent" style="@(activeTab == "Tab6" ? "display: block;" : "display: none;")"> *@
-    @*     <RVParking.Components.Pages.TabComponents.Bkg_Availability_Maint BkgPropertiesAvail="BkgProperties" />*@
-    @* <RVParking.Components.Pages.TabComponents.Bkg_Availability_Maint /> *@
-@* </div> *@
+        <div id="Tab2" class="tabcontent" style="@(activeTab == "Tab2" ? "display: block;" : "display: none;")">
+            <RVParking.Components.Pages.TabComponents.AspNetUser_Maint />
+            @* BkgAvail_BulkChange.razor *@
+        </div>
+        <div id="Tab3" class="tabcontent" style="@(activeTab == "Tab3" ? "display: block;" : "display: none;")">
+            <RVParking.Components.Pages.TabComponents.AspNetUserRoles_Maint />
+        </div>
+        <div id="Tab4" class="tabcontent" style="@(activeTab == "Tab4" ? "display: block;" : "display: none;")">
+            <RVParking.Components.Pages.TabComponents.AspNetRoles_Maint />
+        </div>
+        <div id="Tab5" class="tabcontent" style="@(activeTab == "Tab5" ? "display: block;" : "display: none;")">
+            @*     <RVParking.Components.Pages.TabComponents.Bkg_Property_Maint BkgProperties="BkgProperties" />
+ *@   
+            <RVParking.Components.Pages.TabComponents.Bkg_Property_Maint />
+        </div>
+        @* <div id="Tab6" class="tabcontent" style="@(activeTab == "Tab6" ? "display: block;" : "display: none;")"> *@
+        @*     <RVParking.Components.Pages.TabComponents.Bkg_Availability_Maint BkgPropertiesAvail="BkgProperties" />*@
+        @* <RVParking.Components.Pages.TabComponents.Bkg_Availability_Maint /> *@
+        @* </div> *@
 
 
-<div id="Tab7" class="tabcontent" style="@(activeTab == "Tab7" ? "display: block;" : "display: none;")">
-    <RVParking.Components.Pages.TabComponents.Bkg_User_Maint />
-</div>
-@* <div id="Tab8" class="tabcontent" style="@(activeTab == "Tab8" ? "display: block;" : "display: none;")">
+        <div id="Tab7" class="tabcontent" style="@(activeTab == "Tab7" ? "display: block;" : "display: none;")">
+            <RVParking.Components.Pages.TabComponents.Bkg_User_Maint />
+        </div>
+        @* <div id="Tab8" class="tabcontent" style="@(activeTab == "Tab8" ? "display: block;" : "display: none;")">
     <RVParking.Components.Pages.TabComponents.DB_Maint />
 </div> *@
-<div id="Tab9" class="tabcontent" style="@(activeTab == "Tab9" ? "display: block;" : "display: none;")">
-    <RVParking.Components.Pages.TabComponents.AspNetUser_Maint />
-</div>
+        <div id="Tab9" class="tabcontent" style="@(activeTab == "Tab9" ? "display: block;" : "display: none;")">
+            <RVParking.Components.Pages.TabComponents.AspNetUser_Maint />
+        </div>
+
+    </Authorized>
+    <NotAuthorized>
+        <h4>- You are NOT AUTHORIZED -</h4>
+    </NotAuthorized>
+</AuthorizeView>
+
 
 @code {
     private string activeTab = "Tab7";

@@ -31,110 +31,128 @@
 @inject ApplicationDbContext ApplicationDbContext
 
 @inject IConfiguration configuration
-<!-- Page header with title and button to add a new Booking -->
+<AuthorizeView>
+    <Authorized>
+        <!-- Page header with title and button to add a new Booking -->
+        <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h4>Current Open Bookings - Add, Edit, and Delete All Bookings</h4>
+            </div>
+            <div>
+                <button class="btn btn-primary" @onclick="OpenAddModal">Add New Booking</button>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized> 
+        <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h4>- You are NOT AUTHORIZED -</h4>
+            </div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
 
-<div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
-    <div>
-        <h4>Current Open Bookings - Add, Edit, and Delete All Bookings</h4>
-    </div>
-    <div>
-        <button class="btn btn-primary" @onclick="OpenAddModal">Add New Booking</button>
-    </div>
-</div>
-
-<!-- Search Bar -->
-<div class="search-bar" style="display:flex; flex-wrap: wrap; gap: 4px;">
-    <input type="text" style="flex: 1 1 200px;" placeholder="Search by Client or Bkg Ref:" @bind="searchUsername" />
-    <input type="date" style="flex: 1 1 200px;" @bind="searchFromDate" />
-    <input type="date" style="flex: 1 1 200px;" @bind="searchToDate" />
-    <select style="flex: 1 1 200px;" @bind="searchPropertyId">
-        <option value="">Select Property</option>
-        @foreach (var property in properties)
-        {
-            <option value="@property.PropertyId">@property.Name</option>
-        }
-    </select>
-    <input type="text" style="flex: 1 1 200px; max-width: 300px" placeholder="Search by Status" @bind="searchStatus" />
-    @* <label for="All Bkgs"> All Bkgs</label> *@
-    
-    <button class="bi form-control" style="flex: 0 0 40px; height: 32px; margin-left: 4px;" ALL
-    @onclick="ClearSearch">
-        <i class="bi bi-x-lg"></i> 
-    </button>
-    <button class="bi form-control" style="flex: 0 0 40px; height: 32px; margin-left: 4px;"
-            @onclick="SearchAllBks">
-        @* <i class="bi bi-arrow-bar-left-nav-menu"></i> *@
-        All
-    </button>
-    <button class="bi form-control" style="flex: 0 0 40px; height: 32px; margin-left: 4px;"
-    @onclick="SearchBookings">
-        <i class="bi bi-search"></i>
-    </button>
-</div>
-<br />
-
-<!-- Load Table of all open bookings Bookings -->
-@if (bookings == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <div class="table-responsive">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th style="border: 1px solid #929292;">Fm - To Dates</th>
-                    <th style="border: 1px solid #929292;">First Name</th>
-                    <th style="border: 1px solid #929292;">Last Name</th>
-                    <th style="border: 1px solid #929292;">Phone</th>
-                    <th style="border: 1px solid #929292;">Property Name</th>
-                    <th style="border: 1px solid #929292;">Nights</th>
-                    <th style="border: 1px solid #929292;">Bkg Ref</th>
-                    <th style="border: 1px solid #929292;">Paid</th>
-                    <th style="border: 1px solid #929292;">Status</th>
-                    <th style="border: 1px solid #929292;">Comments</th>
-                    <th style="border: 1px solid #929292;">Bkg Username</th>
-                    <th style="border: 1px solid #929292;">Created-Updates</th>
-                    <th style="border: 1px solid #929292;"><small>Edit Delete Confirm</small></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var booking in bookings)
+<AuthorizeView>
+    <Authorized>
+        <!-- Search Bar -->
+        <div class="search-bar" style="display:flex; flex-wrap: wrap; gap: 4px;">
+            <input type="text" style="flex: 1 1 200px;" placeholder="Search by Client or Bkg Ref:" @bind="searchUsername" />
+            <input type="date" style="flex: 1 1 200px;" @bind="searchFromDate" />
+            <input type="date" style="flex: 1 1 200px;" @bind="searchToDate" />
+            <select style="flex: 1 1 200px;" @bind="searchPropertyId">
+                <option value="">Select Property</option>
+                @foreach (var property in properties)
                 {
-                    <tr>
-                        <td style="border: 1px solid #929292;">@booking.DateArrive.ToShortDateString() to @booking.DateDepart.ToShortDateString()</td>
-                        <td style="border: 1px solid #929292;">@booking.Bkg_User.UserFirstName</td>
-                        <td style="border: 1px solid #929292;">@booking.Bkg_User.UserLastName</td>
-                        <td style="border: 1px solid #929292;">@booking.Bkg_User.UserPhone</td>
-                        <td style="border: 1px solid #929292;">@booking.Bkg_Property.Name</td>
-                        <td style="border: 1px solid #929292;">@booking.Nights</td>
-                        <td style="border: 1px solid #929292;">@booking.BookingId</td>
-                        <td style="border: 1px solid #929292;">@(booking.Paid ? "Y" : "N")</td>
-                        <td style="border: 1px solid #929292;">@booking.BookingStatus</td>
-                        <td style="border: 1px solid #929292;">@booking.BookingComments</td>
-                        <td style="border: 1px solid #929292;">@booking.Bkg_User.UserName</td>
-                        <td style="border: 1px solid #929292;">c:@booking.CreatedDte.ToShortDateString() u:@booking.UpdatedDte.ToShortDateString()</td>
-                        <td style="border: 1px solid #929292;">
-                            <div class="tab-content" style="display:flex;flex-direction:row;">
-                                <button class="bi form-control" style="width: 40px; height: 32px;" @onclick="() => EditBooking(booking)">
-                                    <i class="bi bi-pencil-fill"></i>
-                                </button>
-                                <button class="bi form-control" style="width: 40px; height: 32px;" @onclick="() => DeleteBooking(booking.BookingId)">
-                                    <i class="bi bi-trash3" style="block-size:max-content;"></i>
-                                </button>
-                                <button class="bi form-control" style="width: 70px; height: 32px;" @onclick="() => SendConfirmationModal(booking.BookingId)">
-                                    <i class="bi bi-chat-text" style="block-size:max-content;"></i>
-                                    <i class="bi bi-envelope-arrow-up" style="block-size:max-content;"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                    <option value="@property.PropertyId">@property.Name</option>
                 }
-            </tbody>
-        </table>
-    </div>
-}
+            </select>
+            <input type="text" style="flex: 1 1 200px; max-width: 300px" placeholder="Search by Status" @bind="searchStatus" />
+            @* <label for="All Bkgs"> All Bkgs</label> *@
+    
+            <button class="bi form-control" style="flex: 0 0 40px; height: 32px; margin-left: 4px;" ALL
+            @onclick="ClearSearch">
+                <i class="bi bi-x-lg"></i> 
+            </button>
+            <button class="bi form-control" style="flex: 0 0 40px; height: 32px; margin-left: 4px;"
+                    @onclick="SearchAllBks">
+                @* <i class="bi bi-arrow-bar-left-nav-menu"></i> *@
+                All
+            </button>
+            <button class="bi form-control" style="flex: 0 0 40px; height: 32px; margin-left: 4px;"
+            @onclick="SearchBookings">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+        <br /> 
+    </Authorized>
+</AuthorizeView>
+<AuthorizeView>
+    <Authorized>
+        <!-- Load Table of all open bookings Bookings -->
+        @if (bookings == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid #929292;">Fm - To Dates</th>
+                            <th style="border: 1px solid #929292;">First Name</th>
+                            <th style="border: 1px solid #929292;">Last Name</th>
+                            <th style="border: 1px solid #929292;">Phone</th>
+                            <th style="border: 1px solid #929292;">Property Name</th>
+                            <th style="border: 1px solid #929292;">Nights</th>
+                            <th style="border: 1px solid #929292;">Bkg Ref</th>
+                            <th style="border: 1px solid #929292;">Paid</th>
+                            <th style="border: 1px solid #929292;">Status</th>
+                            <th style="border: 1px solid #929292;">Comments</th>
+                            <th style="border: 1px solid #929292;">Bkg Username</th>
+                            <th style="border: 1px solid #929292;">Created-Updates</th>
+                            <th style="border: 1px solid #929292;"><small>Edit Delete Confirm</small></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var booking in bookings)
+                        {
+                            <tr>
+                                <td style="border: 1px solid #929292;">@booking.DateArrive.ToShortDateString() to @booking.DateDepart.ToShortDateString()</td>
+                                <td style="border: 1px solid #929292;">@booking.Bkg_User.UserFirstName</td>
+                                <td style="border: 1px solid #929292;">@booking.Bkg_User.UserLastName</td>
+                                <td style="border: 1px solid #929292;">@booking.Bkg_User.UserPhone</td>
+                                <td style="border: 1px solid #929292;">@booking.Bkg_Property.Name</td>
+                                <td style="border: 1px solid #929292;">@booking.Nights</td>
+                                <td style="border: 1px solid #929292;">@booking.BookingId</td>
+                                <td style="border: 1px solid #929292;">@(booking.Paid ? "Y" : "N")</td>
+                                <td style="border: 1px solid #929292;">@booking.BookingStatus</td>
+                                <td style="border: 1px solid #929292;">@booking.BookingComments</td>
+                                <td style="border: 1px solid #929292;">@booking.Bkg_User.UserName</td>
+                                <td style="border: 1px solid #929292;">c:@booking.CreatedDte.ToShortDateString() u:@booking.UpdatedDte.ToShortDateString()</td>
+                                <td style="border: 1px solid #929292;">
+                                    <div class="tab-content" style="display:flex;flex-direction:row;">
+                                        <button class="bi form-control" style="width: 40px; height: 32px;" @onclick="() => EditBooking(booking)">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </button>
+                                        <button class="bi form-control" style="width: 40px; height: 32px;" @onclick="() => DeleteBooking(booking.BookingId)">
+                                            <i class="bi bi-trash3" style="block-size:max-content;"></i>
+                                        </button>
+                                        <button class="bi form-control" style="width: 70px; height: 32px;" @onclick="() => SendConfirmationModal(booking.BookingId)">
+                                            <i class="bi bi-chat-text" style="block-size:max-content;"></i>
+                                            <i class="bi bi-envelope-arrow-up" style="block-size:max-content;"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </Authorized>
+</AuthorizeView>
+
 
 <!-- Modal Dialog for Editing/Adding Bookings -->
 @if (showModal)
@@ -232,6 +250,7 @@ else
         </div>
     </div>
 }
+
 
 <!-- Modal Dialog for Sending Email Confirmation -->
 @if (sendConfirmMsg)
