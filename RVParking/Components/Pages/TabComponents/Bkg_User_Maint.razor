@@ -111,6 +111,7 @@ else
                     <th style="border: 1px solid #929292;">Country</th>
                     <th style="border: 1px solid #929292;">Status</th>
                     <th style="border: 1px solid #929292;">Comments</th>
+                    <th style="border: 1px solid #929292;">Created</th>
                     <th style="border: 1px solid #929292;">Actions</th>
                 </tr>
             </thead>
@@ -131,6 +132,7 @@ else
                         <td style="border: 1px solid #929292;">@user.UserCountry</td>
                         <td style="border: 1px solid #929292;">@user.UserStatus</td>
                         <td style="border: 1px solid #929292;">@user.UserComments</td>
+                        <td style="border: 1px solid #929292;">@user.CreatedDte.ToShortDateString()</td>
                         <td style="border: 1px solid #929292;">
                             <div class="tab-content" style="display:flex;flex-direction:row;">
                                 <button class="bi form-control" style="width: 40px; height: 32px;" 

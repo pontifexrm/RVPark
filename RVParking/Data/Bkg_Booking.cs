@@ -17,9 +17,13 @@ namespace RVParking.Data
         public bool Paid { get; set; } = false;
         public string   BookingStatus { get; set; } = string.Empty;
         public string BookingComments { get; set; } = string.Empty;
+        public DateTime CreatedDte { get; set; }
+        public DateTime UpdatedDte { get; set; }
+
 
         // Navigation properties
         public Bkg_User Bkg_User { get; set; }
         public Bkg_Property Bkg_Property { get; set; }
+        public int Nights => (DateDepart - DateArrive).Days;
     }
 }

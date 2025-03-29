@@ -32,6 +32,7 @@
 
 @inject IConfiguration configuration
 <!-- Page header with title and button to add a new Booking -->
+
 <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
     <div>
         <h4>Current Open Bookings - Add, Edit, and Delete All Bookings</h4>
@@ -54,12 +55,19 @@
         }
     </select>
     <input type="text" style="flex: 1 1 200px; max-width: 300px" placeholder="Search by Status" @bind="searchStatus" />
-    <button class="bi form-control" style="flex: 0 0 40px; height: 32px; margin-left: 4px;"
-            @onclick="ClearSearch">
-        <i class="bi bi-x-lg"></i>
+    @* <label for="All Bkgs"> All Bkgs</label> *@
+    
+    <button class="bi form-control" style="flex: 0 0 40px; height: 32px; margin-left: 4px;" ALL
+    @onclick="ClearSearch">
+        <i class="bi bi-x-lg"></i> 
     </button>
     <button class="bi form-control" style="flex: 0 0 40px; height: 32px; margin-left: 4px;"
-            @onclick="SearchBookings">
+            @onclick="SearchAllBks">
+        @* <i class="bi bi-arrow-bar-left-nav-menu"></i> *@
+        All
+    </button>
+    <button class="bi form-control" style="flex: 0 0 40px; height: 32px; margin-left: 4px;"
+    @onclick="SearchBookings">
         <i class="bi bi-search"></i>
     </button>
 </div>
@@ -81,11 +89,13 @@ else
                     <th style="border: 1px solid #929292;">Last Name</th>
                     <th style="border: 1px solid #929292;">Phone</th>
                     <th style="border: 1px solid #929292;">Property Name</th>
+                    <th style="border: 1px solid #929292;">Nights</th>
                     <th style="border: 1px solid #929292;">Bkg Ref</th>
                     <th style="border: 1px solid #929292;">Paid</th>
                     <th style="border: 1px solid #929292;">Status</th>
                     <th style="border: 1px solid #929292;">Comments</th>
                     <th style="border: 1px solid #929292;">Bkg Username</th>
+                    <th style="border: 1px solid #929292;">Created-Updates</th>
                     <th style="border: 1px solid #929292;"><small>Edit Delete Confirm</small></th>
                 </tr>
             </thead>
@@ -98,11 +108,13 @@ else
                         <td style="border: 1px solid #929292;">@booking.Bkg_User.UserLastName</td>
                         <td style="border: 1px solid #929292;">@booking.Bkg_User.UserPhone</td>
                         <td style="border: 1px solid #929292;">@booking.Bkg_Property.Name</td>
+                        <td style="border: 1px solid #929292;">@booking.Nights</td>
                         <td style="border: 1px solid #929292;">@booking.BookingId</td>
                         <td style="border: 1px solid #929292;">@(booking.Paid ? "Y" : "N")</td>
                         <td style="border: 1px solid #929292;">@booking.BookingStatus</td>
                         <td style="border: 1px solid #929292;">@booking.BookingComments</td>
                         <td style="border: 1px solid #929292;">@booking.Bkg_User.UserName</td>
+                        <td style="border: 1px solid #929292;">c:@booking.CreatedDte.ToShortDateString() u:@booking.UpdatedDte.ToShortDateString()</td>
                         <td style="border: 1px solid #929292;">
                             <div class="tab-content" style="display:flex;flex-direction:row;">
                                 <button class="bi form-control" style="width: 40px; height: 32px;" @onclick="() => EditBooking(booking)">
@@ -273,6 +285,7 @@ else
     private bool showModal = false;
     private bool sendConfirmMsg = false;
     private bool allDatesAvailable = true;
+    private bool bAllBkgs = false;
     private string modalTitle = string.Empty;
     private string modalMessage = string.Empty;
     private string searchUsername = string.Empty;
@@ -411,6 +424,8 @@ else
 
         if (currentBooking.BookingId == 0) // A new booking
         {
+            currentBooking.CreatedDte = DateTime.Now;
+            currentBooking.UpdatedDte = DateTime.Now;
             var savedOK = await bkg_Engine.CreateBookingAsync(currentBooking);
             if (!savedOK)
             {
@@ -426,6 +441,7 @@ else
         }
         else // editing existing bkg
         {
+            currentBooking.UpdatedDte = DateTime.Now;
             var savedOK = await bkg_Engine.EditBookingAsync(orgnBkg, currentBooking);
             if (!savedOK)
             {
@@ -525,8 +541,11 @@ else
         var query = ApplicationDbContext.bkg_Bookings
             .Include(b => b.Bkg_User)
             .Include(b => b.Bkg_Property)
-            .Where(b => b.BookingStatus != "Closed")
             .AsQueryable();
+        if (!bAllBkgs)
+        {
+            query = query.Where(b => b.BookingStatus != "Closed");
+        }
 
         if (!string.IsNullOrEmpty(searchUsername))
         {
@@ -563,12 +582,11 @@ else
         query = query.OrderBy(b => b.DateArrive);
         bookings = await query.ToListAsync();
     }
-    private async Task SearchBookingsA()
+    private async Task SearchAllBks()
     {
         var query = ApplicationDbContext.bkg_Bookings
             .Include(b => b.Bkg_User)
             .Include(b => b.Bkg_Property)
-            .Where(b => b.BookingStatus != "Closed")
             .AsQueryable();
 
         if (!string.IsNullOrEmpty(searchUsername))
@@ -628,16 +646,22 @@ else
 
     private void SendEmailConfirmation()
     {
+        // This is to the BkgUser and the bkg_User.email is destination and F/L Names are From the currentBooking.Bkg_User.
         string destination = currentBooking.Bkg_User.UserEmail;
         SendEmailConfirmation(destination);
     }
     private void SendTxtConfirmation()
     {
+        // This is to the BkgUser and the bkg_User.phone is destination and F/L Names are From the currentBooking.Bkg_User.
         string txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
         SendTxtConfirmation(txtrept);
     }
     private void SendAdhocConfirmation()
     {
+        // This is to the Adhoc Destination either email or phne. 
+        // BUT if 'Me' then to the currentUser and F/L Names are From the currentBooking.Bkg_User with a leading text saying cc'd to Adhoc Address.
+        // if NOT ME then to the phone or email in adhoc field F/L Name from currentBooking.Bkg_User and a leading text saying cc'd to phone or email entered.
+
         bool isEmail = true;
         string sendtoWho = string.Empty;
         // if Me then send to the logged in user
@@ -665,11 +689,11 @@ else
         }
         if (isEmail)
         {
-            SendEmailConfirmation(adhocConfirm);
+            SendEmailAdhocConfirmation(adhocConfirm);
         }
         else
         {
-            SendTxtConfirmation(adhocConfirm);
+            SendTxtAdhocConfirmation(adhocConfirm);
         }
 
         adhocConfirm = string.Empty;
@@ -684,8 +708,9 @@ else
         //     "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentBooking.Bkg_User);
 
         // emailMessage.Subject = subjectMsg;
-#if !DEBUG
         // Using TNZ
+#if !DEBUG
+        
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
             {
                 AuthToken = configuration["TNZ:AuthToken"]
@@ -696,6 +721,31 @@ else
             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
             emailSubject: subjectMsg,
             messagePlain: ConfirmBkgMsg(),
+            destination: emailTo
+        );
+#endif
+        sendConfirmMsg = false;
+    }
+    private void SendEmailAdhocConfirmation(string emailTo)
+    {
+        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+    " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        // emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
+        //     "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentBooking.Bkg_User);
+
+        // emailMessage.Subject = subjectMsg;
+#if !Debug
+        // Using TNZ
+        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+            {
+                AuthToken = configuration["TNZ:AuthToken"]
+            };
+        var client = new TNZApiClient(apiUser);
+
+        var reponseEmail = client.Messaging.Email.SendMessage(
+            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+            emailSubject: subjectMsg,
+            messagePlain: ConfirmAdHocBkgMsg(emailTo),
             destination: emailTo
         );
 #endif
@@ -726,19 +776,88 @@ else
 #endif
         sendConfirmMsg = false;
     }
-    private string ConfirmBkgMsg()
+    private void SendTxtAdhocConfirmation(string txtrept)
+    {
+        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+
+        // emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
+        //     "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentBooking.Bkg_User);
+
+        // emailMessage.Subject = subjectMsg;
+        // Using TNZ
+#if !DEBUG
+        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+            {
+                AuthToken = configuration["TNZ:AuthToken"]
+            };
+        var client = new TNZApiClient(apiUser);
+
+        var response = client.Messaging.SMS.SendMessage
+            (
+                destination: txtrept,
+                messageText: ConfirmAdHocBkgMsg(txtrept)
+            );
+#endif
+        sendConfirmMsg = false;
+    }
+    private string ConfirmBkgMsg()  // Uses Bky_User Names
     {
         StringBuilder sb = new StringBuilder();
         sb.Append("Kia ora ");
-        sb.Append(currentUser.UserFirstName);
+//        sb.Append(currentUser.UserFirstName);
+        sb.Append(currentBooking.Bkg_User.UserFirstName);
         sb.Append(" ");
-        sb.Append(currentUser.UserLastName);
+//        sb.Append(currentUser.UserLastName);
+        sb.Append(currentBooking.Bkg_User.UserLastName);
         sb.Append("\n\n");
         sb.Append("Your booking has been confirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
         sb.Append(currentBooking.DateArrive.Date.ToString("d"));
-        sb.Append(" departing before mid-day");
+        sb.Append(" departing before mid-day ");
+        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append("\n\n");
+        sb.Append("Address is\r\n" +
+                 "        22 Fitzpatrick St\r\n" +
+                 "        Newlands\r\n" +
+                 "        Wellington 6037\r\n" +
+                 "Access is best from Stewart Drive.Either from the north where you would exit SH1 at Johnsonville or from the South turning into Newlands. Turn into Fitzpatrick St from Stewart Drive is best as other routes(courtesy of the map apps) send you around a very narrow road.We are on the left corner of the 2nd street on the left going up Fitzpatrick St.\r\n" +
+                 "Payment is $30 for the night with NZMCA Memebrship otherwise $45 per night, payable in advance please to our bank account.\r\n" +
+                 "        Ronald Pontifex\r\n" +
+                 "        03 0525 0253043 000\r\n" +
+                 "(We have Wise Card if that suits you better.)\r\n\r\n" +
+                 "Please text us on arrival and we shall come out to meets you etc.\r\n" +
+                 "Again many thanks\r\n" +
+                 "Ron Pontifex\r\n" +
+                 "WELLINGTON New Zealand\r\n" +
+                 "Ph 027 304 2002\r\n" +
+                 "E - Mail : rvpark@pontifex.nz\r\n");
+        return sb.ToString();
+    }
+    private string ConfirmAdHocBkgMsg(string rept)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("cc'd to ");
+        sb.Append(currentUser.UserFirstName);
+        sb.Append(" ");
+        sb.Append(currentUser.UserLastName);
+        sb.Append(" ");
+        sb.Append(rept);
+        sb.Append("\n\n");
+
+        sb.Append("Kia ora ");
+        //        sb.Append(currentUser.UserFirstName);
+        sb.Append(currentBooking.Bkg_User.UserFirstName);
+        sb.Append(" ");
+        //        sb.Append(currentUser.UserLastName);
+        sb.Append(currentBooking.Bkg_User.UserLastName);
+        sb.Append("\n\n");
+        sb.Append("Your booking has been confirmed for ");
+        sb.Append(currentBooking.Bkg_Property.Name);
+        sb.Append(" arriving after mid-day ");
+        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(" departing before mid-day ");
         sb.Append(currentBooking.DateDepart.Date.ToString("d"));
         sb.Append("\n\n");
         sb.Append("Address is\r\n" +

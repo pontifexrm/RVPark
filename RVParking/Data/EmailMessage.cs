@@ -114,9 +114,11 @@ public class EmailMessage
                               "SUBJECT: {3}  - {4}\r\n" +
                               "email {1} \r\n" +
                               "Phone {2} \r\n" +
+                              "Dates {6} to {7} \r\n" +
                               "{5}",
             this.Name, this.Email, this.E_164_Phone,
-            this.Subject, this.Message, DateTime.Now.ToString("g"));
+            this.Subject, this.Message, DateTime.Now.ToString("g"),
+            this.Fmdate.ToString("yyyy-MM-dd"), this.Todate.ToString("yyyy-MM-dd"));
             return sRtn;
         }
     }

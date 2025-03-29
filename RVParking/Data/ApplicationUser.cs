@@ -15,7 +15,8 @@ namespace RVParking.Data
         public string UserZip { get; set; } = string.Empty;
         public string UserStatus { get; set; } = string.Empty;
         public string UserPassword { get; set; } = string.Empty;
+        public DateTime CreatedDte { get; set; } = DateTime.Now;
 
     }
-
+    
 }

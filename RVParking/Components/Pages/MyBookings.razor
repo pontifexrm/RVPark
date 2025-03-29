@@ -461,6 +461,8 @@ else
         // if a new booking then we need to Create it else Change it.
         if (currentBooking.BookingId == 0) // A new booking
         {
+            currentBooking.CreatedDte = DateTime.Now;
+            currentBooking.UpdatedDte = DateTime.Now;
             var savedOK = await bkg_Engine.CreateBookingAsync(currentBooking);
             if (!savedOK)
             {
@@ -477,6 +479,8 @@ else
         }
         else // editing existing bkg
         {
+            currentBooking.UpdatedDte = DateTime.Now;
+
             var savedOK = await bkg_Engine.EditBookingAsync(orgnBkg, currentBooking);
             if (!savedOK)
             { 
