@@ -1,0 +1,59 @@
+﻿@page "/availability"
+@rendermode InteractiveServer
+<PageTitle>RV Park Availability</PageTitle>
+
+
+@using RVParking.Data
+@using RVParking.Components.Account
+
+@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using TNZAPI.NET;
+@using TNZAPI.NET.Core;
+@using TNZAPI.NET.Api.Addressbook.Contact.Dto;
+
+@* Is Being Used *@
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityUserAccessor UserAccessor
+
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@inject ApplicationDbContext ApplicationDbContext
+
+@inject IConfiguration configuration
+<h3 style="color:darkolivegreen;">Availability - See what dates are available.</h3>
+<div class="form-group" style="text-align:left; margin-left: 1%;">
+    <label>Property</label>
+    <InputSelect select class="form-control" @bind-Value="@currentBooking.PropertyId">
+        <option value="">Select Property</option>
+        @foreach (var property in BkgProperties)
+        {
+            <option value="@property.PropertyId">@property.Name</option>
+        }
+    </InputSelect>
+</div>
+
+@code {
+    private string BkgType = "RVPark On Fitz";
+    private Bkg_Booking currentBooking = new();
+    private List<Bkg_Property> BkgProperties = new List<Bkg_Property>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        BkgProperties = await ApplicationDbContext.bkg_Properties.ToListAsync();
+      //  await LoadBookings();
+
+    }
+}
