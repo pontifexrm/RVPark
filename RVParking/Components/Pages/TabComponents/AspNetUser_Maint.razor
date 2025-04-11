@@ -114,6 +114,7 @@ else
         </table>
     </div>
 }
+
 @if (isEditing)
 {
     <div class="modal show" tabindex="-1" style="display: block;">
@@ -258,12 +259,34 @@ else
 }
 
 
+<!-- Modal Dialog for Error Messages -->
+@if (showErrorModal)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Issue when trying to REMOVE this User</h5>
+                    <button type="button" class="btn-close" @onclick="CloseErrorModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>@errorMessage</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseErrorModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
     private List<ApplicationUser> users = new List<ApplicationUser>();
     private ApplicationUser? currentUser = new ApplicationUser();
 
     private bool isEditing = false;
+    private bool showErrorModal = false;
+    private string errorMessage = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -280,16 +303,26 @@ else
         currentUser = await UserManager.FindByIdAsync(user.Id);
         if (currentUser != null)
         {
-            var result = await UserManager.DeleteAsync(currentUser);
-            if (result.Succeeded)
+            var userRoles = await UserManager.GetRolesAsync(currentUser);
+            if (userRoles.Count > 0)
             {
-                users.Remove(currentUser);
-                await ApplicationDbContext.SaveChangesAsync();
-                users = await ApplicationDbContext.Users.ToListAsync();
+                // tell the user NOT to do this until the user is removed from all the roles
+                errorMessage = $"User {currentUser.UserName} is assigned to one or more roles. Please remove the user from all roles before deleting.";
+                showErrorModal = true;
             }
             else
             {
-                // Handle error
+                var result = await UserManager.DeleteAsync(currentUser);
+                if (result.Succeeded)
+                {
+                    users.Remove(currentUser);
+                    await ApplicationDbContext.SaveChangesAsync();
+                    users = await ApplicationDbContext.Users.ToListAsync();
+                }
+                else
+                {
+                    // Handle error
+                }
             }
         }
         StateHasChanged();
@@ -322,4 +355,8 @@ else
         isEditing = false;
     }
 
+    private void CloseErrorModal()
+    {
+        showErrorModal = false;
+    }
 }

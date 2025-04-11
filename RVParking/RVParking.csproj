@@ -15,6 +15,8 @@
   <ItemGroup>
     <Content Remove="Components\Layout\BkgMmtMainLayout.razor" />
     <Content Remove="Components\Layout\BkgMmtNavMenu.razor" />
+    <Content Remove="Components\Pages\Availability01.razor" />
+    <Content Remove="Components\Pages\Availabilityold.razor" />
     <Content Remove="Components\Pages\TabComponents\DBTblNavMenu.razor" />
     <Content Remove="Components\Pages\TabComponents\DB_Maint.razor" />
     <Content Remove="Components\Pages\TabComponents\DynamicCRUD.razor" />
