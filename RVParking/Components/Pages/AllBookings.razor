@@ -340,7 +340,7 @@
             currentUser = await ApplicationDbContext.bkg_Users.FirstOrDefaultAsync(u => u.UserName == userName);
             // Use the currentUser as needed
         }
-
+        Todate = Fmdate.AddDays(1);
         users = await ApplicationDbContext.bkg_Users.ToListAsync() ?? new List<Bkg_User>();
         properties = await ApplicationDbContext.bkg_Properties.ToListAsync() ?? new List<Bkg_Property>();
         await LoadBookings();
