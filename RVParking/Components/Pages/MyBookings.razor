@@ -446,7 +446,7 @@
                 string CCMsg = string.Concat("CC msg of email to:", booking.Bkg_User.UserEmail, " Warning BkgRef: ", booking.BookingId.ToString(),
                 " for ", booking.Bkg_Property.Name, " from ", booking.DateArrive.Date.ToString("d"), " to ", booking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED");
 
-               await bkg_Engine.DeleteBookingAsync(booking);
+                await bkg_Engine.DeleteBookingAsync(booking);
                 await LoadBookings();
                 string s = configuration["TNZ:SMSrept"];
                 string txtrept = Chk_E_164_Phone(s);

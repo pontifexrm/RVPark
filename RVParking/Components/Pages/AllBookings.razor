@@ -440,8 +440,6 @@
         // if a new booking then we need to Create it else Change it.
         Bkg_Engine bkg_Engine = new Bkg_Engine(ApplicationDbContext);
 
-        // currentBooking.DateArrive = Fmdate; currentBooking.DateDepart = Todate;
-
         if (currentBooking.BookingId == 0) // A new booking
         {
             currentBooking.CreatedDte = DateTime.Now;
@@ -457,6 +455,9 @@
             {
                 showModal = false;
                 modalMessage = "";
+                // Need to send a cc'd to rvpark@pontifex.nz
+                SendCCEmailConfirmation();
+
             }
         }
         else // editing existing bkg
@@ -480,38 +481,14 @@
             {
                 showModal = false;
                 modalMessage = "";
+                // Need to send a cc'd to rvpark@pontifex.nz
+                SendCCEmailConfirmation();
+
             }
 
         }
-
-        //  showModal = false;
         await LoadBookings();
-        // StateHasChanged();
-
-
-
-        // if (isAvailable())
-        // {
-        //     currentBooking.BookingStatus = "Confirmed";
-        // }
-        // else
-        // {
-        //     currentBooking.BookingStatus = "Requested";
-        // }
-        // currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
-        // currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
-
-        // if (currentBooking.BookingId == 0)
-        // {
-        //     ApplicationDbContext.bkg_Bookings.Add(currentBooking);
-        // }
-        // else
-        // {
-        //     ApplicationDbContext.bkg_Bookings.Update(currentBooking);
-        // }
-        // await ApplicationDbContext.SaveChangesAsync();
-        // await LoadBookings();
-        // showModal = false;
+       
     }
 
     private async Task DeleteBooking(int bookingId)
@@ -519,10 +496,17 @@
         var booking = await ApplicationDbContext.bkg_Bookings.FindAsync(bookingId);
         if (booking != null)
         {
-            try
+            string subjectMsg = string.Concat("WARNING", " BkgRef: ", booking.BookingId.ToString(), " for ", booking.Bkg_Property.Name,
+                                " from ", booking.DateArrive.Date.ToString("d"), " to ", booking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED");
+
+            string CCMsg = string.Concat("CC msg of email to:", booking.Bkg_User.UserEmail, " Warning BkgRef: ", booking.BookingId.ToString(),
+                                " for ", booking.Bkg_Property.Name, " from ", booking.DateArrive.Date.ToString("d"), " to ", booking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED"); try
             {
                 await bkg_Engine.DeleteBookingAsync(booking);
                 await LoadBookings();
+                // Need to send a cc'd to rvpark@pontifex.nz
+                SendCCEmailDeleteConfirmation(CCMsg, "Warning");
+
             }
             catch (Exception ex)
             {
@@ -536,13 +520,6 @@
         }
 
 
-        // var booking = await ApplicationDbContext.bkg_Bookings.FindAsync(bookingId);
-        // if (booking != null)
-        // {
-        //     ApplicationDbContext.bkg_Bookings.Remove(booking);
-        //     await ApplicationDbContext.SaveChangesAsync();
-        //     await LoadBookings();
-        // }
     }
 
     private void CloseModal()
@@ -657,14 +634,12 @@
     {
         return double.TryParse(value, out _);
     }
-      
 
     private void SendConfirmationModal(int bookingId)
     {
         currentBooking = bookings.FirstOrDefault(b => b.BookingId == bookingId);
         sendConfirmMsg = true;
     }
-
     private void SendEmailConfirmation()
     {
         // This is to the BkgUser and the bkg_User.email is destination and F/L Names are From the currentBooking.Bkg_User.
@@ -677,9 +652,35 @@
         string txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
         SendTxtConfirmation(txtrept);
     }
+    private void SendEmailConfirmation(string emailTo)
+    {
+        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+    " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        // emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
+        //     "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentBooking.Bkg_User);
+
+        // emailMessage.Subject = subjectMsg;
+        // Using TNZ
+#if !DEBUG
+        
+        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+            {
+                AuthToken = configuration["TNZ:AuthToken"]
+            };
+        var client = new TNZApiClient(apiUser);
+
+        var reponseEmail = client.Messaging.Email.SendMessage(
+            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+            emailSubject: subjectMsg,
+            messagePlain: ConfirmBkgMsg(),
+            destination: emailTo
+        );
+#endif
+        sendConfirmMsg = false;
+    }
     private void SendAdhocConfirmation()
     {
-        // This is to the Adhoc Destination either email or phne. 
+        // This is to the Adhoc Destination either email or phne.
         // BUT if 'Me' then to the currentUser and F/L Names are From the currentBooking.Bkg_User with a leading text saying cc'd to Adhoc Address.
         // if NOT ME then to the phone or email in adhoc field F/L Name from currentBooking.Bkg_User and a leading text saying cc'd to phone or email entered.
 
@@ -721,32 +722,6 @@
         sendConfirmMsg = false;
 
     }
-    private void SendEmailConfirmation(string emailTo)
-    {
-        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-    " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
-        // emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
-        //     "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentBooking.Bkg_User);
-
-        // emailMessage.Subject = subjectMsg;
-        // Using TNZ
-#if !DEBUG
-        
-        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
-        var client = new TNZApiClient(apiUser);
-
-        var reponseEmail = client.Messaging.Email.SendMessage(
-            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-            emailSubject: subjectMsg,
-            messagePlain: ConfirmBkgMsg(),
-            destination: emailTo
-        );
-#endif
-        sendConfirmMsg = false;
-    }
     private void SendEmailAdhocConfirmation(string emailTo)
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
@@ -768,6 +743,48 @@
             emailSubject: subjectMsg,
             messagePlain: ConfirmAdHocBkgMsg(emailTo),
             destination: emailTo
+        );
+#endif
+        sendConfirmMsg = false;
+    }
+    private void SendCCEmailConfirmation()
+    {
+        string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+#if !DEBUG
+        // Using TNZ
+        var apiUser = new TNZApiUser()  // this should come from configuration injection
+            {
+                AuthToken = configuration["TNZ:AuthToken"]
+            };
+        var client = new TNZApiClient(apiUser);
+
+        var reponseEmail = client.Messaging.Email.SendMessage(
+            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+            emailSubject: subjectMsg,
+            messagePlain: ConfirmBkgMsg(),
+            destination: configuration["TNZ:CCemail"]
+        );
+#endif
+        sendConfirmMsg = false;
+    }
+    private void SendCCEmailDeleteConfirmation(string subjectMsg, string DeleteMsg)
+    {
+        // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, DeleteMsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        // " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED");
+#if !DEBUG
+        // Using TNZ
+        var apiUser = new TNZApiUser()  // this should come from configuration injection
+            {
+                AuthToken = configuration["TNZ:AuthToken"]
+            };
+        var client = new TNZApiClient(apiUser);
+
+        var reponseEmail = client.Messaging.Email.SendMessage(
+            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+            emailSubject: subjectMsg,
+            messagePlain: subjectMsg,
+            destination: configuration["TNZ:CCemail"]
         );
 #endif
         sendConfirmMsg = false;
