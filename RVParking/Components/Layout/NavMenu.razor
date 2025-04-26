@@ -31,7 +31,8 @@
                 <span class="bi bi-book-nav-menu" aria-hidden="true"></span> Bookings
             </NavLink>
         </div> *@
-
+        <AuthorizeView>
+            <NotAuthorized>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="things">
                 <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Things to Know
@@ -53,12 +54,17 @@
                 <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
             </NavLink>
         </div> *@
+        </NotAuthorized>
 
-        <AuthorizeView>
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="mybookings">
                         <span class="bi bi-book-nav-menu" aria-hidden="true"></span> My Bookings 
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="availability">
+                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Availability
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
@@ -97,11 +103,11 @@
                         </button>
                     </form>
                 </div>
-                <div class="nav-item px-3">
+@*                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="availability">
                         <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Availability 
                     </NavLink>
-                </div>
+                </div> *@
 
             </Authorized>
         </AuthorizeView>
@@ -137,7 +143,7 @@
 
     </nav>
 
-    <div style="font-size: 0.6em; color: aliceblue; text-align:center;"><br /><br />ver: 1.0.33 2025-04-12</div>
+    <div style="font-size: 0.6em; color: aliceblue; text-align:center;"><br /><br />ver: 1.0.34 2025-04-26</div>
 </div>
 
 @code {
