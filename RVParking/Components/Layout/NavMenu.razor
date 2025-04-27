@@ -25,14 +25,6 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-
-        @*         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="booking">
-                <span class="bi bi-book-nav-menu" aria-hidden="true"></span> Bookings
-            </NavLink>
-        </div> *@
-        <AuthorizeView>
-            <NotAuthorized>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="things">
                 <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Things to Know
@@ -45,16 +37,14 @@
             </NavLink>
         </div>
         @*         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="smsus">
-                <span class="bi bi-envelope-nav-menu" aria-hidden="true"></span> SMS Us
+            <NavLink class="nav-link" href="booking">
+                <span class="bi bi-book-nav-menu" aria-hidden="true"></span> Bookings
             </NavLink>
         </div> *@
-        @*         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="auth">
-                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
-            </NavLink>
-        </div> *@
-        </NotAuthorized>
+        <AuthorizeView>
+            <NotAuthorized>
+
+            </NotAuthorized>
 
             <Authorized>
                 <div class="nav-item px-3">
@@ -143,7 +133,7 @@
 
     </nav>
 
-    <div style="font-size: 0.6em; color: aliceblue; text-align:center;"><br /><br />ver: 1.0.34 2025-04-26</div>
+    <div style="font-size: 0.6em; color: aliceblue; text-align:center;"><br /><br />ver: 1.0.35 2025-04-28</div>
 </div>
 
 @code {

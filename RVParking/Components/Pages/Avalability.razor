@@ -63,10 +63,11 @@
 
 <div class="calendar-grid">
     <div class="calendar-header">
-        @foreach (var day in culture.DateTimeFormat.AbbreviatedDayNames)
-        {
-            <div class="calendar-day-header">@day</div>
-        }
+        @* set for monday start of week, else for Sunday us (var day in culture.DateTimeFormat.AbbreviatedDayNames) below *@
+       @foreach (var day in culture.DateTimeFormat.AbbreviatedDayNames.Skip(1).Concat(culture.DateTimeFormat.AbbreviatedDayNames.Take(1)))
+       {
+           <div class="calendar-day-header">@day</div>
+       }
     </div>
 
     <div class="calendar-body">
@@ -120,11 +121,11 @@
     private async Task  GenerateCalendar()
     {
         calendarDays.Clear();
-        //if() when select is deselcted the property ID is still the l;ast valus does mot go to 0
+        //if() when select is deselcted the property ID is still the last valus does mot go to 0
         var monthStart = new DateTime(CurrentMonth.Year, CurrentMonth.Month, 1);
         var monthEnd = monthStart.AddMonths(1).AddDays(-1);
-        var startDate = monthStart.AddDays(-(int)monthStart.DayOfWeek);
-        var endDate = monthEnd.AddDays(6 - (int)monthEnd.DayOfWeek);
+        var startDate = monthStart.AddDays(-((int)monthStart.DayOfWeek) + 1);
+        var endDate = monthEnd.AddDays(7 - (int)monthEnd.DayOfWeek); // 7 for mon start else 6 for Sun
         var todaydte = DateTime.Now.Date;
         availabilities = new List<Bkg_Availability>();
         if (propertyID > 0)
@@ -132,7 +133,7 @@
             await GetAvailability(monthStart, monthEnd);
             for (var date = startDate; date <= endDate; date = date.AddDays(1))
             {
-                var daystatus = availabilities.FirstOrDefault(a => a.DateAvailable.Date == date.Date)?.Available == true ? "Available" : "NOT Available";
+                var daystatus = availabilities.FirstOrDefault(a => a.DateAvailable.Date == date.Date)?.Available == true ? "Available" : "N/A";
                 if (date.Month != CurrentMonth.Month) daystatus = ""; 
                 if (date < todaydte) daystatus = "";
                 calendarDays.Add(new DayEntry
@@ -194,11 +195,18 @@
     private string GetStatusCss(string daystatus, DateTime date)
     {
         if (date.Month != CurrentMonth.Month) return "other-month";
-        return selectedDay.Status switch
+        // return selectedDay.Status switch
+        // {
+        //     "Available" => "status-available",
+        //     "Busy" => "status-busy",
+        //     "NOT Available" => "status-unavailable",
+        //     _ => ""
+        // };
+        return daystatus switch
         {
             "Available" => "status-available",
             "Busy" => "status-busy",
-            "NOT Available" => "status-unavailable",
+            "N/A" => "status-unavailable",
             _ => ""
         };
     }
@@ -273,7 +281,7 @@
     }
 
     .calendar-day {
-        min-height: 100px;
+        min-height: 40px;
         padding: 5px;
         background-color: white;
         position: relative;
@@ -303,7 +311,7 @@
     }
 
     .status-unavailable {
-        background-color: #f8d7da;
+        background-color: coral;
     }
 
     .day-detail-modal {
