@@ -76,6 +76,7 @@ else
                                 <th>Property</th>
                                 <th>Arrival</th>
                                 <th>Departure</th>
+                                <th>Nights</th>
                                 <th>Status</th>
                                 <th>Comments</th>
                             </tr>
@@ -87,6 +88,7 @@ else
                                     <td>@booking.Bkg_Property.Name</td>
                                     <td>@booking.DateArrive.ToShortDateString()</td>
                                     <td>@booking.DateDepart.ToShortDateString()</td>
+                                    <td>@booking.Nights</td>
                                     <td>@booking.BookingStatus</td>
                                     <td>@booking.BookingComments</td>
                                 </tr>
@@ -135,7 +137,15 @@ else
     protected override async Task OnInitializedAsync()
     {
         // Load all users
-        users = await ApplicationDbContext.bkg_Users.ToListAsync();
+        // users = await ApplicationDbContext.bkg_Users.ToListAsync();
+
+        // Load Users with order by Usernames
+        users = await ApplicationDbContext.bkg_Users
+           .OrderBy(u => u.UserFirstName)
+           .ThenBy(u => u.UserLastName)
+           .ThenBy(u => u.UserName)
+           .ToListAsync();
+            
     }
 
 
