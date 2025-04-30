@@ -6,6 +6,10 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using RVParking.Data
+@using RVParking.Components.Account
+
+@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore
 
 
 @inject UserManager<ApplicationUser> UserManager
@@ -62,6 +66,7 @@
 
 @code {
     private IEnumerable<IdentityError>? identityErrors;
+    private bool isBkg_User = false;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
@@ -109,21 +114,46 @@
         if (!result.Succeeded)
         {
             identityErrors = result.Errors;
-            return;
+            return; // error is annuciated following this line
         }
         // Populate the Bkg_User object and save it.
-        var bkg_User = new Bkg_User
+        // First see if there is a Bkg_User for this email
+        var bkg_User = await ApplicationDbContext.bkg_Users.FirstOrDefaultAsync(u => u.UserEmail == user.Email);
+        if (bkg_User != null)
         {
-            UserEmail = user.Email,
-            UserName = user.Email,
-            AppUserId = user.Id
-        };
-
+            // If a Bkg_User already exists, update it
+            isBkg_User = true;
+            bkg_User.UserName = user.Email;
+            bkg_User.AppUserId = user.Id;
+            ApplicationDbContext.bkg_Users.Update(bkg_User);
+        }
+        else
+        {
+            // If no Bkg_User exists, create a new one
+            bkg_User = new Bkg_User
+                {
+                    UserEmail = user.Email,
+                    UserName = user.Email,
+                    AppUserId = user.Id
+                };
+        }
+ 
         // Save bkg_User to the database
-        await ApplicationDbContext.bkg_Users.AddAsync(bkg_User);
+        if (isBkg_User)
+        {
+            // If the user already exists, update the existing record
+            ApplicationDbContext.bkg_Users.Update(bkg_User);
+        }
+        else
+        {
+            // If the user does not exist, add a new record
+            bkg_User.CreatedDte = DateTime.Now;
+            await ApplicationDbContext.bkg_Users.AddAsync(bkg_User);
+        }
+
         await ApplicationDbContext.SaveChangesAsync();
 
-        Logger.LogInformation("User created a new account with password.");
+        Logger.LogInformation("User created or updated new Add account and password.");
 
         var userId = await UserManager.GetUserIdAsync(user);
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
