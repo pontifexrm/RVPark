@@ -121,11 +121,21 @@
         var bkg_User = await ApplicationDbContext.bkg_Users.FirstOrDefaultAsync(u => u.UserEmail == user.Email);
         if (bkg_User != null)
         {
-            // If a Bkg_User already exists, update it
+            // If a Bkg_User already exists, update it Also should update the AppUSer with data from the Bkg_User, names, phone, address, NZMCA etc.
             isBkg_User = true;
             bkg_User.UserName = user.Email;
             bkg_User.AppUserId = user.Id;
-            ApplicationDbContext.bkg_Users.Update(bkg_User);
+            user.FirstNames = bkg_User.UserFirstName;
+            user.LastName = bkg_User.UserLastName;    
+            user.NZMCA = bkg_User.UserNZMCA;
+            user.City = bkg_User.UserCity;
+            user.Country = bkg_User.UserCountry;
+            user.UserAddress = bkg_User.UserAddress;
+            user.UserState = bkg_User.UserState;
+            user.UserZip = bkg_User.UserZip;
+
+            // ApplicationDbContext.bkg_Users.Update(bkg_User);
+            // ApplicationDbContext.Users.Update(user);
         }
         else
         {
@@ -143,6 +153,7 @@
         {
             // If the user already exists, update the existing record
             ApplicationDbContext.bkg_Users.Update(bkg_User);
+            ApplicationDbContext.Users.Update(user);
         }
         else
         {
