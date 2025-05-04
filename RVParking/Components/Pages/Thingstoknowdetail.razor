@@ -1,0 +1,102 @@
+﻿@page "/thingsdetail"
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Navigations
+
+@rendermode InteractiveServer
+
+<PageTitle>RV Park Things in Detail</PageTitle>
+<h3>RV Park Things to Know in Detail</h3>
+
+<SfAccordion Width="50%" ExpandMode="ExpandMode.Multiple">
+    <Syncfusion.Blazor.Navigations.AccordionItems>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+            </HeaderTemplate>
+            <ContentTemplate>
+            </ContentTemplate>
+            <HeaderTemplate>
+                <div class="container">
+                    <div class="content">
+                        <b>Location</b>: In the northern suburbs of Wellington 10km from the ferry terminals
+                    </div>
+                </div
+            </HeaderTemplate>
+            <ContentTemplate>
+                <div class="container">
+                    @* <img src='https://ej2.syncfusion.com/angular/demos/assets/treegrid/images/MargaretPeacock.png' /> *@
+                    <div class='content'>
+                        <b>Location</b>: In the northern suburbs of Wellington to the east a few blocks from the northern motorway (SH1) 10km from the ferry terminals, 15mins Normal traffic 30mins Peak hour.
+                        Detailed maps are part of your booking confirmation messages sent via email and text.
+                    </div>
+                </div>
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <div>Laura Callahan</div>
+            </HeaderTemplate>
+            <ContentTemplate>
+                <div class='container'>
+                    <img src='https://ej2.syncfusion.com/angular/demos/assets/treegrid/images/LauraCallahan.png'/>
+                    <div class='content'><b>Laura Callahan</b> was born on Tuesday , 06 November 1990. Now lives at Edgeham Hollow Winchester Way, London,UK. Laura Callahan holds a position of <b>Sales Coordinator</b> in our WA department, (Seattle USA). Joined our company on Saturday , 01 May 2010.
+                    </div>
+                </div>
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <div>Margaret Peacock</div>
+            </HeaderTemplate>
+            <ContentTemplate>
+                <div class='container'>
+                    <img src='https://ej2.syncfusion.com/angular/demos/assets/treegrid/images/MargaretPeacock.png'/>
+                    <div class='content'> <b>Margaret Peacock</b> was born on Saturday , 01 December 1990. Now lives at Coventry House Miner Rd., London,UK. Margaret Peacock holds a position of <b>Sales Coordinator</b> in our WA department, (Seattle USA). Joined our company on Saturday , 01 May 2010.
+                    </div>
+                </div>
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <div>Robert King</div>
+            </HeaderTemplate>
+            <ContentTemplate>
+                <div class='container'>
+                    <img src='https://ej2.syncfusion.com/angular/demos/assets/treegrid/images/RobertKing.png'/>
+                    <div class='content'> <b>Robert King</b> was born on Saturday , 01 December 1990. Now lives at 1002 - 10th Ave. N.E., Seattle,USA. Robert King holds a position of <b>Sales Representative</b> in our WA department, (Seattle USA). Joined our company on Saturday , 01 May 2010.
+                    </div>
+                </div>
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <div>Andrew Fuller</div>
+            </HeaderTemplate>
+            <ContentTemplate>
+                <div class='container'>
+                    <img src='https://ej2.syncfusion.com/angular/demos/assets/treegrid/images/AndrewFuller.png'/>
+                    <div class='content'> <b>Albert Dodsworth</b> was born on Thursday , 19 October 1989. Now lives at 4726 - 11th Ave. N.E., Seattle,USA.Albert Dodsworth holds a position of <b>Sales Representative</b> in our WA department, (Seattle USA). Joined our company on Friday , 01 May 2009.
+                    </div>
+                </div>
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+    </Syncfusion.Blazor.Navigations.AccordionItems>
+</SfAccordion>
+
+<style>
+    img {
+        height: 55px;
+        width: 55px;
+        margin-top: 13px;
+    }
+     .container {
+        display: inline-flex;
+        width: auto;
+        padding: 0;
+    }
+    .content {
+        margin-left: 10px;
+    }
+</style>
+@code {
+
+}

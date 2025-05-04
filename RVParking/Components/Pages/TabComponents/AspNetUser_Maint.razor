@@ -34,10 +34,10 @@ else
         <table class="table" style="max-width: 60%;">
             <thead>
                 <tr>
-                    <th style="border: 1px solid #929292;">Id</th>
                     <th style="border: 1px solid #929292;">FirstNames</th>
                     <th style="border: 1px solid #929292;">LastName</th>
                     <th style="border: 1px solid #929292;">EmailConfirmed</th>
+                    <th style="border: 1px solid #929292;">Actions</th>
                     <th style="border: 1px solid #929292;">Created</th>
                     <th style="border: 1px solid #929292;">NZMCA</th>
                     <th style="border: 1px solid #929292;">UserAddress</th>
@@ -45,33 +45,44 @@ else
                     <th style="border: 1px solid #929292;">UserZip</th>
                     <th style="border: 1px solid #929292;">City</th>
                     <th style="border: 1px solid #929292;">Country</th>
-                    <th style="border: 1px solid #929292;">UserStatus</th>
-                    <th style="border: 1px solid #929292;">UserPassword</th>
+                    @* <th style="border: 1px solid #929292;">UserStatus</th> *@
+                    @* <th style="border: 1px solid #929292;">UserPassword</th> *@
                     <th style="border: 1px solid #929292;">UserName</th>
-                    <th style="border: 1px solid #929292;">NormalizedUserName</th>
+                    @* <th style="border: 1px solid #929292;">NormalizedUserName</th> *@
                     <th style="border: 1px solid #929292;">Email</th>
-                    <th style="border: 1px solid #929292;">NormalizedEmail</th>
-                    <th style="border: 1px solid #929292;">PasswordHash</th>
-                    <th style="border: 1px solid #929292;">SecurityStamp</th>
-                    <th style="border: 1px solid #929292;">ConcurrencyStamp</th>
+                    @* <th style="border: 1px solid #929292;">NormalizedEmail</th> *@
+                    @* <th style="border: 1px solid #929292;">PasswordHash</th> *@
+                    @* <th style="border: 1px solid #929292;">SecurityStamp</th> *@
+                    @* <th style="border: 1px solid #929292;">ConcurrencyStamp</th> *@
                     <th style="border: 1px solid #929292;">PhoneNumber</th>
-                    <th style="border: 1px solid #929292;">PhoneNumberConfirmed</th>
-                    <th style="border: 1px solid #929292;">TwoFactorEnabled</th>
-                    <th style="border: 1px solid #929292;">LockoutEnd</th>
-                    <th style="border: 1px solid #929292;">LockoutEnabled</th>
-                    <th style="border: 1px solid #929292;">AccessFailedCount</th>
+                    @* <th style="border: 1px solid #929292;">PhoneNumberConfirmed</th> *@
+                    @* <th style="border: 1px solid #929292;">TwoFactorEnabled</th> *@
+                    @* <th style="border: 1px solid #929292;">LockoutEnd</th> *@
+                    @* <th style="border: 1px solid #929292;">LockoutEnabled</th> *@
+                    @* <th style="border: 1px solid #929292;">AccessFailedCount</th> *@
                     <th style="border: 1px solid #929292;">EmailConfirmed</th>
-                    <th style="border: 1px solid #929292;">Actions</th>
+                    <th style="border: 1px solid #929292;">Id</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var user in users)
                 {
                     <tr>
-                        <td style="border: 1px solid #929292;">@user.Id</td>
                         <td style="border: 1px solid #929292;">@user.FirstNames</td>
                         <td style="border: 1px solid #929292;">@user.LastName</td>
                         <td style="border: 1px solid #929292;">@user.EmailConfirmed</td>
+                        <td style="border: 1px solid #929292;">
+                            <div class="tab-content" style="display:flex;flex-direction:row;">
+                                <button class="bi form-control" style="width: 40px; height: 32px;"
+                                        @onclick="() => EditUser(user)">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                                <button class="bi form-control" style="width: 40px; height: 32px;"
+                                        @onclick="() => RemoveUser(user)">
+                                    <i class="bi bi-trash3" style="block-size:max-content;"></i>
+                                </button>
+                            </div>
+                        </td>
                         <td style="border: 1px solid #929292;">@user.CreatedDte.ToShortDateString()</td>
                         <td style="border: 1px solid #929292;">@user.NZMCA</td>
                         <td style="border: 1px solid #929292;">@user.UserAddress</td>
@@ -79,34 +90,23 @@ else
                         <td style="border: 1px solid #929292;">@user.UserZip</td>
                         <td style="border: 1px solid #929292;">@user.City</td>
                         <td style="border: 1px solid #929292;">@user.Country</td>
-                        <td style="border: 1px solid #929292;">@user.UserStatus</td>
-                        <td style="border: 1px solid #929292;">@user.UserPassword</td>
+                        @* <td style="border: 1px solid #929292;">@user.UserStatus</td> *@
+                        @* <td style="border: 1px solid #929292;">@user.UserPassword</td> *@
                         <td style="border: 1px solid #929292;">@user.UserName</td>
-                        <td style="border: 1px solid #929292;">@user.NormalizedUserName</td>
+                        @* <td style="border: 1px solid #929292;">@user.NormalizedUserName</td> *@
                         <td style="border: 1px solid #929292;">@user.Email</td>
-                        <td style="border: 1px solid #929292;">@user.NormalizedEmail</td>
-                        <td style="border: 1px solid #929292;">@user.PasswordHash</td>
-                        <td style="border: 1px solid #929292;">@user.SecurityStamp</td>
-                        <td style="border: 1px solid #929292;">@user.ConcurrencyStamp</td>
+                        @* <td style="border: 1px solid #929292;">@user.NormalizedEmail</td> *@
+                        @* <td style="border: 1px solid #929292;">@user.PasswordHash</td> *@
+                        @* <td style="border: 1px solid #929292;">@user.SecurityStamp</td> *@
+                        @* <td style="border: 1px solid #929292;">@user.ConcurrencyStamp</td> *@
                         <td style="border: 1px solid #929292;">@user.PhoneNumber</td>
-                        <td style="border: 1px solid #929292;">@user.PhoneNumberConfirmed</td>
-                        <td style="border: 1px solid #929292;">@user.TwoFactorEnabled</td>
-                        <td style="border: 1px solid #929292;">@user.LockoutEnd</td>
-                        <td style="border: 1px solid #929292;">@user.LockoutEnabled</td>
-                        <td style="border: 1px solid #929292;">@user.AccessFailedCount</td>
+                        @* <td style="border: 1px solid #929292;">@user.PhoneNumberConfirmed</td> *@
+                        @* <td style="border: 1px solid #929292;">@user.TwoFactorEnabled</td> *@
+                        @* <td style="border: 1px solid #929292;">@user.LockoutEnd</td> *@
+                        @* <td style="border: 1px solid #929292;">@user.LockoutEnabled</td> *@
+                        @* <td style="border: 1px solid #929292;">@user.AccessFailedCount</td> *@
                         <td style="border: 1px solid #929292;">@user.EmailConfirmed</td>
-                        <td style="border: 1px solid #929292;">
-                            <div class="tab-content" style="display:flex;flex-direction:row;">
-                                <button class="bi form-control" style="width: 40px; height: 32px;"
-                                @onclick="() => EditUser(user)">
-                                    <i class="bi bi-pencil-fill"></i>
-                                </button>
-                                <button class="bi form-control" style="width: 40px; height: 32px;"
-                                @onclick="() => RemoveUser(user)">
-                                    <i class="bi bi-trash3" style="block-size:max-content;"></i>
-                                </button>
-                            </div>
-                        </td>
+                        <td style="border: 1px solid #929292;">@user.Id</td>
 
                     </tr>
                 }

@@ -48,6 +48,24 @@
                 <label for="Input.ConfirmPassword">Confirm Password</label>
                 <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
             </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.FirstName" id="Input.FirstName" class="form-control" autocomplete="firstname" aria-required="true" placeholder="firstnames" />
+                <label for="Input.FirstName">First Name</label>
+                <ValidationMessage For="() => Input.FirstName" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.LastName" id="Input.LastName" class="form-control" autocomplete="lastname" aria-required="true" placeholder="lastname" />
+                <label for="Input.LastName">Last Name</label>
+                <ValidationMessage For="() => Input.LastName" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Mobile" id="Input.Mobile" class="form-control" autocomplete="mobile" aria-required="true" placeholder="mobile" />
+                <label for="Input.Mobile">Mobile Phone Nmbr.</label>
+                <ValidationMessage For="() => Input.Mobile" class="text-danger" />
+            </div>
+
+
+
             <div class="text-body">   
                 Once you have registered and confirmed with the email link please use your Profile page to enter your other details.
             </div>
@@ -106,6 +124,11 @@
 
         var user = CreateUser();
         user.CreatedDte = DateTime.Now;
+        user.FirstNames = Input.FirstName;
+        user.LastName = Input.LastName;
+        // user.Mobile = Input.Mobile;
+        // user.Email = Input.Email;
+
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
         var emailStore = GetEmailStore();
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -144,7 +167,10 @@
                 {
                     UserEmail = user.Email,
                     UserName = user.Email,
-                    AppUserId = user.Id
+                    AppUserId = user.Id,
+                    UserFirstName = Input.FirstName,
+                    UserLastName = Input.LastName,
+                    UserPhone = Input.Mobile
                 };
         }
  
@@ -214,6 +240,20 @@
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; } = "";
+
+        [Required]
+        [Display(Name = "FirstName")]
+        public string FirstName { get; set; } = "";
+
+        [Required]
+        [Display(Name = "LastName")]
+        public string LastName { get; set; } = "";
+
+        [Required]
+        [RegularExpression(@"^\+?[1-9]\d{1,14}$", ErrorMessage = "The phone number is not valid.")]
+        [DataType(DataType.PhoneNumber)]
+        [Display(Name = "Mobile")]
+        public string Mobile { get; set; } = "";
 
         [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
