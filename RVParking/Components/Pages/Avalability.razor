@@ -125,8 +125,10 @@
         var monthStart = new DateTime(CurrentMonth.Year, CurrentMonth.Month, 1);
         var monthEnd = monthStart.AddMonths(1).AddDays(-1);
         var startDate = monthStart.AddDays(-((int)monthStart.DayOfWeek) + 1);
+        if (monthStart.DayOfWeek == DayOfWeek.Sunday) startDate = monthStart.AddDays(-6);
         var endDate = monthEnd.AddDays(7 - (int)monthEnd.DayOfWeek); // 7 for mon start else 6 for Sun
-        var todaydte = DateTime.Now.Date;
+        var todaydte = DateTime.Now.Date.AddDays(-1); // Show yesterdays status to allow self arrival earlier
+        //var todaydte = DateTime.Now.Date;
         availabilities = new List<Bkg_Availability>();
         if (propertyID > 0)
         {
