@@ -412,6 +412,8 @@
         orgnBkg.UserId = currentBooking.UserId;
         orgnBkg.BookingId = currentBooking.BookingId;
         orgnBkg.BookingComments = currentBooking.BookingComments;
+        orgnBkg.Paid = currentBooking.Paid;
+
 
         modalTitle = "Edit Booking";
         modalMessage = "";
@@ -455,7 +457,7 @@
             {
                 showModal = false;
                 modalMessage = "";
-                // Need to send a cc'd to rvpark@pontifex.nz
+                // Need to send a cc'd to rvpark@pontifex.nz For New Booking
                 SendCCEmailConfirmation();
 
             }
@@ -481,14 +483,44 @@
             {
                 showModal = false;
                 modalMessage = "";
-                // Need to send a cc'd to rvpark@pontifex.nz
-                SendCCEmailConfirmation();
+                string chngmsg = string.Empty;
+                if (currentBooking.DateArrive != orgnBkg.DateArrive)
+                {
+                    chngmsg = string.Concat("Arrival Date Changed from ", orgnBkg.DateArrive.ToString("d"), " to ", currentBooking.DateArrive.ToString("d"));
+                }   
+                if (currentBooking.DateDepart != orgnBkg.DateDepart)
+                {
+                    chngmsg = string.Concat(chngmsg, " Departure Date Changed from ", orgnBkg.DateDepart.ToString("d"), " to ", currentBooking.DateDepart.ToString("d"));
+                }
+                if (currentBooking.PropertyId != orgnBkg.PropertyId)
+                {
+                    chngmsg = string.Concat(chngmsg, " Property Changed from [", orgnBkg.Bkg_Property.Name, "] to [", currentBooking.Bkg_Property.Name,"]");
+                }
+                if (currentBooking.BookingStatus != orgnBkg.BookingStatus)
+                {
+                    chngmsg = string.Concat(chngmsg, " Status Changed from [", orgnBkg.BookingStatus, " to [", currentBooking.BookingStatus,"]");
+                }
+                if (currentBooking.BookingComments != orgnBkg.BookingComments)
+                {
+                    chngmsg = string.Concat(chngmsg, " Comments Changed from [", orgnBkg.BookingComments, "] to [", currentBooking.BookingComments, "]");
+                }
+                if (currentBooking.UserId != orgnBkg.UserId)
+                {
+                    chngmsg = string.Concat(chngmsg, " User Changed from [", orgnBkg.Bkg_User.UserName, "] to [", currentBooking.Bkg_User.UserName, "]");
+                }
+                if (currentBooking.Paid != orgnBkg.Paid)
+                {
+                    chngmsg = string.Concat(chngmsg, " Paid Changed from [", orgnBkg.Paid.ToString(), "] to [", currentBooking.Paid.ToString(), "]");
+                }
+
+                // Need to send a cc'd to rvpark@pontifex.nz  For Edit Booking showing Changes made if possible.
+                SendCCEmailConfirmation(chngmsg);
 
             }
 
         }
         await LoadBookings();
-       
+
     }
 
     private async Task DeleteBooking(int bookingId)
@@ -662,7 +694,7 @@
         // emailMessage.Subject = subjectMsg;
         // Using TNZ
 #if !DEBUG
-        
+
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
             {
                 AuthToken = configuration["TNZ:AuthToken"]
@@ -768,6 +800,31 @@
 #endif
         sendConfirmMsg = false;
     }
+    private void SendCCEmailConfirmation(string chngmsg)
+    {
+        string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " Changed! And Now is - BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        string CCMsg = string.Concat(subjectMsg, " Changes are:-", chngmsg);
+        CCMsg += "\r\n" + ConfirmBkgMsg();
+
+        // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, chngmsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+    #if !DEBUG
+        // Using TNZ
+        var apiUser = new TNZApiUser()  // this should come from configuration injection
+            {
+                AuthToken = configuration["TNZ:AuthToken"]
+            };
+        var client = new TNZApiClient(apiUser);
+        var reponseEmail = client.Messaging.Email.SendMessage(
+            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+            emailSubject: subjectMsg,
+            messagePlain: CCMsg,
+            destination: configuration["TNZ:CCemail"]
+        );
+    #endif
+        sendConfirmMsg = false;
+    }
+
     private void SendCCEmailDeleteConfirmation(string subjectMsg, string DeleteMsg)
     {
         // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, DeleteMsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
@@ -865,7 +922,7 @@
                  "https://www.rvpark.nz/directions click for map from the South \r\n" +
                  "https://www.rvpark.nz/directionsnorth click for map from the North \r\n" +
 
-                 "Access from Stewart Drive is also possible via Quiley St. Follow Quigley Street around until it T-intercects with Fitzpatrick St. Your park is then on the left of that interection.\r\n\r\n" +
+                 "Access from Stewart Drive is also possible via Quigley St. Follow Quigley Street around until it T-intersects with Fitzpatrick St. Your park is then on the left of that intersection.\r\n\r\n" +
                  "PLEASE BE AWARE: Some of the roads in Newlands are NOT suitable for RVs and larger vehicles SO DO NOT FOLLOW THE Map Apps THEY WILL GET YOU STUCK... Really We Are Not Kidding.\r\n\r\n" +
                  "Payment is $30 for the night with NZMCA Memebrship otherwise $45 per night, payable in advance please to our bank account.\r\n" +
                  "        Ronald Pontifex\r\n" +
@@ -912,7 +969,7 @@
                  "We are on the left corner of the 2nd street on the left going up Fitzpatrick St.\r\n\r\n" +
                  "https://www.rvpark.nz/directions click for map from the South \r\n" +
                  "https://www.rvpark.nz/directionsnorth click for map from the North \r\n" +
-                 "Access from Stewart Drive is also possible via Quiley St. Follow Quigley Street around until it T-intercects with Fitzpatrick St. Your park is then on the left of that interection.\r\n\r\n" +
+                 "Access from Stewart Drive is also possible via Quigley St. Follow Quigley Street around until it T-intersects with Fitzpatrick St. Your park is then on the left of that intersection.\r\n\r\n" +
                  "PLEASE BE AWARE: Some of the roads in Newlands are NOT suitable for RVs and larger vehicles SO DO NOT FOLLOW THE Map Apps THEY WILL GET YOU STUCK... Really We Are Not Kidding.\r\n\r\n" +
                  "Payment is $30 for the night with NZMCA Memebrship otherwise $45 per night, payable in advance please to our bank account.\r\n" +
                  "        Ronald Pontifex\r\n" +
