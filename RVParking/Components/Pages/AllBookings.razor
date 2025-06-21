@@ -846,6 +846,8 @@
 #endif
         sendConfirmMsg = false;
     }
+    // We perhaps need to put the bulk of this txt message into a page that can be referenced by the client from the sms msg as it is costly to send long messages via SMS.
+    // BUT putting that detail in a web page is not a good idea as it is not secure and anyone can read it. What todo??????
     private void SendTxtConfirmation(string txtrept)
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
