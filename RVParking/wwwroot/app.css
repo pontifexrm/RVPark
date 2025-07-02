@@ -135,9 +135,9 @@ a, a:visited {
 .card-list {
     display: flex;
     flex-wrap: wrap;
-    /*gap: 1em;*/
-/*    margin-left: 1em;
-    margin-right: 1em;*/
+    /*gap: 0.5em;*/
+    margin-left: 0.5em;
+    /*margin-right: 0.5em;*/
 }
 
 .card {
@@ -226,8 +226,8 @@ a.card * {
 /* Styles for screens with max width down to 1200px  1/.1583 = 6 across */
 @media screen and (min-width: 1200px) {
     .card {
-        flex: 0 0 calc(34% - 0.83em);
-        max-width: calc(34% - 0.83em);
+        flex: 0 0 calc(33% - 0.8em);
+        max-width: calc(33% - 0.8em);
     }
 }
 

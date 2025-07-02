@@ -51,7 +51,6 @@
         </div>
     </NotAuthorized>
 </AuthorizeView>
-
 <AuthorizeView>
     <Authorized>
         <!-- Search Bar -->
@@ -681,8 +680,19 @@
     private void SendTxtConfirmation()
     {
         // This is to the BkgUser and the bkg_User.phone is destination and F/L Names are From the currentBooking.Bkg_User.
+        // send a short text message if they have an email address otherwise the full more expensive one
         string txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
-        SendTxtConfirmation(txtrept);
+        string stmp = currentBooking.Bkg_User.UserEmail;
+        if (emailMessage.IsValidEmail(stmp))
+        {
+            // send a SHORT text message
+            SendTxtConfirmation(txtrept);
+        }
+        else
+        {
+            // send the FULL txt message as no email address
+            SendTxtConfirmationNoEmail(txtrept);
+        }
     }
     private void SendEmailConfirmation(string emailTo)
     {
@@ -747,7 +757,7 @@
         }
         else
         {
-            SendTxtAdhocConfirmation(adhocConfirm);
+            SendTxtAdhocConfirmation(adhocConfirm); // Send a txt message (abreviated) to the adhoc phone number.
         }
 
         adhocConfirm = string.Empty;
@@ -846,8 +856,6 @@
 #endif
         sendConfirmMsg = false;
     }
-    // We perhaps need to put the bulk of this txt message into a page that can be referenced by the client from the sms msg as it is costly to send long messages via SMS.
-    // BUT putting that detail in a web page is not a good idea as it is not secure and anyone can read it. What todo??????
     private void SendTxtConfirmation(string txtrept)
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
@@ -858,7 +866,7 @@
 
         // emailMessage.Subject = subjectMsg;
         // Using TNZ
-#if !DEBUG
+//#if !DEBUG
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
             {
                 AuthToken = configuration["TNZ:AuthToken"]
@@ -868,12 +876,12 @@
         var response = client.Messaging.SMS.SendMessage
             (
                 destination: txtrept,
-                messageText: ConfirmBkgMsg()
+                messageText: ConfirmTxtBkgMsg()
             );
-#endif
+//#endif
         sendConfirmMsg = false;
     }
-    private void SendTxtAdhocConfirmation(string txtrept)
+    private void SendTxtConfirmationNoEmail(string txtrept) // txtrept is a phone number in E.164 format and this message is FULL LENGTH expensive.
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
@@ -893,12 +901,37 @@
         var response = client.Messaging.SMS.SendMessage
             (
                 destination: txtrept,
-                messageText: ConfirmAdHocBkgMsg(txtrept)
+                messageText: ConfirmTxtNoEmailBkgMsg()
             );
 #endif
         sendConfirmMsg = false;
     }
-    private string ConfirmBkgMsg()  // Uses Bky_User Names
+    private void SendTxtAdhocConfirmation(string txtrept) // txtrept is a phone number in E.164 format and this message is SHORTER than normal to save service charges.
+    {
+        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+
+        // emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
+        //     "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentBooking.Bkg_User);
+
+        // emailMessage.Subject = subjectMsg;
+        // Using TNZ
+#if !DEBUG
+        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+            {
+                AuthToken = configuration["TNZ:AuthToken"]
+            };
+        var client = new TNZApiClient(apiUser);
+
+        var response = client.Messaging.SMS.SendMessage
+            (
+                destination: txtrept,
+                messageText: ConfirmTxtAdHocBkgMsg(txtrept)
+            );
+#endif
+        sendConfirmMsg = false;
+    }
+    private string ConfirmBkgMsg()  // Uses Bkg_User Names
     {
         StringBuilder sb = new StringBuilder();
         sb.Append("Kia ora ");
@@ -985,6 +1018,97 @@
                  "E - Mail : rvpark@pontifex.nz\r\n");
         return sb.ToString();
     }
+    private string ConfirmTxtBkgMsg()  // Uses Bkg_User Names  is a short message
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("Kia ora ");
+        //        sb.Append(currentUser.UserFirstName);
+        sb.Append(currentBooking.Bkg_User.UserFirstName);
+        sb.Append(" ");
+        //        sb.Append(currentUser.UserLastName);
+        sb.Append(currentBooking.Bkg_User.UserLastName);
+        sb.Append("\n\n");
+        sb.Append("Your booking has been confirmed for ");
+        sb.Append(currentBooking.Bkg_Property.Name);
+        sb.Append(" arriving after mid-day ");
+        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(" departing before mid-day ");
+        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append("\n\n");
+        sb.Append("Please refer to your Bkg confirmation Email for full Details.\r\n" +
+                 "from : rvpark@pontifex.nz\r\n");
+        return sb.ToString();
+    }
+    private string ConfirmTxtNoEmailBkgMsg()  // Uses Bgy_User Names
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("Kia ora ");
+        //        sb.Append(currentUser.UserFirstName);
+        sb.Append(currentBooking.Bkg_User.UserFirstName);
+        sb.Append(" ");
+        //        sb.Append(currentUser.UserLastName);
+        sb.Append(currentBooking.Bkg_User.UserLastName);
+        sb.Append("\n\n");
+        sb.Append("Your booking has been confirmed for ");
+        sb.Append(currentBooking.Bkg_Property.Name);
+        sb.Append(" arriving after mid-day ");
+        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(" departing before mid-day ");
+        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append("\n\n");
+        sb.Append("Address is\r\n" +
+                     "        22 Fitzpatrick St\r\n" +
+                     "        Newlands\r\n" +
+                     "        Wellington 6037\r\n\r\n" +
+                     "Access is best from Stewart Drive. Either from the north where you would exit SH1 at Johnsonville or from the South also through Johnsonville's main street. Turn into Fitzpatrick St from Stewart Drive is best. " +
+                     "We are on the left corner of the 2nd street on the left going up Fitzpatrick St.\r\n\r\n" +
+                     "https://www.rvpark.nz/directions click for map from the South \r\n" +
+                     "https://www.rvpark.nz/directionsnorth click for map from the North \r\n" +
+
+                     "Access from Stewart Drive is also possible via Quigley St. Follow Quigley Street around until it T-intersects with Fitzpatrick St. Your park is then on the left of that intersection.\r\n\r\n" +
+                     "PLEASE BE AWARE: Some of the roads in Newlands are NOT suitable for RVs and larger vehicles SO DO NOT FOLLOW THE Map Apps THEY WILL GET YOU STUCK... Really We Are Not Kidding.\r\n\r\n" +
+                     "Payment is $30 for the night with NZMCA Memebrship otherwise $45 per night, payable in advance please to our bank account.\r\n" +
+                     "        Ronald Pontifex\r\n" +
+                     "        03 0525 0253043 000\r\n" +
+                     "(We have Wise Card if that suits you better.)\r\n\r\n" +
+                     "Please text us on arrival and we shall come out to meets you etc.\r\n" +
+                     "Again many thanks\r\n" +
+                     "Ron Pontifex\r\n" +
+                     "WELLINGTON New Zealand\r\n" +
+                     "Ph 027 304 2002\r\n" +
+                     "E - Mail : rvpark@pontifex.nz\r\n");
+        return sb.ToString();
+    }
+    private string ConfirmTxtAdHocBkgMsg(string rept)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("cc'd to ");
+        sb.Append(currentUser.UserFirstName);
+        sb.Append(" ");
+        sb.Append(currentUser.UserLastName);
+        sb.Append(" ");
+        sb.Append(rept);
+        sb.Append("\n\n");
+
+        sb.Append("Kia ora ");
+        //        sb.Append(currentUser.UserFirstName);
+        sb.Append(currentBooking.Bkg_User.UserFirstName);
+        sb.Append(" ");
+        //        sb.Append(currentUser.UserLastName);
+        sb.Append(currentBooking.Bkg_User.UserLastName);
+        sb.Append("\n\n");
+        sb.Append("Your booking has been confirmed for ");
+        sb.Append(currentBooking.Bkg_Property.Name);
+        sb.Append(" arriving after mid-day ");
+        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(" departing before mid-day ");
+        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append("\n\n");
+        sb.Append("Please refer to your Bkg confirmation Email for full Details.\r\n" +
+                 "from : rvpark@pontifex.nz\r\n");
+        return sb.ToString();
+    }
+
     private string Chk_E_164_Phone(string phne)
     {
         string srtn = string.Empty;

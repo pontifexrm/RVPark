@@ -237,6 +237,7 @@ public class EmailMessage
     public bool IsValidEmail(string Email)
     {
         bool rtn = false;
+        if (Email == string.Empty || Email == null || Email == "") return false;
         try
         {
             MailAddress m = new MailAddress(Email);
