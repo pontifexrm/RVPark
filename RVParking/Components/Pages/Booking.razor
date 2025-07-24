@@ -1,25 +1,70 @@
 ﻿@page "/booking"
+@using Syncfusion.Blazor.Navigations
 @rendermode InteractiveServer
 
-<PageTitle>RV Park Bookings</PageTitle>
+<PageTitle>Info on RV Park and Apartment of Fitz.</PageTitle>
 
-<h1>For bookings :- </h1>
+<h1>RV Park and Apartment of Fitz. Available for Booking</h1>
 <p></p>
+<div class="d-flex align-items-start gap-3">
+    <dev class="card" style="max-width: 500px">
+        <div class="card-content" style="max-width: 100%; text-align: center;">
+
+            <img src="images/RVParkBlkAAb.png" alt="https://via.placeholder.com/100"  max-width="300px"; class="card-sm"/>
+            <br />            
+            <p>Our RV Park or POP site is available for NZMCA members as well as non-member. You can manage your bookings and check availablility through this website. Please <a href="./Account/Register">"Register"</a> to gain access. Or use <a href="./ContactUs">"Contact Us"</a> if you do not wish to.</p>
+        </div>
+    </dev>
+    <a class="carousel" style="max-width: 500px">
+        <Syncfusion.Blazor.Navigations.SfCarousel Width="500px" Height="100%" AnimationEffect="CarouselAnimationEffect.Fade" ShowIndicators="true" ShowArrows="true" AutoPlay="true" Interval="2000">
+            <Syncfusion.Blazor.Navigations.CarouselItem>
+                <img src="images/RVParkFitz01b.jpg" alt="https://via.placeholder.com/100" class="card-sm" />
+            </Syncfusion.Blazor.Navigations.CarouselItem>
+            <Syncfusion.Blazor.Navigations.CarouselItem>
+                <img src="images/IMG_6421b1.jpg" alt="https://via.placeholder.com/100" class="card-sm" />
+            </Syncfusion.Blazor.Navigations.CarouselItem>
+           @*  <Syncfusion.Blazor.Navigations.CarouselItem>
+                <img src="images/IMG_7363b.jpg" alt="https://via.placeholder.com/100" class="card-sm" />
+            </Syncfusion.Blazor.Navigations.CarouselItem>
+            <Syncfusion.Blazor.Navigations.CarouselItem>
+                <img src="images/IMG_7385b.jpg" alt="https://via.placeholder.com/100" class="card-sm" />
+            </Syncfusion.Blazor.Navigations.CarouselItem>
+            <Syncfusion.Blazor.Navigations.CarouselItem>
+                <img src="images/IMG_7386b.jpg" alt="https://via.placeholder.com/100" class="card-sm" />
+            </Syncfusion.Blazor.Navigations.CarouselItem> *@
+        </Syncfusion.Blazor.Navigations.SfCarousel>
+    </a>
+
+</div>
+
+<div class="d-flex align-items-start gap-3" style="margin-top: 10px;">
 <div class="card" style="max-width: 500px">
     <div class="card-sm" style="max-width: 500px; text-align: center;">
-
-        <img src="images/RVParkBlkAA.png" alt="https://via.placeholder.com/100"  max-width="300px"; class="card-sm"/>
-        <br />
-        <a href="./ContactUs">"Contact Us"</a>
-        <p>We manage bookings through this website. Once you have registered you can see Availablility and create your own bookings. Use the "Contact Us" feature if you do not wish to register.</p>
-    </div>
-</div>
-<div class="card" style="max-width: 500px">
-    <div class="card-sm" style="max-width: 500px; text-align: center;">
         <br />
 
-        <img src="images/NZMCALogoA.png" alt="https://via.placeholder.com/100" class="card-sm" />
-        <p>And if you are a NZMCA Member then please let us know so you get your discount. Again Register if you wish or use the<br /> <a href="./ContactUs">"Contact Us"</a> <br />page to arrange your booking with membership discount.</p>
+        <img src="images/NZMCALogoAb.png" alt="https://via.placeholder.com/100" class="card-sm" />
+            <p>Please let us know if you are a NZMCA Member so you get your discount. Our downstairs apartment is available Park your RV up and rest inside.<br/> </p>
     </div>
 </div>
+    <a class="carousel" style="max-width: 500px">
+        <Syncfusion.Blazor.Navigations.SfCarousel Width="500px" Height="100%" AnimationEffect="CarouselAnimationEffect.Fade" ShowArrows="true" AutoPlay="true" Interval="2000">
+            <Syncfusion.Blazor.Navigations.CarouselItem>
+                <img src="images/IMG_7360b.jpg" alt="https://via.placeholder.com/100" class="card-sm" />
+            </Syncfusion.Blazor.Navigations.CarouselItem>
+            <Syncfusion.Blazor.Navigations.CarouselItem>
+                <img src="images/IMG_7361b.jpg" alt="https://via.placeholder.com/100" class="card-sm" />
+            </Syncfusion.Blazor.Navigations.CarouselItem>
+            <Syncfusion.Blazor.Navigations.CarouselItem>
+                <img src="images/IMG_7363b.jpg" alt="https://via.placeholder.com/100" class="card-sm" />
+            </Syncfusion.Blazor.Navigations.CarouselItem>
+            <Syncfusion.Blazor.Navigations.CarouselItem>
+                <img src="images/IMG_7385b.jpg" alt="https://via.placeholder.com/100" class="card-sm" />
+            </Syncfusion.Blazor.Navigations.CarouselItem>
+            <Syncfusion.Blazor.Navigations.CarouselItem>
+                <img src="images/IMG_7386b.jpg" alt="https://via.placeholder.com/100" class="card-sm" />
+            </Syncfusion.Blazor.Navigations.CarouselItem>
+        </Syncfusion.Blazor.Navigations.SfCarousel>
+    </a>
+</div>
+
 
