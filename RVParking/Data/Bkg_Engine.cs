@@ -75,7 +75,7 @@ namespace RVParking.Data
                     // for each Bkg_availability record that is part of the current booking
                     // set the availability to true and the status to "Available" and Stats to string.Empty
                     var dte = currentBooking.DateArrive;
-                    while (dte <= currentBooking.DateArrive)
+                    while (dte <= currentBooking.DateDepart)
                     {
 #pragma warning disable CS8604 // Possible null reference argument.
                         var avail = _context.bkg_Availabilities

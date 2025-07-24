@@ -133,6 +133,12 @@ a, a:visited {
 /* Cards to display individual products */
 
 .card-list {
+    @media screen and (min-width: 1200px) {
+        .card {
+            flex: 0 0 calc(17% - 0.8em);
+            max-width: calc(17% - 0.8em);
+        }
+    }
     display: flex;
     flex-wrap: wrap;
     /*gap: 0.5em;*/

@@ -23,9 +23,6 @@
 
 @* Is Being Used *@
 
-@inject UserManager<ApplicationUser> UserManager
-@inject IUserStore<ApplicationUser> UserStore
-@inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityUserAccessor UserAccessor
 
 @inject IEmailSender<ApplicationUser> EmailSender
@@ -35,7 +32,15 @@
 @inject ApplicationDbContext ApplicationDbContext
 
 @inject IConfiguration configuration
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IEmailSender<ApplicationUser> EmailSender
+
+<AuthorizeView>
+    <Authorized>
 
 
 <h3 style="color:darkolivegreen;">Availability - See what dates are available.</h3>
@@ -95,6 +100,13 @@
         </div>
     </div>
 }
+
+    </Authorized>
+    <NotAuthorized>
+        <h4>- You are NOT AUTHORIZED -</h4>
+    </NotAuthorized>
+</AuthorizeView>
+
 
 @code {
 
@@ -179,8 +191,15 @@
         //     bool isAvailable = searchIsAvail == "Yes";
         //     query = query.Where(a => a.Available == isAvailable);
         // }
-
-        availabilities = await query.AsNoTracking().ToListAsync();   // Simulate getting availability status
+        try{
+            
+                availabilities = await query.AsNoTracking().ToListAsync();
+        }
+            catch (Exception ex)
+        {
+           // Console.WriteLine($"Error ordering availability: {ex.Message}");
+        }
+        //availabilities = await query.AsNoTracking().ToListAsync();   // Simulate getting availability status
         // return GetRandomStatus();
     }
     private string GetStatusCss(DateTime date)
