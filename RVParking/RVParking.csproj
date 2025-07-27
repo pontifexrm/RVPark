@@ -50,6 +50,7 @@
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0-preview.2.efcore.9.0.0" />
     <PackageReference Include="Syncfusion.Blazor.Calendars" Version="28.2.4" />
     <PackageReference Include="Syncfusion.Blazor.Navigations" Version="28.2.4" />
+    <PackageReference Include="Syncfusion.Blazor.SplitButtons" Version="28.2.4" />
     <PackageReference Include="Syncfusion.Blazor.Themes" Version="28.2.4" />
     <PackageReference Include="TNZAPI.NET" Version="2.4.1.3" />
   </ItemGroup>

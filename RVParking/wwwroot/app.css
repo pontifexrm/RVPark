@@ -246,8 +246,12 @@ a.card * {
 
 .card-content, .card-footer {
     padding: 0.5em;
+    padding-bottom: 0em;
 }
-
+.card-detail {
+    margin-left: 0.5em;
+    padding: unset
+}
     .card-content h1, .card-content h2 {
         margin-top: 0;
     }

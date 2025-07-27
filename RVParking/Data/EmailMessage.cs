@@ -28,14 +28,14 @@ public class EmailMessage
     [Required, Phone]
     public string Phone { get; set; } = string.Empty;
 
-    [Required, MinLength(3), MaxLength(128)]
+   // [Required, MinLength(3), MaxLength(128)]
     public string FirstName { get; set; } = string.Empty;
 
     [Required, MinLength(3), MaxLength(128)]
     public string Name { get; set; } = string.Empty;
 
 
-    [Required, MinLength(3), MaxLength(128)]
+   // [Required, MinLength(3), MaxLength(128)]
     public string LastName { get; set; } = string.Empty;
     
     [Required, MinLength(4), MaxLength(80)]
