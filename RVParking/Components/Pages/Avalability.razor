@@ -13,6 +13,7 @@
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
+@using System.Security.Claims
 @using TNZAPI.NET;
 @using TNZAPI.NET.Core;
 @using TNZAPI.NET.Api.Addressbook.Contact.Dto;
@@ -109,7 +110,6 @@
 
 
 @code {
-
     private string BkgType = "RVPark On Fitz";
     private Bkg_Booking currentBooking = new();
     private List<Bkg_Property> BkgProperties = new List<Bkg_Property>();
@@ -121,12 +121,20 @@
     private DayEntry selectedDay = new();
     private readonly CultureInfo culture = CultureInfo.CurrentCulture;
     private int propertyID = 1; // should be id of first in loaded properties
+
+    private bool isAdmin = false;
+
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        isAdmin = user.IsInRole("Admin");
+
 
         BkgProperties = await ApplicationDbContext.bkg_Properties.ToListAsync();
         //  await LoadBookings();
-        GenerateCalendar();
+        await GenerateCalendar();
 
     }
 
@@ -139,7 +147,12 @@
         var startDate = monthStart.AddDays(-((int)monthStart.DayOfWeek) + 1);
         if (monthStart.DayOfWeek == DayOfWeek.Sunday) startDate = monthStart.AddDays(-6);
         var endDate = monthEnd.AddDays(7 - (int)monthEnd.DayOfWeek); // 7 for mon start else 6 for Sun
-        var todaydte = DateTime.Now.Date.AddDays(-1); // Show yesterdays status to allow self arrival earlier
+        var todaydte = DateTime.Now.Date.AddDays(-1); // Show yesterdays status to allow self arrival earlier 
+        // If an Admin User then allow display from the first day of the month.
+        if(isAdmin)
+        {
+            todaydte = monthStart;
+        }
         //var todaydte = DateTime.Now.Date;
         availabilities = new List<Bkg_Availability>();
         if (propertyID > 0)
@@ -147,15 +160,28 @@
             await GetAvailability(monthStart, monthEnd);
             for (var date = startDate; date <= endDate; date = date.AddDays(1))
             {
-                var daystatus = availabilities.FirstOrDefault(a => a.DateAvailable.Date == date.Date)?.Available == true ? "Available" : "N/A";
+                var availability = availabilities.FirstOrDefault(a => a.DateAvailable.Date == date.Date);
+                string daystatus;
+                if (availability == null)
+                {
+                    daystatus = "N/A";
+                }
+                else if (availability.Available)
+                {
+                    daystatus = "Available";
+                }
+                else
+                {
+                    daystatus = "Booked";
+                }
                 if (date.Month != CurrentMonth.Month) daystatus = ""; 
                 if (date < todaydte) daystatus = "";
                 calendarDays.Add(new DayEntry
-                    {
-                        Date = date,
-                        Status = daystatus,
-                        StatusCss = GetStatusCss(daystatus, date)
-                    });
+                {
+                    Date = date,
+                    Status = daystatus,
+                    StatusCss = GetStatusCss(daystatus, date)
+                });
             }
         }
         StateHasChanged();
@@ -208,7 +234,7 @@
         return selectedDay.Status switch
         {
             "Available" => "status-available",
-            "Busy" => "status-busy",
+            "Booked" => "status-busy",
             "Unavailable" => "status-unavailable",
             _ => ""
         };
@@ -226,7 +252,7 @@
         return daystatus switch
         {
             "Available" => "status-available",
-            "Busy" => "status-busy",
+            "Booked" => "status-busy",
             "N/A" => "status-unavailable",
             _ => ""
         };
@@ -239,7 +265,7 @@
     }
     private void propertyChanged()
     {
-        GenerateCalendar();
+         GenerateCalendar();
     }
     private void PreviousMonth()
     {
