@@ -311,7 +311,8 @@
     {
         if (!_isDataLoaded)
         {
-            BkgPropertiesAvail = await ApplicationDbContext.bkg_Properties.AsNoTracking().ToListAsync();
+            DbSet<Bkg_Property> bkg_Properties = ApplicationDbContext.bkg_Properties;
+            BkgPropertiesAvail = await bkg_Properties.AsNoTracking().ToListAsync();
             BkgType = "1";
             await LoadAvailabilities();
             _isDataLoaded = true;
@@ -376,10 +377,11 @@
     {
         if (toDelete == "YES")
         {
-            var recordsToDelete = ApplicationDbContext.bkg_Availabilities
-                .Where(a => a.Bkg_PropertyId == int.Parse(BkgType) && a.DateAvailable >= Fmdate && a.DateAvailable <= Todate);
+            DbSet<Bkg_Availability>? bkg_Availabilities = ApplicationDbContext.bkg_Availabilities;
+            var recordsToDelete = bkg_Availabilities
+            .Where(a => a.Bkg_PropertyId == int.Parse(BkgType) && a.DateAvailable >= Fmdate && a.DateAvailable <= Todate);
 
-            ApplicationDbContext.bkg_Availabilities.RemoveRange(recordsToDelete);
+            bkg_Availabilities.RemoveRange(recordsToDelete);
         }
         else
         {
@@ -387,8 +389,9 @@
             DateTime? dteTo = Todate != null ? Todate : DateTime.Now.Date;
             while (dte <= dteTo)
             {
-                var existingRecord = ApplicationDbContext.bkg_Availabilities
-                    .FirstOrDefault(a => a.Bkg_PropertyId == int.Parse(BkgType) && a.DateAvailable == dte);
+                DbSet<Bkg_Availability> bkg_Availabilities = ApplicationDbContext.bkg_Availabilities;
+                var existingRecord = bkg_Availabilities
+                .FirstOrDefault(a => a.Bkg_PropertyId == int.Parse(BkgType) && a.DateAvailable == dte);
 
                 if (existingRecord != null)
                 {
@@ -406,7 +409,8 @@
                                 Available = isAvail == "Yes",
                                 AvailabilityStatus = status
                             };
-                        ApplicationDbContext.bkg_Availabilities.Add(newRecord);
+                        DbSet<Bkg_Availability> bkg_Availabilities1 = ApplicationDbContext.bkg_Availabilities;
+                        bkg_Availabilities1.Add(newRecord);
                     }
                 }
                 dte = dte?.AddDays(1);
@@ -434,14 +438,14 @@
         await ApplicationDbContext.SaveChangesAsync();
         await LoadAvailabilities();
     }
-    private void ClearSearchAvailability()
+    private async Task ClearSearchAvailability()
     {
         searchPropertyId = null;
         searchFromDate = null;
         searchToDate = null;
         searchStatus = string.Empty;
         searchIsAvail = string.Empty;
-        SearchAvailability();
+        await SearchAvailability();
     }
     private void OpenBlkChngModal()
     {
@@ -457,7 +461,16 @@
     // edit and delete availability records form table
     private void EditAvailability(Bkg_Availability availability)
     {
-        currbkg_Availability = availability;
+        // Create a new instance to avoid tracking issues
+        currbkg_Availability = new Bkg_Availability
+        {
+            AvailabilityId = availability.AvailabilityId,
+            Bkg_PropertyId = availability.Bkg_PropertyId,
+            DateAvailable = availability.DateAvailable,
+            Available = availability.Available,
+            AvailabilityStatus = availability.AvailabilityStatus,
+            // Copy other properties as needed
+        };
         isEditing = true;
         isNew = false;
     }
@@ -466,16 +479,21 @@
     {
         if (currbkg_Availability != null)
         {
+            // Make sure navigation property is null to avoid tracking issues
+            currbkg_Availability.Bkg_Property = null;
             if (isNew)
             {
-                ApplicationDbContext.bkg_Availabilities.Add(currbkg_Availability);
+                ApplicationDbContext.bkg_Availabilities?.Add(currbkg_Availability);
             }
             else
             {
-                ApplicationDbContext.bkg_Availabilities.Update(currbkg_Availability);
+                //ApplicationDbContext.bkg_Availabilities?.Update(currbkg_Availability);
+                // Attach and mark as modified to avoid tracking issues
+                ApplicationDbContext.Attach(currbkg_Availability);
+                ApplicationDbContext.Entry(currbkg_Availability).State = EntityState.Modified;
             }
             await ApplicationDbContext.SaveChangesAsync();
-            LoadAvailabilities();
+            await LoadAvailabilities();
             isEditing = false;
         }
     }
