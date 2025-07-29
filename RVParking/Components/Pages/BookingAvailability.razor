@@ -433,9 +433,31 @@
     }
     private async Task DeleteBkgAvailability(Bkg_Availability availability)
     {
-        // Implement the logic to delete the availability record
-        ApplicationDbContext.bkg_Availabilities?.Remove(availability);
-        await ApplicationDbContext.SaveChangesAsync();
+        // Create a new instance to avoid tracking issues
+        currbkg_Availability = new Bkg_Availability
+        {
+            AvailabilityId = availability.AvailabilityId,
+            Bkg_PropertyId = availability.Bkg_PropertyId,
+            DateAvailable = availability.DateAvailable,
+            Available = availability.Available,
+            AvailabilityStatus = availability.AvailabilityStatus,
+            // Copy other properties as needed
+        };
+        // Use the injected ServiceProvider to create a scope
+        using var scope = ServiceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+        var freshDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        if (currbkg_Availability != null)
+        {   // Make sure navigation property is null to avoid tracking issues  
+            currbkg_Availability.Bkg_Property = null;
+            // Attach and mark as deleted to avoid tracking issues  
+            freshDbContext.Attach(currbkg_Availability);
+            freshDbContext.Entry(currbkg_Availability).State = EntityState.Deleted;
+        }
+        await freshDbContext.SaveChangesAsync();
+
+        // // Implement the logic to delete the availability record
+        // ApplicationDbContext.bkg_Availabilities?.Remove(availability);
+        // await ApplicationDbContext.SaveChangesAsync();
         await LoadAvailabilities();
     }
     private async Task ClearSearchAvailability()
