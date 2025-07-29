@@ -132,19 +132,29 @@ a, a:visited {
 
 /* Cards to display individual products */
 
-.card-list {
-    @media screen and (min-width: 1200px) {
-        .card {
-            flex: 0 0 calc(17% - 0.8em);
-            max-width: calc(17% - 0.8em);
-        }
+
+@media screen and (min-width: 1200px) {
+    .card {
+        flex: 0 0 calc(17% - 0.8em);
+        max-width: calc(17% - 0.8em);
     }
+}
+/*@media screen and (min-width: 1200px) {
+    .card-list {
+        flex: 0 0 calc(17% - 0.8em);
+        max-width: calc(17% - 0.8em);
+    }
+}*/
+.card-list {
     display: flex;
     flex-wrap: wrap;
+    flex: 0 0 calc(95% - 0.8em);
+    max-width: calc(95% - 0.8em);
     /*gap: 0.5em;*/
     margin-left: 0.5em;
     /*margin-right: 0.5em;*/
 }
+
 
 .card {
     flex: 1 1 100%;
@@ -221,6 +231,7 @@ a.card * {
     }
 }
 
+
 /* Styles for screens with max width from 1200 down to of 768px 1/.25 ~= 4 across */
 @media screen and (min-width: 992px) {
     .card {
@@ -236,6 +247,7 @@ a.card * {
         max-width: calc(33% - 0.8em);
     }
 }
+
 
 
 .card-img {
