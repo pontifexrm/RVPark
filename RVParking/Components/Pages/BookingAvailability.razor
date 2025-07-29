@@ -29,7 +29,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 @inject ApplicationDbContext ApplicationDbContext
-
+@inject IServiceProvider ServiceProvider
 @inject IConfiguration configuration
 
 <AuthorizeView>
@@ -477,26 +477,31 @@
 
     private async Task SaveAvailability()
     {
+        // Use the injected ServiceProvider to create a scope
+        using var scope = ServiceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+        var freshDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         if (currbkg_Availability != null)
         {
-            // Make sure navigation property is null to avoid tracking issues
+            // Make sure navigation property is null to avoid tracking issues  
             currbkg_Availability.Bkg_Property = null;
             if (isNew)
             {
-                ApplicationDbContext.bkg_Availabilities?.Add(currbkg_Availability);
+                freshDbContext.bkg_Availabilities?.Add(currbkg_Availability);
             }
             else
             {
-                //ApplicationDbContext.bkg_Availabilities?.Update(currbkg_Availability);
-                // Attach and mark as modified to avoid tracking issues
-                ApplicationDbContext.Attach(currbkg_Availability);
-                ApplicationDbContext.Entry(currbkg_Availability).State = EntityState.Modified;
+                // Attach and mark as modified to avoid tracking issues  
+                freshDbContext.Attach(currbkg_Availability);
+                freshDbContext.Entry(currbkg_Availability).State = EntityState.Modified;
             }
-            await ApplicationDbContext.SaveChangesAsync();
+            await freshDbContext.SaveChangesAsync();
             await LoadAvailabilities();
             isEditing = false;
         }
     }
+  
+
+
 
     // private async Task DeleteEditAvailability(Bkg_Availability currbkg_Availability)
     // {
