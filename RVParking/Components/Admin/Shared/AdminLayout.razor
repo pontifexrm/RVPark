@@ -1,0 +1,17 @@
+@inherits LayoutComponentBase
+@layout RVParking.Components.Layout.MainLayout
+
+<h1>Admin Panel</h1>
+
+<div>
+    <h2>Manage administrative tasks</h2>
+    <hr />
+    <div class="row">
+        <div class="col-lg-2">
+            <AdminNavMenu />
+        </div>
+        <div class="col-lg-10">
+            @Body
+        </div>
+    </div>
+</div>

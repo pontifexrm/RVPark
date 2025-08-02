@@ -1,5 +1,6 @@
 ﻿@using Syncfusion.Blazor.Navigations
 @using Syncfusion.Blazor.SplitButtons
+@using Syncfusion.Blazor.Buttons    
 @implements IDisposable
 
 @inject NavigationManager NavigationManager 
@@ -127,6 +128,13 @@
                         <span class="bi bi-person-circle-nav-menu" aria-hidden="true"></span> User Bookings
                     </NavLink>
                 </div>
+                <SfDropDownButton Content="Admin Tools">
+                    <DropDownMenuItems>
+                        <DropDownMenuItem Text="Bkg User Admin" Url="/bkg_user_admin" />
+                        <DropDownMenuItem Text="AppUser Admin" Url="/aspnetuser_admin" />
+                    </DropDownMenuItems>
+                </SfDropDownButton>
+            
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="bkg_user_admin">
                         <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span> Bkg User Admin
@@ -166,6 +174,67 @@
                         <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>User to Role Admin
                     </NavLink>
                 </div>
+          @*       <ul class="nav flex-column">
+                    <!-- Top-level item -->
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="/">Home</NavLink>
+                    </li>
+
+                    <!-- First dropdown section -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle"
+                           href="#"
+                           id="section1"
+                           role="button"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            Admin Tasks
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="section1">
+                            <li>
+                                <NavLink class="dropdown-item" href="/bkg_user_admin">Bkg User Admin</NavLink>
+                            </li>
+                            <li>
+                                <NavLink class="dropdown-item" href="/aspnetuser_admin">AppUser Admin</NavLink>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Section with nested dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle"
+                           href="#"
+                           id="section2"
+                           role="button"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            Section 2
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="section2">
+                            <li>
+                                <NavLink class="dropdown-item" href="/sub3">Subpage 3</NavLink>
+                            </li>
+                            <!-- Nested submenu -->
+                            <li class="dropdown-submenu">
+                                <a class="dropdown-item dropdown-toggle" href="#">More…</a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <NavLink class="dropdown-item" href="/sub3a">Sub-subpage A</NavLink>
+                                    </li>
+                                    <li>
+                                        <NavLink class="dropdown-item" href="/sub3b">Sub-subpage B</NavLink>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul> *@
+
+
+
+
+
+
             </Authorized>
         </AuthorizeView>
 

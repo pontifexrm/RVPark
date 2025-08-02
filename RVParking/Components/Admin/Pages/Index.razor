@@ -1,0 +1,13 @@
+﻿@page "/Admin"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Identity
+@using RVParking.Components.Account
+@using RVParking.Data
+
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityUserAccessor UserAccessor
+@inject IdentityRedirectManager RedirectManager
+@inject ApplicationDbContext ApplicationDbContext
+@* @inject Bkg_UserService Bkg_UserService  *@
