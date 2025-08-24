@@ -1,0 +1,156 @@
+﻿@page "/Admin/asprole_admin"
+@rendermode InteractiveServer
+
+
+<h3>AppRole_Admin</h3>
+
+
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.EntityFrameworkCore
+@using RVParking.Data
+
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject NavigationManager NavigationManager
+@inject ApplicationDbContext ApplicationDbContext
+@* @inject Bkg_UserService Bkg_UserService
+ *@
+<div class="tab-content" style="max-width: 80%; display: flex; justify-content: space-between; align-items: center;">
+    <div><h3>AspNetRoles Maintenance</h3></div>
+    <div>
+        <button class="btn btn-primary" @onclick="AddRole">
+            @*       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2" />
+            </svg> *@
+            Add Role
+        </button>
+    </div>
+</div>
+<table class="table" style="max-width: 80%;">
+    <thead>
+        <tr>
+            <th style="border: 1px solid #929292; width: 80%;">Role Name</th>
+            <th style="border: 1px solid #929292;">Actions</th>
+        </tr>
+    </thead>
+
+    @if (roles == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <tbody>
+            @foreach (var role in roles)
+            {
+                <tr>
+                    <td style="border: 1px solid #929292; width: 70%;">@role.Name</td>
+                    <td style="border: 1px solid #929292; display:flex;flex-direction:row;">
+                        <button class="bi form-control" style="width: 40px; height: 32px;" @onclick="() => EditRole(role)">
+                            @*                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"  viewBox="0 0 16 16">
+                        <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
+                         </svg> *@
+                            <i class="bi bi-pencil-fill"></i>
+                        </button>
+
+                        <button class="bi form-control" style="width: 40px; height: 32px;" @onclick="() => DeleteRole(role)">
+                            @*                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"  viewBox="0 0 16 16">
+                               <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                               </svg> *@
+                            <i class="bi bi-trash3" style="block-size:max-content;"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    }
+
+</table>
+@if (roles == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    @if (isEditing)
+    {
+        <div>
+            <input @bind="currentRole.Name" placeholder="Role Name" />
+            <button @onclick="SaveRole">Save</button>
+            <button @onclick="CancelEdit">Cancel</button>
+        </div>
+    }
+}
+
+@code {
+    private List<IdentityRole> roles;
+    private IdentityRole currentRole;
+    private bool isEditing = false;
+    private bool isNew = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        roles = await ApplicationDbContext.Roles
+                                .Select(r => new IdentityRole { Id = r.Id, Name = r.Name, NormalizedName = r.NormalizedName, ConcurrencyStamp = r.ConcurrencyStamp })
+                                .ToListAsync();
+
+        //roles = await ApplicationDbContext.Roles.ToListAsync();
+    }
+
+    private void AddRole()
+    {
+        currentRole = new IdentityRole();
+        isEditing = true;
+        isNew = true;
+    }
+
+    private void EditRole(IdentityRole role)
+    {
+        currentRole = role;
+        isEditing = true;
+        isNew = false;
+    }
+
+    private async Task SaveRole()
+    {
+        //    if (string.IsNullOrWhiteSpace(currentRole.Id))
+        // need to make sure Role.NormalizedName is correct
+        if (currentRole.NormalizedName == null && currentRole.Name != null)
+        {
+            currentRole.NormalizedName = currentRole.Name.ToUpper();
+        }
+
+        if (isNew)
+        {
+            ApplicationDbContext.Roles.Add(currentRole);
+        }
+        else
+        {
+            ApplicationDbContext.Roles.Update(currentRole);
+        }
+
+        await ApplicationDbContext.SaveChangesAsync();
+        roles = await ApplicationDbContext.Roles.ToListAsync();
+        isEditing = false;
+    }
+
+    private void CancelEdit()
+    {
+        currentRole = null;
+        isEditing = false;
+    }
+
+    private async Task DeleteRole(IdentityRole role)
+    {
+        ApplicationDbContext.Roles.Remove(role);
+        await ApplicationDbContext.SaveChangesAsync();
+        roles = await ApplicationDbContext.Roles.ToListAsync();
+    }
+}

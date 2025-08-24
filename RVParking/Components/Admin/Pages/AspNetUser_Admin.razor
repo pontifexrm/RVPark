@@ -1,0 +1,367 @@
+﻿@page "/Admin/aspnetuser_admin"
+@rendermode InteractiveServer
+<PageTitle>RV Park AspNetUser_Admin</PageTitle>
+
+
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.EntityFrameworkCore
+@using RVParking.Data
+
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject NavigationManager NavigationManager
+@inject ApplicationDbContext ApplicationDbContext
+
+@* <h3>Application (LoggedIn) User Admin</h3> *@
+@* <h3>Application (LoggedIn) User Maint</h3> *@
+
+<div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+            <h4>Application (LoggedIn) User Admin</h4>
+    </div>        
+    
+
+</div>
+@if (users == null)  // Availability table
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table" style="max-width: 60%;">
+            <thead>
+                <tr>
+                    <th style="border: 1px solid #929292;">FirstNames</th>
+                    <th style="border: 1px solid #929292;">LastName</th>
+                    <th style="border: 1px solid #929292;">EmailConfirmed</th>
+                    <th style="border: 1px solid #929292;">Actions</th>
+                    <th style="border: 1px solid #929292;">Created</th>
+                    <th style="border: 1px solid #929292;">NZMCA</th>
+                    <th style="border: 1px solid #929292;">UserAddress</th>
+                    <th style="border: 1px solid #929292;">UserState</th>
+                    <th style="border: 1px solid #929292;">UserZip</th>
+                    <th style="border: 1px solid #929292;">City</th>
+                    <th style="border: 1px solid #929292;">Country</th>
+                    @* <th style="border: 1px solid #929292;">UserStatus</th> *@
+                    @* <th style="border: 1px solid #929292;">UserPassword</th> *@
+                    <th style="border: 1px solid #929292;">UserName</th>
+                    @* <th style="border: 1px solid #929292;">NormalizedUserName</th> *@
+                    <th style="border: 1px solid #929292;">Email</th>
+                    @* <th style="border: 1px solid #929292;">NormalizedEmail</th> *@
+                    @* <th style="border: 1px solid #929292;">PasswordHash</th> *@
+                    @* <th style="border: 1px solid #929292;">SecurityStamp</th> *@
+                    @* <th style="border: 1px solid #929292;">ConcurrencyStamp</th> *@
+                    <th style="border: 1px solid #929292;">PhoneNumber</th>
+                    @* <th style="border: 1px solid #929292;">PhoneNumberConfirmed</th> *@
+                    @* <th style="border: 1px solid #929292;">TwoFactorEnabled</th> *@
+                    @* <th style="border: 1px solid #929292;">LockoutEnd</th> *@
+                    @* <th style="border: 1px solid #929292;">LockoutEnabled</th> *@
+                    @* <th style="border: 1px solid #929292;">AccessFailedCount</th> *@
+                    <th style="border: 1px solid #929292;">EmailConfirmed</th>
+                    <th style="border: 1px solid #929292;">Id</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in users)
+                {
+                    <tr>
+                        <td style="border: 1px solid #929292;">@user.FirstNames</td>
+                        <td style="border: 1px solid #929292;">@user.LastName</td>
+                        <td style="border: 1px solid #929292;">@user.EmailConfirmed</td>
+                        <td style="border: 1px solid #929292;">
+                            <div class="tab-content" style="display:flex;flex-direction:row;">
+                                <button class="bi form-control" style="width: 40px; height: 32px;"
+                                        @onclick="() => EditUser(user)">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                                <button class="bi form-control" style="width: 40px; height: 32px;"
+                                        @onclick="() => RemoveUser(user)">
+                                    <i class="bi bi-trash3" style="block-size:max-content;"></i>
+                                </button>
+                            </div>
+                        </td>
+                        <td style="border: 1px solid #929292;">@user.CreatedDte.ToShortDateString()</td>
+                        <td style="border: 1px solid #929292;">@user.NZMCA</td>
+                        <td style="border: 1px solid #929292;">@user.UserAddress</td>
+                        <td style="border: 1px solid #929292;">@user.UserState</td>
+                        <td style="border: 1px solid #929292;">@user.UserZip</td>
+                        <td style="border: 1px solid #929292;">@user.City</td>
+                        <td style="border: 1px solid #929292;">@user.Country</td>
+                        @* <td style="border: 1px solid #929292;">@user.UserStatus</td> *@
+                        @* <td style="border: 1px solid #929292;">@user.UserPassword</td> *@
+                        <td style="border: 1px solid #929292;">@user.UserName</td>
+                        @* <td style="border: 1px solid #929292;">@user.NormalizedUserName</td> *@
+                        <td style="border: 1px solid #929292;">@user.Email</td>
+                        @* <td style="border: 1px solid #929292;">@user.NormalizedEmail</td> *@
+                        @* <td style="border: 1px solid #929292;">@user.PasswordHash</td> *@
+                        @* <td style="border: 1px solid #929292;">@user.SecurityStamp</td> *@
+                        @* <td style="border: 1px solid #929292;">@user.ConcurrencyStamp</td> *@
+                        <td style="border: 1px solid #929292;">@user.PhoneNumber</td>
+                        @* <td style="border: 1px solid #929292;">@user.PhoneNumberConfirmed</td> *@
+                        @* <td style="border: 1px solid #929292;">@user.TwoFactorEnabled</td> *@
+                        @* <td style="border: 1px solid #929292;">@user.LockoutEnd</td> *@
+                        @* <td style="border: 1px solid #929292;">@user.LockoutEnabled</td> *@
+                        @* <td style="border: 1px solid #929292;">@user.AccessFailedCount</td> *@
+                        <td style="border: 1px solid #929292;">@user.EmailConfirmed</td>
+                        <td style="border: 1px solid #929292;">@user.Id</td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (isEditing)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Availability</h5>
+                    <button type="button" class="btn-close" @onclick="CancelEdit"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="currentUser" OnValidSubmit="SaveUser">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <InputText id="city" class="form-control" @bind-Value="currentUser.City" />
+                        </div>
+                        <div class="form-group">
+                            <label for="country">Country</label>
+                            <InputText id="country" class="form-control" @bind-Value="currentUser.Country" />
+                        </div>
+                        <div class="form-group">
+                            <label for="firstNames">First Names</label>
+                            <InputText id="firstNames" class="form-control" @bind-Value="currentUser.FirstNames" />
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <InputText id="lastName" class="form-control" @bind-Value="currentUser.LastName" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userAddress">User Address</label>
+                            <InputText id="userAddress" class="form-control" @bind-Value="currentUser.UserAddress" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userState">User State</label>
+                            <InputText id="userState" class="form-control" @bind-Value="currentUser.UserState" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userZip">User Zip</label>
+                            <InputText id="userZip" class="form-control" @bind-Value="currentUser.UserZip" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userStatus">User Status</label>
+                            <InputText id="userStatus" class="form-control" @bind-Value="currentUser.UserStatus" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userPassword">User Password</label>
+                            <InputText id="userPassword" class="form-control" @bind-Value="currentUser.UserPassword" />
+                        </div>
+                        <div class="form-group">
+                            <label for="nzmca">NZMCA</label>
+                            <InputText id="nzmca" class="form-control" @bind-Value="currentUser.NZMCA" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <InputText id="email" class="form-control" @bind-Value="currentUser.Email" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="NormalizedEmail">NormalizedEmail</label>
+                            <InputText id="NormalizedEmail" class="form-control" @bind-Value="currentUser.NormalizedEmail" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="username">UserName</label>
+                            <InputText id="username" class="form-control" @bind-Value="currentUser.UserName" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="NormalizedUserName">NormalizedUserName</label>
+                            <InputText id="NormalizedUserName" class="form-control" @bind-Value="currentUser.NormalizedUserName" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="emailconfirmed">EmailConfirmed</label>
+                            <InputCheckbox id="emailconfirmed" class="bi form-check-inline" @bind-Value="currentUser.EmailConfirmed" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="passwordhash">PasswordHash</label>
+                            <InputText id="passwordhash" class="form-control" @bind-Value="currentUser.PasswordHash" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="securitystamp">SecurityStamp</label>
+                            <InputText id="securitystamp" class="form-control" @bind-Value="currentUser.SecurityStamp" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="concurrencystamp">ConcurrencyStamp</label>
+                            <InputText id="concurrencystamp" class="form-control" @bind-Value="currentUser.ConcurrencyStamp" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phonenumber">PhoneNumber</label>
+                            <InputText id="phonenumber" class="form-control" @bind-Value="currentUser.PhoneNumber" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phonenumberconfirmed">PhoneNumberConfirmed</label>
+                            <InputCheckbox id="phonenumberconfirmed" class="bi form-check-inline" @bind-Value="currentUser.PhoneNumberConfirmed" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="twofactorenabled">TwoFactorEnabled</label>
+                            <InputCheckbox id="twofactorenabled" class="bi form-check-inline" @bind-Value="currentUser.TwoFactorEnabled" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lockoutend">LockoutEnd</label>
+                            <InputDate id="lockoutend" class="form-control" @bind-Value="currentUser.LockoutEnd" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lockoutenabled">LockoutEnabled</label>
+                            <InputCheckbox id="lockoutenabled" class="bi form-check-inline" @bind-Value="currentUser.LockoutEnabled" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="accessfailedcount">AccessFailedCount</label>
+                            <InputNumber id="accessfailedcount" class="form-control" @bind-Value="currentUser.AccessFailedCount" />
+                        </div>
+
+
+
+
+
+
+
+
+
+
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<!-- Modal Dialog for Error Messages -->
+@if (showErrorModal)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Issue when trying to REMOVE this User</h5>
+                    <button type="button" class="btn-close" @onclick="CloseErrorModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>@errorMessage</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseErrorModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ApplicationUser> users = new List<ApplicationUser>();
+    private ApplicationUser? currentUser = new ApplicationUser();
+
+    private bool isEditing = false;
+    private bool showErrorModal = false;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await ApplicationDbContext.Users.ToListAsync();
+    }
+
+    private async Task EditUser(IdentityUser user)
+    {
+        currentUser = await UserManager.FindByIdAsync(user.Id);
+        isEditing = true;
+    }
+    private async Task RemoveUser(IdentityUser user)
+    {
+        currentUser = await UserManager.FindByIdAsync(user.Id);
+        if (currentUser != null)
+        {
+            var userRoles = await UserManager.GetRolesAsync(currentUser);
+            if (userRoles.Count > 0)
+            {
+                // tell the user NOT to do this until the user is removed from all the roles
+                errorMessage = $"User {currentUser.UserName} is assigned to one or more roles. Please remove the user from all roles before deleting.";
+                showErrorModal = true;
+            }
+            else
+            {
+                var result = await UserManager.DeleteAsync(currentUser);
+                if (result.Succeeded)
+                {
+                    users.Remove(currentUser);
+                    await ApplicationDbContext.SaveChangesAsync();
+                    users = await ApplicationDbContext.Users.ToListAsync();
+                }
+                else
+                {
+                    // Handle error
+                }
+            }
+        }
+        StateHasChanged();
+    }
+
+    private async Task SaveUser()
+    {
+        try
+        {
+            var result = await UserManager.UpdateAsync(currentUser);
+            if (result.Succeeded)
+            {
+                await ApplicationDbContext.SaveChangesAsync();
+            }
+            else
+            {
+                // Handle error
+            }
+
+        }
+        catch (Exception e) { }
+
+        users = await ApplicationDbContext.Users.ToListAsync();
+        isEditing = false;
+        StateHasChanged();
+    }
+
+    private void CancelEdit()
+    {
+        isEditing = false;
+    }
+
+    private void CloseErrorModal()
+    {
+        showErrorModal = false;
+    }
+}
