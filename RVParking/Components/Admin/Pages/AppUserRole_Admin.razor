@@ -24,100 +24,119 @@
 
 
 <h3>User - Roles Maintenance</h3>
-
-@if (users == null || roles == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th  style ="border: 1px solid #929292; width: 40%;">User Name (Login)</th>
-                <th style="border: 1px solid #929292; width: 30%;">Roles</th>
-                <th style="border: 1px solid #929292; width: 20%; max-width: 80px">Edit/Delete</th>
-                <th style="border: 1px solid #929292; width: 20%; max-width: 40px">Add</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in users)
-            {
-                <tr>
-                    <td style="border: 1px solid #929292;">@user.UserName</td>
-                    <td style="border: 1px solid #929292;">
-                        @foreach (var role in userRoles[user.Id])
-                        {
-                            <span>@role</span> <br />
-                        }  
-                    </td>
-                    <td style="border: 1px solid #929292;">
-                        @foreach (var role in userRoles[user.Id])
-                        {
-                            <div class="tab-content" style="display:flex;flex-direction:row;">
-                                <button class="bi form-control" style="width: 40px; height: 32px;" @onclick="() => EditUserRoles(user)">
-                                    @* <i class="bi btn-pen" style="color: white; background: green; block-size:max-content;"></i> *@
-                                    <i class="bi bi-pencil-fill"></i>
-@*                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"  viewBox="0 0 16 16">
-                                        <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
-                                    </svg>  *@
-                                </button>
-                                <button class="bi form-control" style="width: 40px; height: 32px;"  @onclick ="() => RemoveUserRole(user.Id, role)">
-@*                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"  viewBox="0 0 16 16">
-                                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-                                    </svg> *@
-                                    <i class="bi bi-trash3" style="block-size:max-content;"></i> 
-                                     @* <i class="bi bi-trash3-nav-menu" style="block-size:max-content;"></i> *@
-                                </button>
-                                <br />
-                            </div>
-                        }
-                    </td>
-                    <td style="border: 1px solid #929292;">
-                        <button class="bi form-control" style="width: 40px; height: 32px;" @onclick="() => AddUserRole(user.Id)">
-@*                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2" />
-                            </svg> *@
-                            <i class="bi bi-plus-lg"></i>
-                        </button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-    <br />
-
-    @if (isEditing)
-    {
-        <EditForm Model="currentUserRole" OnValidSubmit="SaveUserRole">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
-
+<AuthorizeView Roles="Admin" Context="authContext">
+    <NotAuthorized> 
+        <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
             <div>
-                <label>User</label>
-                <InputSelect @bind-Value="currentUserRole.UserId">
+                <h4>- You are NOT AUTHORIZED -</h4>
+            </div>
+        </div>
+    </NotAuthorized>
+    <Authorized>
+	<!--  -->
+        @if (users == null || roles == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th  style ="border: 1px solid #929292; width: 40%;">User Name (Login)</th>
+                        <th style="border: 1px solid #929292; width: 30%;">Roles</th>
+                        <th style="border: 1px solid #929292; width: 20%; max-width: 80px">Edit/Delete</th>
+                        <th style="border: 1px solid #929292; width: 20%; max-width: 40px">Add</th>
+                    </tr>
+                </thead>
+                <tbody>
                     @foreach (var user in users)
                     {
-                        <option value="@user.Id">@user.UserName</option>
+                        <tr>
+                            <td style="border: 1px solid #929292;">@user.UserName</td>
+                            <td style="border: 1px solid #929292;">
+                                @foreach (var role in userRoles[user.Id])
+                                {
+                                    <span>@role</span> <br />
+                                }  
+                            </td>
+                            <td style="border: 1px solid #929292;">
+                                @foreach (var role in userRoles[user.Id])
+                                {
+                                    <div class="tab-content" style="display:flex;flex-direction:row;">
+                                        <button class="bi form-control" style="width: 40px; height: 32px;" @onclick="() => EditUserRoles(user)">
+                                            @* <i class="bi btn-pen" style="color: white; background: green; block-size:max-content;"></i> *@
+                                            <i class="bi bi-pencil-fill"></i>
+        @*                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"  viewBox="0 0 16 16">
+                                                <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
+                                            </svg>  *@
+                                        </button>
+                                        <button class="bi form-control" style="width: 40px; height: 32px;"  @onclick ="() => RemoveUserRole(user.Id, role)">
+        @*                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"  viewBox="0 0 16 16">
+                                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                                            </svg> *@
+                                            <i class="bi bi-trash3" style="block-size:max-content;"></i> 
+                                             @* <i class="bi bi-trash3-nav-menu" style="block-size:max-content;"></i> *@
+                                        </button>
+                                        <br />
+                                    </div>
+                                }
+                            </td>
+                            <td style="border: 1px solid #929292;">
+                                <button class="bi form-control" style="width: 40px; height: 32px;" @onclick="() => AddUserRole(user.Id)">
+        @*                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2" />
+                                    </svg> *@
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                            </td>
+                        </tr>
                     }
-                </InputSelect>
-            </div>
+                </tbody>
+            </table>
+            <br />
 
-            <div>
-                <label>Role</label>
-                <InputSelect @bind-Value="currentUserRole.RoleId">
-                    @foreach (var role in roles)
-                    {
-                        <option value="@role.Id">@role.Name</option>
-                    }
-                </InputSelect>
-            </div>
+            @if (isEditing)
+            {
+                <EditForm Model="currentUserRole" OnValidSubmit="SaveUserRole">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
 
-            <button class="btn-primary" type="submit">Save</button> 
-            <button class="btn-warning" type="button" @onclick="CancelEdit">Cancel</button>
-        </EditForm>
-    }
-}
+                    <div>
+                        <label>User</label>
+                        <InputSelect @bind-Value="currentUserRole.UserId">
+                            @foreach (var user in users)
+                            {
+                                <option value="@user.Id">@user.UserName</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <div>
+                        <label>Role</label>
+                        <InputSelect @bind-Value="currentUserRole.RoleId">
+                            @foreach (var role in roles)
+                            {
+                                <option value="@role.Id">@role.Name</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <button class="btn-primary" type="submit">Save</button> 
+                    <button class="btn-warning" type="button" @onclick="CancelEdit">Cancel</button>
+                </EditForm>
+            }
+        }
+
+
+
+
+
+
+    </Authorized>
+</AuthorizeView>
+
+
 
 @code {
     private List<ApplicationUser> users;

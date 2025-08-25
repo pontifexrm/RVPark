@@ -34,7 +34,7 @@
 
 
 @inject IConfiguration configuration
-<AuthorizeView>
+<AuthorizeView Roles="Admin" Context="authContext">
     <Authorized>
         <!-- Page header with title and button to add a new Booking -->
         <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
@@ -54,7 +54,7 @@
         </div>
     </NotAuthorized>
 </AuthorizeView>
-<AuthorizeView>
+<AuthorizeView Roles="Admin">
     <Authorized>
         <!-- Search Bar -->
         <div class="search-bar" style="display:flex; flex-wrap: wrap; gap: 4px;">
@@ -88,7 +88,7 @@
         <br /> 
     </Authorized>
 </AuthorizeView>
-<AuthorizeView>
+<AuthorizeView Roles="Admin">
     <Authorized>
         <!-- Load Table of all open bookings Bookings -->
         @if (bookings == null)

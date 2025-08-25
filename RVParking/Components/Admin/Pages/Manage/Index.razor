@@ -16,19 +16,31 @@
 <PageTitle>Administration</PageTitle>
 
 <h3>Administration</h3>
-<StatusMessage />
-<section class="card-list product-list">
-    <a class="card">
-        <div class="card-content">
-            <img src="images/website-management-diagram.jpg" alt="https://via.placeholder.com/400" class="card-img" />
-            <h2 class="title">The sub menu allows <b>Admin Users</b> to manage this site.</h2>
-            <small>
-                Care MUST be taking when using these menu items. Data is not backed up before changes and NO EDITS can be undone once committed. Restoring the live system is a difficult task so be very very careful please.
-            </small>
-        </div>
-    </a>
 
-</section>
+<AuthorizeView Roles="Admin">
+    <NotAuthorized> 
+        <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h4>- You are NOT AUTHORIZED -</h4>
+            </div>
+        </div>
+    </NotAuthorized>
+    <Authorized>
+        <section class="card-list product-list">
+            <a class="card">
+                <div class="card-content">
+                    <img src="images/website-management-diagram.jpg" alt="https://via.placeholder.com/400" class="card-img" />
+                    <h2 class="title">The sub menu allows <b>Admin Users</b> to manage this site.</h2>
+                    <small>
+                        Care MUST be taking when using these menu items. Data is not backed up before changes and NO EDITS can be undone once committed. Restoring the live system is a difficult task so be very very careful please.
+                    </small>
+                </div>
+            </a>
+        </section>
+    </Authorized>
+
+</AuthorizeView>
+
 
 @* <div class="row">
     <div class="col-xl-6">
@@ -85,125 +97,14 @@
 </div>
  *@
 @code {
-    private ApplicationUser user = default!;
-    private Bkg_User? bkg_User = default!;
-    private string? username;
-    private string? phoneNumber;
-    private string? firstnames;
-    private string? lastName;
-    private string? nzmca;
-    private string? address;
-    private string? zip;
-    private string? city;
-    private string? country;
+
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
-    [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-        username = await UserManager.GetUserNameAsync(user);
-        phoneNumber = await UserManager.GetPhoneNumberAsync(user);
-        bkg_User = await ApplicationDbContext.GetBkgUserByAppUserIdAsync(user.Id);
-
-        firstnames = user.FirstNames;
-        lastName = user.LastName;
-        city = user.City;
-        country = user.Country;
-        nzmca = bkg_User?.UserNZMCA;
-        address = bkg_User?.UserAddress;
-        zip = bkg_User?.UserZip;
-        
-        Input.PhoneNumber ??= phoneNumber;
-        Input.FirstNames ??= firstnames;
-        Input.LastName ??= lastName;
-        Input.NZMCA ??= nzmca;
-        Input.Address ??= address;
-        Input.Zip ??= zip;
-        Input.City ??= city;
-        Input.Country ??= country;
-
-        bkg_User = await ApplicationDbContext.GetBkgUserByAppUserIdAsync(user.Id);
-    }
-
-    private async Task OnValidSubmitAsync()
-    {
-        if (Input.PhoneNumber != phoneNumber)
-        {
-            var setPhoneResult = await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-            if (!setPhoneResult.Succeeded)
-            {
-                RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone number.", HttpContext);
-                return;
-            }
-        }
-        user.FirstNames = Input.FirstNames;
-        user.LastName = Input.LastName;
-        user.NZMCA = Input.NZMCA;
-        user.UserAddress = Input.Address;
-        user.UserZip = Input.Zip;  
-        user.City = Input.City;
-        user.Country = Input.Country;
-
-        var updateResult = await UserManager.UpdateAsync(user);
 
 
-        if (!updateResult.Succeeded)
-        {
-            RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to update profile.", HttpContext);
-            return;
-        }
+   
 
-        if (bkg_User != null)
-        {
-            bkg_User.UserFirstName = user.FirstNames;
-            bkg_User.UserLastName = user.LastName;
-            bkg_User.UserAddress = user.UserAddress;
-            bkg_User.UserZip = user.UserZip;
-            bkg_User.UserCity = user.City;
-            bkg_User.UserCountry = user.Country;
-            bkg_User.UserPhone = user.PhoneNumber;
-            bkg_User.UserNZMCA = user.NZMCA;
 
-            // Save bkg_User to the database  
-            await ApplicationDbContext.SaveChangesAsync();
-
-        }
-
-        await SignInManager.RefreshSignInAsync(user);
-        RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
-    }
-
-    private sealed class InputModel
-    {
-        [Phone]
-        [Display(Name = "Phone number")]
-        public string? PhoneNumber { get; set; }
-
-        //[FirstNames]
-        [Display(Name = "First Names")]
-        public string? FirstNames { get; set; }
-
-        [Display(Name = "Last Name")]
-        public string? LastName { get; set; }
-
-        [Display(Name = "NZMCA")]
-        public string? NZMCA { get; set; }
-
-        [Display(Name = "Address")]
-        public string? Address { get; set; }
-        
-        [Display(Name = "Zip")]
-        public string? Zip { get; set; }
-
-        [Display(Name = "City")]
-        public string? City { get; set; }
-
-        [Display(Name = "Country")]
-        public string? Country { get; set; }
-    }
 }

@@ -1,54 +1,61 @@
-﻿<ul class="nav nav-pills flex-column">
-    <li class="nav-item" >
-        <NavLink class="nav-link" style="color: darkolivegreen;" href="admin/allbookings">
-            <span class="bi bi-book-nav-menu"  aria-hidden="true"></span> All Bookings
-        </NavLink>
-    </li>
+﻿@* <AuthorizeView Roles="Admin">
+    <NotAuthorized> 
+        <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h4>- You are NOT AUTHORIZED -</h4>
+            </div>
+        </div>
+    </NotAuthorized>
+    <Authorized>
+	<!--  --> *@
+        <ul class="nav nav-pills flex-column">
+            <li class="nav-item" >
+                <NavLink class="nav-link" style="color: darkolivegreen;" href="admin/allbookings">
+                    <span class="bi bi-book-nav-menu"  aria-hidden="true"></span> All Bookings
+                </NavLink>
+            </li>
 
-    <li class="nav-item">
-        <NavLink class="nav-link" style="color: darkolivegreen;" href="admin/bkg_user_admin">
-            <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span> Bkg User Admin
-        </NavLink>
-    </li>
-        <li class="nav-item">
-        <NavLink class="nav-link" style="color: darkolivegreen;" href="admin/aspnetuser_admin">
-            <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span>AppUser Admin
-        </NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" style="color: darkolivegreen;" href="admin/bookingavailability">
-            <span class="bi bi-book-nav-menu" aria-hidden="true"></span> Booking Avail_Mnt
-        </NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" style="color: darkolivegreen;" href="admin/bkgproperty_admin">
-            <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>Property Admin
-        </NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" style="color: darkolivegreen;" href="admin/asprole_admin">
-            <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>Role Admin
-        </NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" style="color: darkolivegreen;" href="admin/aspuserrole_admin">
-            <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>User to Role Admin
-        </NavLink>
-    </li>
+            <li class="nav-item">
+                <NavLink class="nav-link" style="color: darkolivegreen;" href="admin/bkg_user_admin">
+                    <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span> Bkg User Admin
+                </NavLink>
+            </li>
+                <li class="nav-item">
+                <NavLink class="nav-link" style="color: darkolivegreen;" href="admin/aspnetuser_admin">
+                    <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span>AppUser Admin
+                </NavLink>
+            </li>
+            <li class="nav-item">
+                <NavLink class="nav-link" style="color: darkolivegreen;" href="admin/bookingavailability">
+                    <span class="bi bi-book-nav-menu" aria-hidden="true"></span> Booking Avail_Mnt
+                </NavLink>
+            </li>
+            <li class="nav-item">
+                <NavLink class="nav-link" style="color: darkolivegreen;" href="admin/bkgproperty_admin">
+                    <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>Property Admin
+                </NavLink>
+            </li>
+            <li class="nav-item">
+                <NavLink class="nav-link" style="color: darkolivegreen;" href="admin/asprole_admin">
+                    <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>Role Admin
+                </NavLink>
+            </li>
+            <li class="nav-item">
+                <NavLink class="nav-link" style="color: darkolivegreen;" href="admin/aspuserrole_admin">
+                    <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>User to Role Admin
+                </NavLink>
+            </li>
+            </ul>
 
 
-@* 
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Admin/Dashboard" Match="NavLinkMatch.All">Dashboard</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Admin/Users">Users</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Admin/Settings">Settings</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Admin/Reports">Reports</NavLink>
-    </li> *@
-    <!-- Add more admin items as needed -->
-</ul>
+
+@*     </Authorized>
+</AuthorizeView> *@
+
+
+
+
+
+
+
+
