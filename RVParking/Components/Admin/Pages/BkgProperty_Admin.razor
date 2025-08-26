@@ -1,7 +1,7 @@
 ﻿@page "/Admin/bkgproperty_admin"
 @rendermode InteractiveServer
 
-<h3>BkgProperty_Admin</h3>
+
 @using System.ComponentModel.DataAnnotations
 @using System.Text
 @using System.Text.Encodings.Web
@@ -20,7 +20,6 @@
 @* @inject Bkg_UserService Bkg_UserService *@
 
 
-<h3>Property Maintenance</h3>
 <AuthorizeView Roles="Admin" Context="authContext">
     <NotAuthorized>
         <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
@@ -30,7 +29,8 @@
         </div>
     </NotAuthorized>
     <Authorized>
-        <!--  -->
+        <h3>Property Maintenance</h3>
+        <h4>BkgProperty_Admin</h4>
         @if (BkgProperties == null || BkgProperties.Count == 0)
         {
             <button class="btn btn-primary" @onclick="OpenAddModal">Add New Property</button>

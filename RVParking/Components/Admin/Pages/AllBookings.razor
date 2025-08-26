@@ -54,7 +54,7 @@
         </div>
     </NotAuthorized>
 </AuthorizeView>
-<AuthorizeView Roles="Admin">
+<AuthorizeView Roles="Admin" Context="authContext">
     <Authorized>
         <!-- Search Bar -->
         <div class="search-bar" style="display:flex; flex-wrap: wrap; gap: 4px;">
@@ -88,7 +88,7 @@
         <br /> 
     </Authorized>
 </AuthorizeView>
-<AuthorizeView Roles="Admin">
+<AuthorizeView Roles="Admin" Context="authContext">
     <Authorized>
         <!-- Load Table of all open bookings Bookings -->
         @if (bookings == null)

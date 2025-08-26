@@ -23,7 +23,6 @@
 @inject IServiceProvider ServiceProvider
 
 
-<h3>User - Roles Maintenance</h3>
 <AuthorizeView Roles="Admin" Context="authContext">
     <NotAuthorized> 
         <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
@@ -33,7 +32,7 @@
         </div>
     </NotAuthorized>
     <Authorized>
-	<!--  -->
+        <h3>User - Roles Maintenance</h3>
         @if (users == null || roles == null)
         {
             <p><em>Loading...</em></p>
