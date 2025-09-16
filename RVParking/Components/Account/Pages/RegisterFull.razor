@@ -1,0 +1,203 @@
+@page "/Account/RegisterFull"
+
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using RVParking.Data
+@using RVParking.Components.Account
+@using TNZAPI.NET;
+@using TNZAPI.NET.Core;
+@using TNZAPI.NET.Api.Addressbook.Contact.Dto;
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IEmailSender<ApplicationUser> EmailSender
+@* @inject ISmsSender SmsSender *@
+@inject ILogger<RegisterFull> Logger
+@inject NavigationManager NavigationManager
+@inject ApplicationDbContext ApplicationDbContext
+
+<PageTitle>Register Full</PageTitle>
+
+<h1>Register (Full Details)</h1>
+
+<div class="row">
+    <div class="col-lg-6">
+        <StatusMessage Message="@Message" />
+        <EditForm Model="Input" OnValidSubmit="SendConfirmationCodes">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert" />
+            <!-- All fields including City, Country, NZMCA -->
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Email" class="form-control" placeholder="Email" />
+                <label>Email</label>
+                <ValidationMessage For="() => Input.Email" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText type="password" @bind-Value="Input.Password" class="form-control" placeholder="Password" />
+                <label>Password</label>
+                <ValidationMessage For="() => Input.Password" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" placeholder="Confirm Password" />
+                <label>Confirm Password</label>
+                <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.FirstName" class="form-control" placeholder="First Name" />
+                <label>First Name</label>
+                <ValidationMessage For="() => Input.FirstName" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.LastName" class="form-control" placeholder="Last Name" />
+                <label>Last Name</label>
+                <ValidationMessage For="() => Input.LastName" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Mobile" class="form-control" placeholder="Mobile" />
+                <label>Mobile Phone</label>
+                <ValidationMessage For="() => Input.Mobile" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.City" class="form-control" placeholder="City" />
+                <label>City</label>
+                <ValidationMessage For="() => Input.City" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Country" class="form-control" placeholder="Country" />
+                <label>Country</label>
+                <ValidationMessage For="() => Input.Country" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.NZMCA" class="form-control" placeholder="NZMCA #" />
+                <label>NZMCA #</label>
+                <ValidationMessage For="() => Input.NZMCA" class="text-danger" />
+            </div>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Send Confirmation Codes</button>
+        </EditForm>
+
+        @if (codesSent)
+        {
+            <EditForm Model="Input" OnValidSubmit="ValidateCodesAndRegister">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" role="alert" />
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="Input.EmailCode" class="form-control" placeholder="Email Code" />
+                    <label>Email Confirmation Code</label>
+                    <ValidationMessage For="() => Input.EmailCode" class="text-danger" />
+                </div>
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="Input.SmsCode" class="form-control" placeholder="SMS Code" />
+                    <label>SMS Confirmation Code</label>
+                    <ValidationMessage For="() => Input.SmsCode" class="text-danger" />
+                </div>
+                <button type="submit" class="w-100 btn btn-lg btn-success">Register</button>
+            </EditForm>
+        }
+    </div>
+</div>
+
+@code {
+    private bool codesSent = false;
+    private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+    private IEnumerable<IdentityError>? identityErrors;
+
+    private string? generatedEmailCode;
+    private string? generatedSmsCode;
+
+    private InputModel Input { get; set; } = new();
+    public EmailMessage emailMessage { get; set; } = new EmailMessage();
+
+
+    // Generate random code
+    private string GenerateCode() => new Random().Next(100000, 999999).ToString();
+
+    private async Task SendConfirmationCodes()
+    {
+        generatedEmailCode = GenerateCode();
+        generatedSmsCode = GenerateCode();
+        if (emailMessage.HasValidMxRecord(emailMessage.Email) == false)  // checked to see if a valid email address
+        {
+            emailMessage.Email = string.Empty;
+            return;
+        }
+
+        // Send email code
+        // await EmailSender.SendEmailAsync(Input.Email, "Your Email Confirmation Code", $"Your code: {generatedEmailCode}");
+
+        // Send SMS code
+        // await SmsSender.SendSmsAsync(Input.Mobile, $"Your SMS confirmation code: {generatedSmsCode}");
+
+        codesSent = true;
+    }
+
+    private async Task ValidateCodesAndRegister()
+    {
+        if (Input.EmailCode != generatedEmailCode || Input.SmsCode != generatedSmsCode)
+        {
+            identityErrors = new[] { new IdentityError { Description = "Invalid confirmation codes." } };
+            return;
+        }
+
+        // Proceed with registration (similar to your RegisterUser logic)
+        var user = new ApplicationUser
+        {
+            Email = Input.Email,
+            UserName = Input.Email,
+            FirstNames = Input.FirstName,
+            LastName = Input.LastName,
+            PhoneNumber = Input.Mobile,
+            City = Input.City,
+            Country = Input.Country,
+            NZMCA = Input.NZMCA,
+            CreatedDte = DateTime.Now
+        };
+
+        var result = await UserManager.CreateAsync(user, Input.Password);
+
+        if (!result.Succeeded)
+        {
+            identityErrors = result.Errors;
+            return;
+        }
+
+        // Optionally sign in and redirect
+        await SignInManager.SignInAsync(user, isPersistent: false);
+        NavigationManager.NavigateTo("/");
+    }
+
+    protected override void OnInitialized()
+    {
+        // Codes are only valid for the lifetime of this page instance
+        generatedEmailCode = null;
+        generatedSmsCode = null;
+        codesSent = false;
+    }
+
+    private sealed class InputModel
+    {
+        [Required, EmailAddress]
+        public string Email { get; set; } = "";
+        [Required]
+        public string FirstName { get; set; } = "";
+        [Required]
+        public string LastName { get; set; } = "";
+        [Required]
+        public string Mobile { get; set; } = "";
+        [Required]
+        public string City { get; set; } = "";
+        [Required]
+        public string Country { get; set; } = "";
+        [Required]
+        public string NZMCA { get; set; } = "";
+        [Required, StringLength(100, MinimumLength = 6)]
+        public string Password { get; set; } = "";
+        [Required, Compare("Password")]
+        public string ConfirmPassword { get; set; } = "";
+        public string EmailCode { get; set; } = "";
+        public string SmsCode { get; set; } = "";
+    }
+}
