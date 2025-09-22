@@ -1,0 +1,152 @@
+﻿@page "/Account/RegisterDS"
+@using System.ComponentModel.DataAnnotations
+
+<h3>User Registration</h3>
+
+<EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <!-- Step 1: Contact Information -->
+    @if (currentStep == 1)
+    {
+        <div class="step">
+            <h4>Contact Information</h4>
+
+            <div class="form-group">
+                <label for="name">Full Name:</label>
+                <InputText id="name" @bind-Value="model.Name" class="form-control" />
+                <ValidationMessage For="@(() => model.Name)" />
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <InputText id="email" @bind-Value="model.Email" class="form-control" />
+                <ValidationMessage For="@(() => model.Email)" />
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone:</label>
+                <InputText id="phone" @bind-Value="model.Phone" class="form-control" />
+                <ValidationMessage For="@(() => model.Phone)" />
+            </div>
+
+            <button type="submit" @onclick="SendVerification" disabled="@sending">
+                @(sending ? "Sending..." : "Send Verification")
+            </button>
+        </div>
+    }
+
+    <!-- Step 2: Verification Codes -->
+    @if (currentStep == 2)
+    {
+        <div class="step">
+            <h4>Verification</h4>
+            <p>Please enter the codes sent to your email and phone</p>
+
+            <div class="form-group">
+                <label for="emailCode">Email Code:</label>
+                <InputText id="emailCode" @bind-Value="model.EmailVerificationCode" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label for="phoneCode">Phone Code:</label>
+                <InputText id="phoneCode" @bind-Value="model.PhoneVerificationCode" class="form-control" />
+            </div>
+
+            <button type="submit">Complete Registration</button>
+        </div>
+    }
+</EditForm>
+<style>
+
+.step {
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin: 20px 0;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+</style>
+@code {
+    private RegistrationModel model = new();
+    private int currentStep = 1;
+    private bool sending = false;
+
+    private async Task SendVerification()
+    {
+        sending = true;
+
+        // TODO: Replace with actual email/SMS sending logic
+        model.GeneratedEmailCode = GenerateRandomCode();
+        model.GeneratedPhoneCode = GenerateRandomCode();
+
+        // Simulate async operation
+        await Task.Delay(1000);
+
+        // For demo purposes - in production, actually send these codes
+        Console.WriteLine($"Email code: {model.GeneratedEmailCode}");
+        Console.WriteLine($"SMS code: {model.GeneratedPhoneCode}");
+
+        currentStep = 2;
+        sending = false;
+    }
+
+    private void HandleValidSubmit()
+    {
+        // Verify codes match
+        if (model.EmailVerificationCode != model.GeneratedEmailCode ||
+            model.PhoneVerificationCode != model.GeneratedPhoneCode)
+        {
+            // TODO: Show error message
+            return;
+        }
+
+        // TODO: Save user data (model.Name, model.Email, model.Phone)
+        Console.WriteLine("Registration successful!");
+
+        // Reset form or redirect
+        model = new();
+        currentStep = 1;
+    }
+
+    private string GenerateRandomCode()
+    {
+        return new Random().Next(100000, 999999).ToString();
+    }
+
+    public class RegistrationModel
+    {
+        [Required]
+        [StringLength(100, ErrorMessage = "Name is too long.")]
+        public string Name { get; set; }
+
+        [Required]
+        [EmailAddress(ErrorMessage = "Invalid email address.")]
+        public string Email { get; set; }
+
+        [Required]
+        [Phone(ErrorMessage = "Invalid phone number.")]
+        public string Phone { get; set; }
+
+        public string EmailVerificationCode { get; set; }
+        public string PhoneVerificationCode { get; set; }
+        public string GeneratedEmailCode { get; set; }
+        public string GeneratedPhoneCode { get; set; }
+    }
+}
+
