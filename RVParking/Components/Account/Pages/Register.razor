@@ -82,9 +82,12 @@
     </div> *@
 </div>
 
-@code {
-    private IEnumerable<IdentityError>? identityErrors;
+@code {    
     private bool isBkg_User = false;
+   
+    
+    private IEnumerable<IdentityError>? identityErrors;
+
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();

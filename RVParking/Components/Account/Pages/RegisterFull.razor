@@ -1,8 +1,11 @@
-@page "/Account/RegisterFull"
-
+﻿@page "/Account/RegisterFull"
+@rendermode InteractiveServer
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
 @using RVParking.Data
+@using TNZAPI.NET;
+@using TNZAPI.NET.Core;
+@using TNZAPI.NET.Api.Addressbook.Contact.Dto;
 
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
@@ -10,6 +13,7 @@
 @inject ILogger<RegisterFull> Logger
 @inject NavigationManager NavigationManager
 @inject ApplicationDbContext ApplicationDbContext
+@inject IConfiguration configuration
 
 <PageTitle>Register Full</PageTitle>
 
@@ -17,9 +21,9 @@
 
 <div class="row">
     <div class="col-lg-6">
-        <StatusMessage Message="@Message" />
-        @if (!codesSent)
+        @if (currentStep == 1)
         {
+            @* <StatusMessage Message="@Message" /> *@
             <EditForm Model="RegistrationInput" OnSubmit="@SendConfirmationCodes" FormName="SendCodesForm">
                 <DataAnnotationsValidator />
                 <ValidationSummary class="text-danger" role="alert" />
@@ -71,34 +75,68 @@
                 <button type="submit" class="w-100 btn btn-lg btn-primary">Send Confirmation Codes</button>
             </EditForm>
         }
-        else
+ 
+        @if (currentStep == 2)
         {
-            <EditForm Model="CodeInput" OnValidSubmit="@ValidateCodesAndRegister" FormName="ValidateCodesForm">
+            @* <StatusMessage Message="@Message" /> *@
+            <EditForm Model="RegistrationInput" OnValidSubmit="@ValidateCodesAndRegister" FormName="ValidateCodesForm">
                 <DataAnnotationsValidator />
                 <ValidationSummary class="text-danger" role="alert" />
                 <div class="form-floating mb-3">
-                    <InputText @bind-Value="CodeInput.EmailCode" class="form-control" placeholder="Email Code" />
-                    <label>Email Confirmation Code</label>
-                    <ValidationMessage For="() => CodeInput.EmailCode" class="text-danger" />
+                    <InputText @bind-Value="RegistrationInput.SmsCode" class="form-control" placeholder="SMS Code" />
+                    <label>SMS Confirmation Code</label>
+                    <ValidationMessage For="() => RegistrationInput.SmsCode" class="text-danger" />
                 </div>
                 <div class="form-floating mb-3">
-                    <InputText @bind-Value="CodeInput.SmsCode" class="form-control" placeholder="SMS Code" />
-                    <label>SMS Confirmation Code</label>
-                    <ValidationMessage For="() => CodeInput.SmsCode" class="text-danger" />
+                    <InputText @bind-Value="RegistrationInput.EmailCode" class="form-control" placeholder="Email Code" />
+                    <label>Email Confirmation Code</label>
+                    <ValidationMessage For="() => RegistrationInput.EmailCode" class="text-danger" />
                 </div>
                 <button type="submit" class="w-100 btn btn-lg btn-success">Register</button>
             </EditForm>
+            @if (verificationResult != null)
+            {
+                <p>@verificationResult</p>
+            }
+        }
+        @if (currentStep == 3)
+        {
+            @if (verificationResult != null)
+            {
+                <p>@verificationResult</p>
+            }
+            @* <StatusMessage Message="@Message" /> *@
+            <EditForm Model="RegistrationInput" OnValidSubmit="@ExitRegisterForm" FormName="ExitRegForm">
+     @*            <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" role="alert" />
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="RegistrationInput.EmailCode" class="form-control" placeholder="Email Code" />
+                    <label>Email Confirmation Code</label>
+                    <ValidationMessage For="() => RegistrationInput.EmailCode" class="text-danger" />
+                </div>
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="RegistrationInput.SmsCode" class="form-control" placeholder="SMS Code" />
+                    <label>SMS Confirmation Code</label>
+                    <ValidationMessage For="() => RegistrationInput.SmsCode" class="text-danger" />
+                </div> *@
+                <button type="submit" class="w-100 btn btn-lg btn-success">exit</button>
+            </EditForm>
+
         }
     </div>
 </div>
 
 @code {
-    private bool codesSent = false;
-    private IEnumerable<IdentityError>? identityErrors;
+    private bool codesSent = false;    
+    private int currentStep = 1;    
     private string? generatedEmailCode;
     private string? generatedSmsCode;
+    private string verificationResult;
+
+    private IEnumerable<IdentityError>? identityErrors;
+
     private RegistrationInputModel RegistrationInput { get; set; } = new();
-    private CodeInputModel CodeInput { get; set; } = new();
+    // private CodeInputModel CodeInput { get; set; } = new();
 
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
@@ -111,20 +149,31 @@
 
         // Send email code
         // await EmailSender.SendEmailAsync(RegistrationInput.Email, "Your Email Confirmation Code", $"Your code: {generatedEmailCode}");
+        SendEmailConfirmationCode(RegistrationInput.Email);
 
         // Send SMS code
         // await SmsSender.SendSmsAsync(RegistrationInput.Mobile, $"Your SMS confirmation code: {generatedSmsCode}");
+        string txtrept = Chk_E_164_Phone(RegistrationInput.Mobile);
+        SendTxtConfirmationCode(txtrept);
 
+        currentStep = 2;    
         codesSent = true;
     }
 
     private async Task ValidateCodesAndRegister()
     {
-        if (CodeInput.EmailCode != generatedEmailCode || CodeInput.SmsCode != generatedSmsCode)
+        // if (verificationResult != null)
+        // {
+        //     NavigationManager.NavigateTo("/");
+        // }
+        if (RegistrationInput.EmailCode != generatedEmailCode || RegistrationInput.SmsCode != generatedSmsCode)
         {
             identityErrors = new[] { new IdentityError { Description = "Invalid confirmation codes." } };
+            verificationResult =  "❌ Verification failed.";
+            currentStep = 3;
             return;
         }
+
 
         var user = new ApplicationUser
         {
@@ -144,13 +193,20 @@
         if (!result.Succeeded)
         {
             identityErrors = result.Errors;
+            string serr = result.Errors.FirstOrDefault()?.Description ?? string.Empty;
+            verificationResult =  "❌ Verification failed. " + serr;
+            currentStep = 3;
             return;
         }
-
+     
         await SignInManager.SignInAsync(user, isPersistent: false);
         NavigationManager.NavigateTo("/");
     }
-
+    private Task ExitRegisterForm()
+    {
+        NavigationManager.NavigateTo("/");
+        return Task.CompletedTask;
+    }
     private sealed class RegistrationInputModel
     {
         [Required]
@@ -185,13 +241,66 @@
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; } = "";
-    }
 
-    private sealed class CodeInputModel
-    {
-        [Required]
         public string EmailCode { get; set; } = "";
-        [Required]
         public string SmsCode { get; set; } = "";
     }
+
+    private void SendEmailConfirmationCode(string emailTo)
+    {
+        string subjectMsg = "Email Confirmation Code";
+        string bodyMsg = $"Your Email Confirmation code is: {generatedEmailCode}";
+
+      
+// #if !DEBUG
+
+        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+            {
+                AuthToken = configuration["TNZ:AuthToken"]
+            };
+        var client = new TNZApiClient(apiUser);
+
+        var reponseEmail = client.Messaging.Email.SendMessage(
+            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+            emailSubject: subjectMsg,
+            messagePlain: bodyMsg,
+            destination: emailTo
+        );
+// #endif
+
+    }
+    private void SendTxtConfirmationCode(string txtrept) // txtrept is a phone number in E.164 format and this message is FULL LENGTH expensive.
+    {
+        string msg = $"Your SMS confirmation code: {generatedSmsCode}";
+// #if !DEBUG
+        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
+        var client = new TNZApiClient(apiUser);
+
+        var response = client.Messaging.SMS.SendMessage
+            (
+                destination: txtrept,
+                messageText: msg
+            );
+// #endif   
+    }
+    private string Chk_E_164_Phone(string phne)
+    {
+        string srtn = string.Empty;
+        if (phne.Length > 0)
+        {
+            if (phne.StartsWith("+")) // then likely in the corect format already
+            {
+                srtn = phne.Trim();
+            }
+            else if (phne.StartsWith("0"))// then likely miss country code so remove the "0" and add "+64"
+            {
+                srtn = string.Concat("+64" + phne[1..]); // this prefix should be a configurable for the ountry the app is being run in.
+            }
+        }
+        return srtn;
+    }
+
 }
