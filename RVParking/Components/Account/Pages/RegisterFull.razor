@@ -2,7 +2,14 @@
 @rendermode InteractiveServer
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.WebUtilities
 @using RVParking.Data
+@using RVParking.Components.Account
+
+@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore
 @using TNZAPI.NET;
 @using TNZAPI.NET.Core;
 @using TNZAPI.NET.Api.Addressbook.Contact.Dto;
@@ -14,6 +21,10 @@
 @inject NavigationManager NavigationManager
 @inject ApplicationDbContext ApplicationDbContext
 @inject IConfiguration configuration
+
+
+@inject RoleManager<IdentityRole> RoleManager
+
 
 <PageTitle>Register Full</PageTitle>
 
@@ -127,13 +138,16 @@
 </div>
 
 @code {
+    private bool isBkg_User = false;
     private bool codesSent = false;    
     private int currentStep = 1;    
     private string? generatedEmailCode;
     private string? generatedSmsCode;
-    private string verificationResult;
+    private string? verificationResult;
 
     private IEnumerable<IdentityError>? identityErrors;
+    private IdentityRole? role { get; set; }
+
 
     private RegistrationInputModel RegistrationInput { get; set; } = new();
     // private CodeInputModel CodeInput { get; set; } = new();
@@ -169,12 +183,34 @@
         if (RegistrationInput.EmailCode != generatedEmailCode || RegistrationInput.SmsCode != generatedSmsCode)
         {
             identityErrors = new[] { new IdentityError { Description = "Invalid confirmation codes." } };
-            verificationResult =  "❌ Verification failed.";
+            verificationResult = "❌ Verification failed. -- Invalid confirmation codes.";
             currentStep = 3;
             return;
         }
 
+        // see if this is the first User and if so perhaps role = Admin needs to be added if it is not there so the Admin and setup features will be available to the first confirmed user.
+        var userCount = await ApplicationDbContext.GetIdentityUserCountAsync();
+        if (userCount == 0)
+        {
+            role = await ApplicationDbContext.Roles.FindAsync("Admin");
+            if (role == null)
+            {
+                role = new IdentityRole();
+                if (role != null)
+                {
+                    role.Name = "Admin";
+                    role.NormalizedName = role.Name.ToUpper();
+                    await ApplicationDbContext.Roles.AddAsync(role);
+                    await ApplicationDbContext.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new Exception("Role Admin not created");
+                }
+            }
+        }
 
+        // At this point we have valid codes so we can try to create the user account
         var user = new ApplicationUser
         {
             Email = RegistrationInput.Email,
@@ -187,9 +223,8 @@
             NZMCA = RegistrationInput.NZMCA,
             CreatedDte = DateTime.Now
         };
-
         var result = await UserManager.CreateAsync(user, RegistrationInput.Password);
-
+        // If the user already exists or other issue then we will end up here.
         if (!result.Succeeded)
         {
             identityErrors = result.Errors;
@@ -198,15 +233,95 @@
             currentStep = 3;
             return;
         }
-     
-        await SignInManager.SignInAsync(user, isPersistent: false);
-        NavigationManager.NavigateTo("/");
+
+        // If we get here then the user was created and now we create the BkgUser for this person.
+        // Populate the Bkg_User object and save it.
+        // First see if there is a Bkg_User for this email
+        var bkg_User = await ApplicationDbContext.bkg_Users.FirstOrDefaultAsync(u => u.UserEmail == user.Email);
+        if (bkg_User != null)
+        {
+            // If a Bkg_User already exists, update it Also should update the AppUSer with data from the Bkg_User, names, phone, address, NZMCA etc.
+            isBkg_User = true;
+            bkg_User.UserName = user.Email;
+            bkg_User.AppUserId = user.Id;
+            user.FirstNames = bkg_User.UserFirstName;
+            user.LastName = bkg_User.UserLastName;
+            user.NZMCA = bkg_User.UserNZMCA;
+            user.City = bkg_User.UserCity;
+            user.Country = bkg_User.UserCountry;
+            user.UserAddress = bkg_User.UserAddress;
+            user.UserState = bkg_User.UserState;
+            user.UserZip = bkg_User.UserZip;
+
+            // ApplicationDbContext.bkg_Users.Update(bkg_User);
+            // ApplicationDbContext.Users.Update(user);
+        }
+        else
+        {
+            // If no Bkg_User exists, create a new one
+            bkg_User = new Bkg_User
+            {
+                UserEmail = user.Email,
+                UserName = user.Email,
+                AppUserId = user.Id,
+                UserFirstName = RegistrationInput.FirstName,
+                UserLastName = RegistrationInput.LastName,
+                UserPhone = RegistrationInput.Mobile
+            };
+        }
+        // Save bkg_User to the database
+        if (isBkg_User)
+        {
+            // If the user already exists, update the existing record
+            ApplicationDbContext.bkg_Users.Update(bkg_User);
+            ApplicationDbContext.Users.Update(user);
+        }
+        else
+        {
+            // If the user does not exist, add a new record
+            bkg_User.CreatedDte = DateTime.Now;
+            await ApplicationDbContext.bkg_Users.AddAsync(bkg_User);
+        }
+
+        await ApplicationDbContext.SaveChangesAsync();
+
+        Logger.LogInformation("User created or updated new Add account and password.");
+
+        // now generate the code
+        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+        // Now we have the code we can confirm the user which means they can sign in. They have the EmailCofirmed flag set to true.
+        var resultConfirm = await UserManager.ConfirmEmailAsync(user, code);
+
+
+        // If this is the first time a user has confirmed their email, this user may need to be added as to the Admin Role.
+        // See if there are any other users that have email confirmed and if not add this user to the Admin Role.
+        userCount = await ApplicationDbContext.CountUserConfirmedAsync();
+        if (userCount <= 1) // then this is the first confirming user so add this user to this role. Might also see if any other user has Admin
+        {
+            var role = await RoleManager.FindByNameAsync("Admin");
+            if (role != null)
+            {
+                var addResult = await UserManager.AddToRoleAsync(user, role.Name);
+                if (addResult.Succeeded)
+                {
+                    verificationResult += " Also you have been made Administrator for this App.";
+                }
+            }
+            await ApplicationDbContext.SaveChangesAsync();
+        }
+        verificationResult = "✅ Verified and created! You can now use the system." ;
+        currentStep = 3;
+        // // await SignInManager.SignInAsync(user, isPersistent: false);
+        // NavigationManager.NavigateTo("/");
     }
     private Task ExitRegisterForm()
     {
         NavigationManager.NavigateTo("/");
         return Task.CompletedTask;
     }
+
+
+
     private sealed class RegistrationInputModel
     {
         [Required]
