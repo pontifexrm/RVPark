@@ -110,6 +110,7 @@
                 <p>@verificationResult</p>
             }
         }
+        
         @if (currentStep == 3)
         {
             @if (verificationResult != null)
@@ -169,7 +170,7 @@
         // await SmsSender.SendSmsAsync(RegistrationInput.Mobile, $"Your SMS confirmation code: {generatedSmsCode}");
         string txtrept = Chk_E_164_Phone(RegistrationInput.Mobile);
         SendTxtConfirmationCode(txtrept);
-
+        await Task.Delay(500); // slight delay to allow for the messages to be sent before moving to next step  
         currentStep = 2;    
         codesSent = true;
     }
@@ -205,7 +206,9 @@
                 }
                 else
                 {
-                    throw new Exception("Role Admin not created");
+                    verificationResult = "❌ Verification failed. -- Role Admin, found to be needed BUT not created.";
+                    currentStep = 3;
+                    return;
                 }
             }
         }
@@ -309,7 +312,7 @@
             }
             await ApplicationDbContext.SaveChangesAsync();
         }
-        verificationResult = "✅ Verified and created! You can now use the system." ;
+        verificationResult += "✅ Verified and created! You can now use the system. Please login as normal." ;
         currentStep = 3;
         // // await SignInManager.SignInAsync(user, isPersistent: false);
         // NavigationManager.NavigateTo("/");

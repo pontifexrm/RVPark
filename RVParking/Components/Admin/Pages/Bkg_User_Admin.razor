@@ -116,6 +116,7 @@
                             <th style="border: 1px solid #929292;">User Name</th>
                             <th style="border: 1px solid #929292;">First Name</th>
                             <th style="border: 1px solid #929292;">Last Name</th>
+                            <th style="border: 1px solid #929292;">Actions</th>
                             <th style="border: 1px solid #929292;">Email</th>
                             <th style="border: 1px solid #929292;">Phone</th>
                             <th style="border: 1px solid #929292;">NZMCA</th>
@@ -127,7 +128,6 @@
                             <th style="border: 1px solid #929292;">Status</th>
                             <th style="border: 1px solid #929292;">Comments</th>
                             <th style="border: 1px solid #929292;">Created</th>
-                            <th style="border: 1px solid #929292;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -137,17 +137,6 @@
                                 <td style="border: 1px solid #929292;">@user.UserName</td>
                                 <td style="border: 1px solid #929292;">@user.UserFirstName</td>
                                 <td style="border: 1px solid #929292;">@user.UserLastName</td>
-                                <td style="border: 1px solid #929292;">@user.UserEmail</td>
-                                <td style="border: 1px solid #929292;">@user.UserPhone</td>
-                                <td style="border: 1px solid #929292;">@user.UserNZMCA</td>
-                                <td style="border: 1px solid #929292;">@user.UserAddress</td>
-                                <td style="border: 1px solid #929292;">@user.UserCity</td>
-                                <td style="border: 1px solid #929292;">@user.UserState</td>
-                                <td style="border: 1px solid #929292;">@user.UserZip</td>
-                                <td style="border: 1px solid #929292;">@user.UserCountry</td>
-                                <td style="border: 1px solid #929292;">@user.UserStatus</td>
-                                <td style="border: 1px solid #929292;">@user.UserComments</td>
-                                <td style="border: 1px solid #929292;">@user.CreatedDte.ToShortDateString()</td>
                                 <td style="border: 1px solid #929292;">
                                     <div class="tab-content" style="display:flex;flex-direction:row;">
                                         <button class="bi form-control" style="width: 40px; height: 32px;"
@@ -160,6 +149,17 @@
                                         </button>
                                     </div>
                                 </td>
+                                <td style="border: 1px solid #929292;">@user.UserEmail</td>
+                                <td style="border: 1px solid #929292;">@user.UserPhone</td>
+                                <td style="border: 1px solid #929292;">@user.UserNZMCA</td>
+                                <td style="border: 1px solid #929292;">@user.UserAddress</td>
+                                <td style="border: 1px solid #929292;">@user.UserCity</td>
+                                <td style="border: 1px solid #929292;">@user.UserState</td>
+                                <td style="border: 1px solid #929292;">@user.UserZip</td>
+                                <td style="border: 1px solid #929292;">@user.UserCountry</td>
+                                <td style="border: 1px solid #929292;">@user.UserStatus</td>
+                                <td style="border: 1px solid #929292;">@user.UserComments</td>
+                                <td style="border: 1px solid #929292;">@user.CreatedDte.ToShortDateString()</td>
                             </tr>
                         }
                     </tbody>
