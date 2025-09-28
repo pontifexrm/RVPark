@@ -1,5 +1,6 @@
-﻿@page "/Account/RegisterFull"
+﻿@page "/ContactRegister"
 @rendermode InteractiveServer
+
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
 @using System.Text
@@ -7,7 +8,6 @@
 @using Microsoft.AspNetCore.WebUtilities
 @using RVParking.Data
 @using RVParking.Components.Account
-
 @using Microsoft.AspNetCore.Identity.EntityFrameworkCore
 @using Microsoft.EntityFrameworkCore
 @using TNZAPI.NET;
@@ -17,33 +17,130 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IEmailSender<ApplicationUser> EmailSender
-@inject ILogger<RegisterFull> Logger
+@inject ILogger<ContactRegister> Logger
 @inject NavigationManager NavigationManager
 @inject ApplicationDbContext ApplicationDbContext
 @inject IConfiguration configuration
-
-
 @inject RoleManager<IdentityRole> RoleManager
+@inject ApplicationDbContext ApplicationDbContext
 
 
-<PageTitle>Register Full</PageTitle>
+<PageTitle>Contact Us</PageTitle>
 
-<h1>Register (Full Details)</h1>
-
+<h1>Ask, Check Availability, Book.</h1>
+If the booking is available it will be reserved for you.
+<br /> Once you have registered you will be able to manage the booking on this website.
+<br />
 <div class="row">
     <div class="col-lg-6">
         @if (currentStep == 1)
         {
             @* <StatusMessage Message="@Message" /> *@
+
+            <span><i>The information we need to register you.</i></span>
             <EditForm Model="RegistrationInput" OnSubmit="@SendConfirmationCodes" FormName="SendCodesForm">
                 <DataAnnotationsValidator />
                 <ValidationSummary class="text-danger" role="alert" />
-                <div class="form-floating mb-3">
+                <div class="form-group" style="display:flex;flex-direction:row; max-width: 75%; margin-left: 2%">
+                    <div class="form-group" style="max-width: 100%; ">
+                        <label for="firstname">First Name</label>
+                        <InputText @bind-Value=RegistrationInput.FirstName class="form-control" id="firstname" />
+                        <ValidationMessage For="() => RegistrationInput.FirstName" />
+                    </div>
+                    <div class="form-group" style="max-width: 100%;  margin-left: 2%">
+                        <label for="lastname">Last Name</label>
+                        <InputText @bind-Value=RegistrationInput.LastName class="form-control" id="lastname" />
+                        <ValidationMessage For="() => RegistrationInput.LastName" />
+                    </div>
+                </div>
+                <div class="form-group" style="display:flex;flex-direction:row; max-width: 75%; margin-left: 2%">
+                    <div class="form-group" style="max-width: 100%; ">
+                        <label for="email">Email</label>
+                        <InputText @bind-Value=RegistrationInput.Email class="form-control" id="email" />
+                        <ValidationMessage For="() => RegistrationInput.Email" />
+                    </div>
+                    <div class="form-group" style="max-width: 100%;  margin-left: 2%">
+                        <label for="mobile">Mobile Phone</label>
+                        <InputText @bind-Value=RegistrationInput.Mobile class="form-control" id="mobile" />
+                        <ValidationMessage For="() => RegistrationInput.Mobile" />
+                    </div>
+                </div>
+@*                 <div class="form-floating mb-3">
                     <InputText @bind-Value="RegistrationInput.Email" class="form-control" placeholder="Email" />
                     <label>Email</label>
                     <ValidationMessage For="() => RegistrationInput.Email" class="text-danger" />
+                </div> *@
+                <div class="form-group" style="display:flex;flex-direction:row; max-width: 75%; margin-left: 2%">
+                    <div class="form-group" style="max-width: 100%; ">
+                        <label for="password">Password</label>
+                        <InputText @bind-Value=RegistrationInput.Password class="form-control" id="password" />
+                        <ValidationMessage For="() => RegistrationInput.Password" />
+                    </div>
+                    <div class="form-group" style="max-width: 100%;  margin-left: 2%">
+                        <label for="confirmpassword">Confirm Password</label>
+                        <InputText @bind-Value=RegistrationInput.ConfirmPassword class="form-control" id="confirmpassword" />
+                        <ValidationMessage For="() => RegistrationInput.ConfirmPassword" />
+                    </div>
                 </div>
-                <div class="form-floating mb-3">
+
+                <div class="form-group" style="display:flex;flex-direction:row; max-width: 75%; margin-left: 2%">
+                    <div class="form-group" style="max-width: 100%; ">
+                        <label for="city">City/Town</label>
+                        <InputText @bind-Value=RegistrationInput.City class="form-control" id="city" />
+                        <ValidationMessage For="() => RegistrationInput.City" />
+                    </div>
+                    <div class="form-group" style="max-width: 100%;  margin-left: 2%">
+                        <label for="country">Country</label>
+                        <InputText @bind-Value=RegistrationInput.Country class="form-control" id="country" />
+                        <ValidationMessage For="() => RegistrationInput.Country" />
+                    </div>
+                </div>
+                <div class="form-group" style="display:flex;flex-direction:row; max-width: 50%; margin-left: 2%">
+                    <div class="form-group" style="max-width: 100%; ">
+                        <label for="nzmca">NZMCA #</label>
+                        <InputText @bind-Value=RegistrationInput.NZMCA class="form-control" id="nzmca" />
+                        <ValidationMessage For="() => RegistrationInput.NZMCA" />
+                    </div>
+
+                </div>
+                <hr />
+
+                <span><i>Your Availability Query, RV Park or Apartment and In/Out Dates.</i></span>
+
+                <div class="form-group" style="text-align:left; max-width: 75%; margin-left: 2%;">
+                    <label>RVPark/Apartment</label>
+                    <select style="flex: 1 1 600px;  margin-left: 2%;" @bind="searchPropertyId">
+                        <option value="">Select</option>
+                        @foreach (var property in properties)
+                        {
+                            <option value="@property.PropertyId">@property.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group" style="display:flex;flex-direction:row;">
+                    <div class="form-group" style="max-width: 25%;  margin-left: 2%">
+                        <label for="fmdate">From</label>
+                        <InputDate @bind-Value=RegistrationInput.Fmdate class="form-control" id="fmdate" />
+                        <ValidationMessage For="() => RegistrationInput.Fmdate" />
+                    </div>
+                    <div class="form-group" style="max-width: 25%;  margin-left: 2%">
+                        <label for="todate">To</label>
+                        <InputDate @bind-Value=RegistrationInput.Todate class="form-control" id="todate" />
+                        <ValidationMessage For="() => RegistrationInput.Todate" />
+                    </div>
+
+                </div>
+                <div class="form-group" style="max-width: 75%;width: 500px; margin-left: 2%">
+                    <label for="subject">Subject</label>
+                    <InputText @bind-Value="RegistrationInput.Subject" class="form-control" id="subject" />
+                    <ValidationMessage For="() => RegistrationInput.Subject" />
+                </div>
+                <div class="form-group" style="max-width: 75%;width:500px;  margin-left: 2%">
+                    <label for="message">Message</label>
+                    <InputTextArea @bind-Value="RegistrationInput.Message" class="form-control" id="message" />
+
+                </div>
+@*                 <div class="form-floating mb-3">
                     <InputText type="password" @bind-Value="RegistrationInput.Password" class="form-control" placeholder="Password" />
                     <label>Password</label>
                     <ValidationMessage For="() => RegistrationInput.Password" class="text-danger" />
@@ -68,7 +165,8 @@
                     <label>Mobile Phone</label>
                     <ValidationMessage For="() => RegistrationInput.Mobile" class="text-danger" />
                 </div>
-                <div class="form-floating mb-3">
+ *@                
+@*                 <div class="form-floating mb-3">
                     <InputText @bind-Value="RegistrationInput.City" class="form-control" placeholder="City" />
                     <label>City</label>
                     <ValidationMessage For="() => RegistrationInput.City" class="text-danger" />
@@ -82,15 +180,16 @@
                     <InputText @bind-Value="RegistrationInput.NZMCA" class="form-control" placeholder="NZMCA #" />
                     <label>NZMCA #</label>
                     <ValidationMessage For="() => RegistrationInput.NZMCA" class="text-danger" />
-                </div>
-                <button type="submit" class="w-100 btn btn-lg btn-primary">Send Confirmation Codes</button>
+                </div> *@
+                <hr />
+                <button type="submit" class="w-100 btn btn-lg btn-primary">Check Availability, Message US and get email/SMS Confirmation Codes</button>
             </EditForm>
         }
- 
+
         @if (currentStep == 2)
         {
             @* <StatusMessage Message="@Message" /> *@
-            <h5>Please enter the confirmation codes sent to your Email and Mobile Phone<br/>This may take a minute or two depending on the email servers involved, so do please hang in there.</h5>
+            <h5>Please enter the confirmation codes sent to your Email and Mobile Phone<br />This may take a minute or two depending on the email servers involved, so do please hang in there.</h5>
             <EditForm Model="RegistrationInput" OnValidSubmit="@ValidateCodesAndRegister" FormName="ValidateCodesForm">
                 <DataAnnotationsValidator />
                 <ValidationSummary class="text-danger" role="alert" />
@@ -111,7 +210,7 @@
                 <p>@verificationResult</p>
             }
         }
-        
+
         @if (currentStep == 3)
         {
             @if (verificationResult != null)
@@ -120,7 +219,7 @@
             }
             @* <StatusMessage Message="@Message" /> *@
             <EditForm Model="RegistrationInput" OnValidSubmit="@ExitRegisterForm" FormName="ExitRegForm">
-     @*            <DataAnnotationsValidator />
+                @*            <DataAnnotationsValidator />
                 <ValidationSummary class="text-danger" role="alert" />
                 <div class="form-floating mb-3">
                     <InputText @bind-Value="RegistrationInput.EmailCode" class="form-control" placeholder="Email Code" />
@@ -141,15 +240,18 @@
 
 @code {
     private bool isBkg_User = false;
-    private bool codesSent = false;    
-    private int currentStep = 1;    
+    private bool codesSent = false;
+    private int currentStep = 1;
     private string? generatedEmailCode;
     private string? generatedSmsCode;
     private string? verificationResult;
 
     private IEnumerable<IdentityError>? identityErrors;
     private IdentityRole? role { get; set; }
+    private int searchPropertyId = 1; // should be id of first in loaded properties
+    private Bkg_Engine bkg_Engine;
 
+    private List<Bkg_Property> properties = new();
 
     private RegistrationInputModel RegistrationInput { get; set; } = new();
     // private CodeInputModel CodeInput { get; set; } = new();
@@ -171,8 +273,8 @@
         // await SmsSender.SendSmsAsync(RegistrationInput.Mobile, $"Your SMS confirmation code: {generatedSmsCode}");
         string txtrept = Chk_E_164_Phone(RegistrationInput.Mobile);
         SendTxtConfirmationCode(txtrept);
-        await Task.Delay(500); // slight delay to allow for the messages to be sent before moving to next step  
-        currentStep = 2;    
+        await Task.Delay(500); // slight delay to allow for the messages to be sent before moving to next step
+        currentStep = 2;
         codesSent = true;
     }
 
@@ -233,7 +335,7 @@
         {
             identityErrors = result.Errors;
             string serr = result.Errors.FirstOrDefault()?.Description ?? string.Empty;
-            verificationResult =  "❌ Verification failed. " + serr;
+            verificationResult = "❌ Verification failed. " + serr;
             currentStep = 3;
             return;
         }
@@ -314,7 +416,7 @@
             }
             await ApplicationDbContext.SaveChangesAsync();
         }
-        verificationResult += "✅ Verified and created! You can now use the system. Please login as normal." ;
+        verificationResult += "✅ Verified and created! You can now use the system. Please login as normal.";
         currentStep = 3;
         // // await SignInManager.SignInAsync(user, isPersistent: false);
         // NavigationManager.NavigateTo("/");
@@ -324,6 +426,17 @@
         NavigationManager.NavigateTo("/");
         return Task.CompletedTask;
     }
+    protected override async Task OnInitializedAsync()
+    {
+        if (bkg_Engine == null)
+        {
+            bkg_Engine = new Bkg_Engine(ApplicationDbContext);
+        }
+        properties = await ApplicationDbContext.bkg_Properties.ToListAsync() ?? new List<Bkg_Property>();
+
+    }
+
+    
 
 
 
@@ -362,6 +475,11 @@
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; } = "";
 
+        public DateTime Fmdate { get; set; } = DateTime.Now.Date;
+        public DateTime Todate { get; set; } = DateTime.Now.Date;
+        public string Subject { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+
         public string EmailCode { get; set; } = "";
         public string SmsCode { get; set; } = "";
     }
@@ -371,13 +489,13 @@
         string subjectMsg = "Email Confirmation Code";
         string bodyMsg = $"Your Email Confirmation code is: {generatedEmailCode}";
 
-      
-// #if !DEBUG
+
+        // #if !DEBUG
 
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
         var client = new TNZApiClient(apiUser);
 
         var reponseEmail = client.Messaging.Email.SendMessage(
@@ -386,13 +504,13 @@
             messagePlain: bodyMsg,
             destination: emailTo
         );
-// #endif
+        // #endif
 
     }
     private void SendTxtConfirmationCode(string txtrept) // txtrept is a phone number in E.164 format and this message is FULL LENGTH expensive.
     {
         string msg = $"Your SMS confirmation code: {generatedSmsCode}";
-// #if !DEBUG
+        // #if !DEBUG
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
         {
             AuthToken = configuration["TNZ:AuthToken"]
@@ -404,7 +522,7 @@
                 destination: txtrept,
                 messageText: msg
             );
-// #endif   
+        // #endif
     }
     private string Chk_E_164_Phone(string phne)
     {
