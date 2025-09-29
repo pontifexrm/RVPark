@@ -28,15 +28,18 @@
 <PageTitle>Contact Us</PageTitle>
 
 <h1>Ask, Check Availability, Book.</h1>
-If the booking is available it will be reserved for you.
-<br /> Once you have registered you will be able to manage the booking on this website.
-<br />
+
 <div class="row">
     <div class="col-lg-6">
         @if (currentStep == 1)
         {
             @* <StatusMessage Message="@Message" /> *@
+           <span> Once you have registered and if the booking is available it will be booked for you.</span>
+            <br />
 
+            <span> Email will be sent to you with all the details.<br /></span>
+            <span>And you will be able to manage the booking on this website.</span>
+            <br />
             <span><i>The information we need to register you.</i></span>
             <EditForm Model="RegistrationInput" OnSubmit="@SendConfirmationCodes" FormName="SendCodesForm">
                 <DataAnnotationsValidator />
@@ -105,7 +108,7 @@ If the booking is available it will be reserved for you.
                 </div>
                 <hr />
 
-                <span><i>Your Availability Query, RV Park or Apartment and In/Out Dates.</i></span>
+                <span><i>Query Availability for RV Park or Apartment with In/Out Dates.</i></span>
 
                 <div class="form-group" style="text-align:left; max-width: 75%; margin-left: 2%;">
                     <label>RVPark/Apartment</label>
@@ -130,6 +133,7 @@ If the booking is available it will be reserved for you.
                     </div>
 
                 </div>
+                <span><i>Contact Us with a message or question.</i></span>
                 <div class="form-group" style="max-width: 75%;width: 500px; margin-left: 2%">
                     <label for="subject">Subject</label>
                     <InputText @bind-Value="RegistrationInput.Subject" class="form-control" id="subject" />
@@ -182,14 +186,17 @@ If the booking is available it will be reserved for you.
                     <ValidationMessage For="() => RegistrationInput.NZMCA" class="text-danger" />
                 </div> *@
                 <hr />
-                <button type="submit" class="w-100 btn btn-lg btn-primary">Check Availability, Message US and get email/SMS Confirmation Codes</button>
+                <button type="submit" class="w-100 btn btn-lg btn-primary">Check Availability, Message US and get EMAIL/SMS Confirmation Codes</button>
             </EditForm>
         }
 
         @if (currentStep == 2)
         {
             @* <StatusMessage Message="@Message" /> *@
-            <h5>Please enter the confirmation codes sent to your Email and Mobile Phone<br />This may take a minute or two depending on the email servers involved, so do please hang in there.</h5>
+            <span>Please enter the confirmation codes sent to your Email and Mobile Phone<br />
+                This may take a minute or two depending on the email servers involved, so do please hang in there.<br/>
+                If you do not whish to register or book just leave the two confirmation codes blank.<br/>
+            We get back to you shorthly.</span>
             <EditForm Model="RegistrationInput" OnValidSubmit="@ValidateCodesAndRegister" FormName="ValidateCodesForm">
                 <DataAnnotationsValidator />
                 <ValidationSummary class="text-danger" role="alert" />
@@ -248,7 +255,7 @@ If the booking is available it will be reserved for you.
 
     private IEnumerable<IdentityError>? identityErrors;
     private IdentityRole? role { get; set; }
-    private int searchPropertyId = 1; // should be id of first in loaded properties
+    private int searchPropertyId = 0; // should be id of first in loaded properties
     private Bkg_Engine bkg_Engine;
 
     private List<Bkg_Property> properties = new();
