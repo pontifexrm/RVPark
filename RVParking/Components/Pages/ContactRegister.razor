@@ -33,19 +33,13 @@
     <div class="col-lg-6">
         @if (currentStep == 1)
         {
-            @* <StatusMessage Message="@Message" /> *@
-@*            <span> Once you have registered and if the booking is available it will be booked for you.</span>
-            <br />
-
-            <span> Email will be sent to you with all the details.<br /></span>
-            <span>And you will be able to manage the booking on this website.</span>
-            <br /> *@
-
-            <EditForm Model="RegistrationInput" OnSubmit="@SendConfirmationCodes" FormName="SendCodesForm">
+            <EditForm Model="RegistrationInput" OnValidSubmit="@SendConfirmationCodes" FormName="SendCodesForm">
                 <DataAnnotationsValidator />
                 <ValidationSummary class="text-danger" role="alert" />
-
-             
+                <span>
+                    <small>Please register, you can then view bkg-availablility. You can Opt out.<br/>
+                    </small>
+                 </span>
 
                 <span><i>Query Availability for RV Park or Apartment with In/Out Dates.</i></span>
 
@@ -83,48 +77,8 @@
                     <InputTextArea @bind-Value="RegistrationInput.Message" class="form-control" id="message" />
 
                 </div>
-@*                 <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="RegistrationInput.Password" class="form-control" placeholder="Password" />
-                    <label>Password</label>
-                    <ValidationMessage For="() => RegistrationInput.Password" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="RegistrationInput.ConfirmPassword" class="form-control" placeholder="Confirm Password" />
-                    <label>Confirm Password</label>
-                    <ValidationMessage For="() => RegistrationInput.ConfirmPassword" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="RegistrationInput.FirstName" class="form-control" placeholder="First Name" />
-                    <label>First Name</label>
-                    <ValidationMessage For="() => RegistrationInput.FirstName" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="RegistrationInput.LastName" class="form-control" placeholder="Last Name" />
-                    <label>Last Name</label>
-                    <ValidationMessage For="() => RegistrationInput.LastName" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="RegistrationInput.Mobile" class="form-control" placeholder="Mobile" />
-                    <label>Mobile Phone</label>
-                    <ValidationMessage For="() => RegistrationInput.Mobile" class="text-danger" />
-                </div>
- *@                
-@*                 <div class="form-floating mb-3">
-                    <InputText @bind-Value="RegistrationInput.City" class="form-control" placeholder="City" />
-                    <label>City</label>
-                    <ValidationMessage For="() => RegistrationInput.City" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="RegistrationInput.Country" class="form-control" placeholder="Country" />
-                    <label>Country</label>
-                    <ValidationMessage For="() => RegistrationInput.Country" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="RegistrationInput.NZMCA" class="form-control" placeholder="NZMCA #" />
-                    <label>NZMCA #</label>
-                    <ValidationMessage For="() => RegistrationInput.NZMCA" class="text-danger" />
-                </div> *@
-                <hr />
+
+                @* <hr /> *@
                 <span><i>The information we need of you.</i></span>
                 <div class="form-group" style="display:flex;flex-direction:row; max-width: 75%; margin-left: 2%">
                     <div class="form-group" style="max-width: 100%; ">
@@ -150,23 +104,7 @@
                         <ValidationMessage For="() => RegistrationInput.Mobile" />
                     </div>
                 </div>
-                @*                 <div class="form-floating mb-3">
-                    <InputText @bind-Value="RegistrationInput.Email" class="form-control" placeholder="Email" />
-                    <label>Email</label>
-                    <ValidationMessage For="() => RegistrationInput.Email" class="text-danger" />
-                </div> *@
-                @*  <div class="form-group" style="display:flex;flex-direction:row; max-width: 75%; margin-left: 2%">
-                    <div class="form-group" style="max-width: 100%; ">
-                        <label for="password">Password</label>
-                        <InputText @bind-Value=RegistrationInput.Password class="form-control" id="password" />
-                        <ValidationMessage For="() => RegistrationInput.Password" />
-                    </div>
-                    <div class="form-group" style="max-width: 100%;  margin-left: 2%">
-                        <label for="confirmpassword">Confirm Password</label>
-                        <InputText @bind-Value=RegistrationInput.ConfirmPassword class="form-control" id="confirmpassword" />
-                        <ValidationMessage For="() => RegistrationInput.ConfirmPassword" />
-                    </div>
-                </div> *@
+ 
 
                 <div class="form-group" style="display:flex;flex-direction:row; max-width: 75%; margin-left: 2%">
                     <div class="form-group" style="max-width: 100%; ">
@@ -180,13 +118,18 @@
                         <ValidationMessage For="() => RegistrationInput.Country" />
                     </div>
                 </div>
-                <div class="form-group" style="display:flex;flex-direction:row; max-width: 50%; margin-left: 2%">
+                <div class="form-group" style="display:flex;flex-direction:row; max-width: 75%; margin-left: 2%">
                     <div class="form-group" style="max-width: 100%; ">
                         <label for="nzmca">NZMCA #</label>
                         <InputText @bind-Value=RegistrationInput.NZMCA class="form-control" id="nzmca" />
                         <ValidationMessage For="() => RegistrationInput.NZMCA" />
                     </div>
+                    <div class="form-group" style="max-width: 100%; margin-left: 2% ">
+                        <label for="checked">Become a user?</label>
+                        <br/>
 
+                        <SfSwitch @bind-Checked="regChecked" style="margin-top:0.5pc;" id="checked"></SfSwitch>
+                    </div>
                 </div>
                 <button type="submit" class="w-100 btn btn-lg btn-primary">Check Availability, Message US and get EMAIL/SMS Confirmation Codes</button>
             </EditForm>
@@ -237,16 +180,7 @@
                         <ValidationMessage For="() => RegistrationInput.EmailCode" />
                     </div>
                 </div>
-     @*            <div class="form-floating mb-3">
-                    <InputText @bind-Value="RegistrationInput.SmsCode" class="form-control" placeholder="SMS Code" />
-                    <label>SMS Confirmation Code</label>
-                    <ValidationMessage For="() => RegistrationInput.SmsCode" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="RegistrationInput.EmailCode" class="form-control" placeholder="Email Code" />
-                    <label>Email Confirmation Code</label>
-                    <ValidationMessage For="() => RegistrationInput.EmailCode" class="text-danger" />
-                </div> *@
+
                 <button type="submit" class="w-100 btn btn-lg btn-success">Register and Check Availability</button>
             </EditForm>
             @if (verificationResult != null)
@@ -289,7 +223,7 @@
     private string? generatedEmailCode;
     private string? generatedSmsCode;
     private string? verificationResult;
-
+    private bool regChecked = true;
     private IEnumerable<IdentityError>? identityErrors;
     private IdentityRole? role { get; set; }
     private int searchPropertyId = 0; // should be id of first in loaded properties
