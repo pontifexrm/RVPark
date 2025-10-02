@@ -13,6 +13,7 @@
 @using TNZAPI.NET;
 @using TNZAPI.NET.Core;
 @using TNZAPI.NET.Api.Addressbook.Contact.Dto;
+@using Syncfusion.Blazor.Buttons
 
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
@@ -24,7 +25,14 @@
 @inject RoleManager<IdentityRole> RoleManager
 @inject ApplicationDbContext ApplicationDbContext
 
+<style>
 
+
+    .e-switch-wrapper .e-switch-on, .e-css.e-switch-wrapper .e-switch-on {
+        background-color:  rgb(25, 135, 84);
+        color: #fff;
+    }
+ </style>
 <PageTitle>Contact Us</PageTitle>
 
 <h1>Ask, Check Availability, Book.</h1>
@@ -128,7 +136,7 @@
                         <label for="checked">Become a user?</label>
                         <br/>
 
-                        <SfSwitch @bind-Checked="regChecked" style="margin-top:0.5pc;" id="checked"></SfSwitch>
+                        <SfSwitch @bind-Checked="regChecked" style="margin-top:0.5pc; " id="checked"></SfSwitch>
                     </div>
                 </div>
                 <button type="submit" class="w-100 btn btn-lg btn-primary">Check Availability, Message US and get EMAIL/SMS Confirmation Codes</button>

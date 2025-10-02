@@ -32,6 +32,7 @@
 
   <ItemGroup>
     <None Remove="Components\Layout\BkgMmtNavMenu.razor.css" />
+    <None Remove="Components\Pages\ContactRegister.razor.css" />
   </ItemGroup>
 
   <ItemGroup>
