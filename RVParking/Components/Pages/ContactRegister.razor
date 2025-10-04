@@ -24,6 +24,8 @@
 @inject IConfiguration configuration
 @inject RoleManager<IdentityRole> RoleManager
 @inject ApplicationDbContext ApplicationDbContext
+@inject HttpContextAccessorService httpContextAccessorService
+
 
 <style>
 
@@ -227,6 +229,7 @@
 @code {
     private bool isBkg_User = false;
     private bool codesSent = false;
+    private bool isSubmitting = false;
     private int currentStep = 1;
     private string? generatedEmailCode;
     private string? generatedSmsCode;
@@ -236,6 +239,9 @@
     private IdentityRole? role { get; set; }
     private int searchPropertyId = 0; // should be id of first in loaded properties
     private Bkg_Engine bkg_Engine;
+    public EmailMessage emailMessage { get; set; } = new EmailMessage();
+    private string userIpAddress = string.Empty;
+
 
     private List<Bkg_Property> properties = new();
 
@@ -248,6 +254,26 @@
 
     private async Task SendConfirmationCodes()
     {
+        if(regChecked == false)
+        {
+            // then the user does not want to register so just send the message and return to home page.
+            JustSendContactUs();
+            currentStep = 3;
+            // string fullmsg = $"From: {RegistrationInput.FirstName} {RegistrationInput.LastName}\n" +
+            //     $"Email: {RegistrationInput.Email}\n" +
+            //     $"Mobile: {RegistrationInput.Mobile}\n" +
+            //     $"City: {RegistrationInput.City}\n" +
+            //     $"Country: {RegistrationInput.Country}\n" +
+            //     $"NZMCA: {RegistrationInput.NZMCA}\n\n" +
+            //     $"Message:\n{RegistrationInput.Message}\n\n" +
+            //     $"Querying availability for property id: {searchPropertyId} from {RegistrationInput.Fmdate.ToShortDateString()} to {RegistrationInput.Todate.ToShortDateString()}.\n";
+            // SendEmailConfirmationCode(configuration["TNZ:AdminEmail"]); // send a copy to the admin email
+            // // await EmailSender.SendEmailAsync(configuration["TNZ:AdminEmail"], "Contact Us Message", fullmsg);
+            verificationResult = "✅ Your message has been sent. We will get back to you shortly. Thank you.";
+            currentStep = 3;
+            return;
+        }
+
         generatedEmailCode = GenerateCode();
         generatedSmsCode = GenerateCode();
 
@@ -419,11 +445,85 @@
             bkg_Engine = new Bkg_Engine(ApplicationDbContext);
         }
         properties = await ApplicationDbContext.bkg_Properties.ToListAsync() ?? new List<Bkg_Property>();
+        userIpAddress = httpContextAccessorService.GetUserIpAddress();
+
 
     }
 
     
+    private void JustSendContactUs()
+    {
+        // var etst = emailMessage.Name;
+        if (isSubmitting)
+            return;
+        if (emailMessage.HasValidMxRecord(RegistrationInput.Email) == false)  // checked to see if a valid email address
+        {
+            emailMessage.Email = string.Empty;
+            return;
+        }
+        isSubmitting = true;
+        emailMessage.Name = RegistrationInput.FirstName + " " + RegistrationInput.LastName;
+        emailMessage.Email = RegistrationInput.Email;
+        emailMessage.Phone = RegistrationInput.Mobile;
+        emailMessage.Subject = RegistrationInput.Subject;
+        emailMessage.Message = RegistrationInput.Message;
+        emailMessage.Nzmca = RegistrationInput.NZMCA;
+        emailMessage.Fmdate = RegistrationInput.Fmdate;
+        emailMessage.Todate = RegistrationInput.Todate;
+       // emailMessage.PropertyId = searchPropertyId;
 
+
+        
+        #region
+        // try
+        // {
+        //     result = "sending your request...";
+        //     await EmailSender.SendEmailAsync(emailMessage.Email, "RV Park Wgtn: " + emailMessage.Subject, emailMessage.ChkMsg);
+        // }
+        // catch (Exception ex)
+        // {
+        //     result = "Woops and Error:\n" + ex.Message;
+        // }
+        // finally
+        // {
+        //     isSubmitting = false;
+        // }
+        #endregion
+        //#if !DEBUG
+        // Using TNZ
+        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
+        var client = new TNZApiClient(apiUser);
+
+        var reponseEmail = client.Messaging.Email.SendMessage(
+            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+            emailSubject: RegistrationInput.Subject,
+            messagePlain: emailMessage.ChkMsg,
+            destination: RegistrationInput.Email
+        );
+        var reponseEmailcc = client.Messaging.Email.SendMessage(
+            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+            emailSubject: "cc'd msg re: " + emailMessage.Email + "|" + emailMessage.Subject,
+            messagePlain: emailMessage.ChkMsg + " " + userIpAddress,
+            destination: configuration["TNZ:CCemail"]
+        );
+
+        // next send an SMS to admin to say we have a contact.
+        // emailMessage.Phone = "";
+        string rept = configuration["TNZ:SMSrept"]; //"+64273042002";    // this shoild come from configuration injection
+                                                    //const string txtmsg = "From RVPark using TNZ API out of Blazor";
+        var response = client.Messaging.SMS.SendMessage
+                    (
+                        destination: rept,                     // Recipient
+                        messageText: emailMessage.smsMsg + " " + userIpAddress      // SMS Message
+                                                                                    //sendMode: Enums.SendModeType.Test           // TEST Mode - Remove this to send live traffic
+                    );
+        //#endif
+        verificationResult = "Thanks we have your message and we'll be in contact very soon. Meantime you will recieve an email copy of your message.";
+       // sendConfirmMsg = true;
+    }
 
 
     private sealed class RegistrationInputModel
