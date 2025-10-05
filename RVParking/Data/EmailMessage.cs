@@ -51,6 +51,25 @@ public class EmailMessage
     public DateTime Fmdate { get; set; } = DateTime.Now.Date;
 
     public DateTime Todate { get; set; } = DateTime.Now.Date;
+    public int PropertyId { get; set; } = 0;
+    public List<Bkg_Property> Properties { get; set; } = new List<Bkg_Property>();
+    public string PropertyName
+    {
+        get
+        {
+            string sRtn = string.Empty;
+            if (PropertyId > 0 && bkg_User != null && bkg_User.Bkg_Properties != null && bkg_User.Bkg_Properties.Count > 0)
+            {
+                var prp = Properties.Where(p => p.PropertyId == PropertyId).FirstOrDefault();
+                if (prp != null)
+                {
+                    sRtn = prp.Name;
+                }
+            }
+            return sRtn;
+        }
+    }
+
     public string FullName
     {
         get
@@ -79,6 +98,7 @@ public class EmailMessage
             return srtn;
         }
     }
+
     public string Chk_E_164_Phone(string phne)
     {
         string srtn = string.Empty;
@@ -95,23 +115,40 @@ public class EmailMessage
         }
         return srtn;
     }
+
+    public string getPropMsg()
+    {
+        string spropmsg = string.Empty;
+        if (this.PropertyId == 0) //No property for a booking is selected.
+        {
+            spropmsg = "";
+        }
+        else
+        {
+            var prp = Properties.Where(p => p.PropertyId == this.PropertyId).FirstOrDefault();
+            if (prp != null)
+            {
+                spropmsg = string.Format("You are interested in {0}, dates from [{1}] to [{2}] \\r\\n\"", prp.Name, this.Fmdate.ToString("yyyy-MM-dd"), this.Todate.ToString("yyyy-MM-dd")) + "\r\n";
+            }
+        }
+        return spropmsg;
+    }
+
     public string ChkMsg
     { 
         get{
             string sRtn = string.Format("Hi {0} \r\n" +
                               "Thanks for your interest in RV Park NZ.\r\n\r\nWe have received your message and will be contacting you soon with our response. \r\n" +
                               "Just so you have a record of this message here are the details you sent to us. \r\n\r\n" +
-                              "SUBJECT: [{7}]\r\n" +
+                              "SUBJECT: [{5}]\r\n" +
                               "Your email address is [{1}] \r\n" +
-                              "Your Phone number is [{2}] \r\n" +
-                              "You are interested in dates from [{3}] to [{4}] \r\n" +
-                              "If you are an NZMCA member your number being [{5}] \r\n" +
-                              "And finally your message is \r\n[{6}] \r\n\r\n" +
+                              "Your Phone number is [{2}] \r\n" + this.getPropMsg() +
+                              "If you are an NZMCA member your number being [{3}] \r\n" +
+                              "And finally your message is \r\n[{4}] \r\n\r\n" +
                               "Many thanks \r\n" +
                               "RV Park on Fitz \r\n" +
-                              "Date: {8}",
-            this.Name, this.Email, this.Phone,
-            this.Fmdate.ToString("yyyy-MM-dd"), this.Todate.ToString("yyyy-MM-dd"), this.Nzmca,
+                              "Date: {6}",
+            this.Name, this.Email, this.Phone, this.Nzmca,
             this.Message, this.Subject, DateTime.Now.ToString("g"));
             return sRtn;
         } 
@@ -120,15 +157,14 @@ public class EmailMessage
     {
         get
         {
-            string sRtn = string.Format("RVPark fm: {0} \r\n" +                              
+            string sRtn = string.Format("RVPark Msg fm: {0} \r\n" +
+                              this.getPropMsg() +
                               "SUBJECT: {3}  - {4}\r\n" +
                               "email {1} \r\n" +
                               "Phone {2} \r\n" +
-                              "Dates {6} to {7} \r\n" +
                               "{5}",
             this.Name, this.Email, this.E_164_Phone,
-            this.Subject, this.Message, DateTime.Now.ToString("g"),
-            this.Fmdate.ToString("yyyy-MM-dd"), this.Todate.ToString("yyyy-MM-dd"));
+            this.Subject, this.Message, DateTime.Now.ToString("g"));
             return sRtn;
         }
     }

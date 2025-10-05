@@ -470,7 +470,8 @@
         emailMessage.Nzmca = RegistrationInput.NZMCA;
         emailMessage.Fmdate = RegistrationInput.Fmdate;
         emailMessage.Todate = RegistrationInput.Todate;
-       // emailMessage.PropertyId = searchPropertyId;
+        emailMessage.PropertyId = searchPropertyId;
+        emailMessage.Properties = properties;
 
 
         
@@ -496,6 +497,7 @@
             AuthToken = configuration["TNZ:AuthToken"]
         };
         var client = new TNZApiClient(apiUser);
+        // TODO: Add property description if selected. If not also ignore dates.
 
         var reponseEmail = client.Messaging.Email.SendMessage(
             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
