@@ -143,7 +143,7 @@ public class EmailMessage
                               "SUBJECT: [{5}]\r\n" +
                               "Your email address is [{1}] \r\n" +
                               "Your Phone number is [{2}] \r\n" + this.getPropMsg() +
-                              "If you are an NZMCA member your number being [{3}] \r\n" +
+                              "Are you an NZMCA member [{3}] \r\n" +
                               "And finally your message is \r\n[{4}] \r\n\r\n" +
                               "Many thanks \r\n" +
                               "RV Park on Fitz \r\n" +

@@ -238,7 +238,7 @@
     private IEnumerable<IdentityError>? identityErrors;
     private IdentityRole? role { get; set; }
     private int searchPropertyId = 0; // should be id of first in loaded properties
-    private Bkg_Engine bkg_Engine;
+
     public EmailMessage emailMessage { get; set; } = new EmailMessage();
     private string userIpAddress = string.Empty;
 
@@ -247,6 +247,11 @@
 
     private RegistrationInputModel RegistrationInput { get; set; } = new();
     // private CodeInputModel CodeInput { get; set; } = new();
+    private Bkg_Booking newBooking = new();
+    private Bkg_Booking currentBooking = new();
+    private Bkg_Booking orgnBkg = new();
+
+    private Bkg_Engine? bkg_Engine;
 
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
@@ -286,6 +291,8 @@
         string txtrept = Chk_E_164_Phone(RegistrationInput.Mobile);
         SendTxtConfirmationCode(txtrept);
         await Task.Delay(500); // slight delay to allow for the messages to be sent before moving to next step
+        // send ContactUs message if needed
+        SendContactUs();
         currentStep = 2;
         codesSent = true;
     }
@@ -428,6 +435,35 @@
             }
             await ApplicationDbContext.SaveChangesAsync();
         }
+
+        // Need now to see if we are asking for a booking and if so see if it is possible and then bookin it else show appropriate message.
+        if (searchPropertyId != 0)
+        {
+            newBooking = new Bkg_Booking();
+            newBooking.DateArrive = RegistrationInput.Fmdate;
+            newBooking.DateDepart = RegistrationInput.Todate;
+            newBooking.UserId = bkg_User.UserId;
+            newBooking.PropertyId = searchPropertyId;
+            newBooking.BookingStatus = "Requested";
+            newBooking.Bkg_User = bkg_User;
+            //        newBooking.Bkg_Property = BkgProperties.FirstOrDefault(p => p.PropertyId == rqstPropertyId);
+            currentBooking = newBooking;  // maybe ???
+
+            var isAvail = bkg_Engine.RequestBooking(newBooking);
+            if (isAvail)
+            {
+                // modalTitle = "Booking Requested";
+                // modalMessage = "Your booking request is AVAILABLE. Please press SAVE to confirm or CANEL to quit.";
+                // allDatesAvailable = true;
+            }
+            else
+            {
+                // modalTitle = "Booking Request Failed";
+                // modalMessage = "Sorry but your booking request is not possible.";
+                // allDatesAvailable = false;
+            }
+            
+        }
         verificationResult += "✅ Verified and created! You can now use the system. Please login as normal.";
         currentStep = 3;
         // // await SignInManager.SignInAsync(user, isPersistent: false);
@@ -450,7 +486,7 @@
 
     }
 
-    
+
     private void JustSendContactUs()
     {
         // var etst = emailMessage.Name;
@@ -474,7 +510,7 @@
         emailMessage.Properties = properties;
 
 
-        
+
         #region
         // try
         // {
@@ -515,16 +551,79 @@
         // next send an SMS to admin to say we have a contact.
         // emailMessage.Phone = "";
         string rept = configuration["TNZ:SMSrept"]; //"+64273042002";    // this shoild come from configuration injection
-                                                    //const string txtmsg = "From RVPark using TNZ API out of Blazor";
+        //const string txtmsg = "From RVPark using TNZ API out of Blazor";
         var response = client.Messaging.SMS.SendMessage
                     (
                         destination: rept,                     // Recipient
                         messageText: emailMessage.smsMsg + " " + userIpAddress      // SMS Message
-                                                                                    //sendMode: Enums.SendModeType.Test           // TEST Mode - Remove this to send live traffic
+                    //sendMode: Enums.SendModeType.Test           // TEST Mode - Remove this to send live traffic
                     );
         //#endif
         verificationResult = "Thanks we have your message and we'll be in contact very soon. Meantime you will recieve an email copy of your message.";
-       // sendConfirmMsg = true;
+        // sendConfirmMsg = true;
+    }
+    private void SendContactUs()
+    {
+        // var etst = emailMessage.Name;
+        if (isSubmitting)
+            return;
+        if (emailMessage.HasValidMxRecord(RegistrationInput.Email) == false)  // checked to see if a valid email address
+        {
+            return;
+        }
+        if (searchPropertyId == 0 && RegistrationInput.Subject == string.Empty && RegistrationInput.Message == string.Empty)
+        {
+            // only send the contact us if the user has entered any fields for it
+            return;
+        }
+        isSubmitting = true;
+        emailMessage.Name = RegistrationInput.FirstName + " " + RegistrationInput.LastName;
+        emailMessage.Email = RegistrationInput.Email;
+        emailMessage.Phone = RegistrationInput.Mobile;
+        emailMessage.Subject = RegistrationInput.Subject;
+        emailMessage.Message = RegistrationInput.Message;
+        emailMessage.Nzmca = RegistrationInput.NZMCA;
+        emailMessage.Fmdate = RegistrationInput.Fmdate;
+        emailMessage.Todate = RegistrationInput.Todate;
+        emailMessage.PropertyId = searchPropertyId;
+        emailMessage.Properties = properties;
+
+        //#if !DEBUG
+        // Using TNZ
+        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
+        var client = new TNZApiClient(apiUser);
+
+
+        var reponseEmail = client.Messaging.Email.SendMessage(
+            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+            emailSubject: RegistrationInput.Subject,
+            messagePlain: emailMessage.ChkMsg,
+            destination: RegistrationInput.Email
+        );
+        var reponseEmailcc = client.Messaging.Email.SendMessage(
+            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+            emailSubject: "cc'd msg re: " + emailMessage.Email + "|" + emailMessage.Subject,
+            messagePlain: emailMessage.ChkMsg + " " + userIpAddress,
+            destination: configuration["TNZ:CCemail"]
+        );
+
+        // next send an SMS to admin to say we have a contact.
+        // emailMessage.Phone = "";
+        string rept = configuration["TNZ:SMSrept"]; //"+64273042002";    // this shoild come from configuration injection
+        //const string txtmsg = "From RVPark using TNZ API out of Blazor";
+        var response = client.Messaging.SMS.SendMessage
+                    (
+                        destination: rept,                     // Recipient
+                        messageText: emailMessage.smsMsg + " " + userIpAddress      // SMS Message
+                    //sendMode: Enums.SendModeType.Test           // TEST Mode - Remove this to send live traffic
+                    );
+        //#endif
+        //verificationResult = "Thanks we have your message and we'll be in contact very soon. Meantime you will recieve an email copy of your message.";
+        // sendConfirmMsg = true;
+        return;
     }
 
 
