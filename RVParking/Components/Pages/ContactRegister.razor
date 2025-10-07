@@ -452,14 +452,16 @@
             var isAvail = bkg_Engine.RequestBooking(newBooking);
             if (isAvail)
             {
+                // we have a booking so create it and save it.
                 // modalTitle = "Booking Requested";
-                // modalMessage = "Your booking request is AVAILABLE. Please press SAVE to confirm or CANEL to quit.";
+                verificationResult = "✅ Your booking request is AVAILABLE. It has been booked for you. Please log in to see and manage this and future bookings.";
                 // allDatesAvailable = true;
+                await SaveBooking();
             }
             else
             {
                 // modalTitle = "Booking Request Failed";
-                // modalMessage = "Sorry but your booking request is not possible.";
+                verificationResult = "❌  Sorry but your booking request is not possible. Please log in to see other possible dates and manage future bookings. ";
                 // allDatesAvailable = false;
             }
             
@@ -484,6 +486,56 @@
         userIpAddress = httpContextAccessorService.GetUserIpAddress();
 
 
+    }
+    private async Task SaveBooking()
+    {
+        currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
+        currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
+        string s = configuration["TNZ:SMSrept"];
+        string txtrept = Chk_E_164_Phone(s);
+//        currentBooking.DateArrive = Fmdate; currentBooking.DateDepart = Todate;
+
+        // if a new booking then we need to Create it else Change it.
+        if (currentBooking.BookingId == 0) // A new booking
+        {
+            currentBooking.CreatedDte = DateTime.Now;
+            currentBooking.UpdatedDte = DateTime.Now;
+            var savedOK = await bkg_Engine.CreateBookingAsync(currentBooking);
+            if (!savedOK)
+            {
+                verificationResult += "❌ Error found saving this new Booking";
+            }
+            else
+            {
+                // will send an email confirmation
+                SendEmailConfirmation();
+                SendTxtConfirmation(txtrept); //send a txt to System Admin
+                // Need to send a cc'd to rvpark@pontifex.nz
+                SendCCEmailConfirmation();
+            }
+        }
+        else // editing existing bkg
+        {
+            currentBooking.UpdatedDte = DateTime.Now;
+
+            var savedOK = await bkg_Engine.EditBookingAsync(orgnBkg, currentBooking);
+            if (!savedOK)
+            {
+                verificationResult += "❌ Error found saving this edited Booking";
+
+            }
+            else
+            {
+                // will send an email confirmation
+                SendEmailConfirmation();
+                SendTxtConfirmation(txtrept); //send a txt to System Admin
+                // Need to send a cc'd to rvpark@pontifex.nz
+                SendCCEmailConfirmation();
+            }
+
+        }
+
+        StateHasChanged();
     }
 
 
@@ -711,6 +763,247 @@
             );
         // #endif
     }
+
+
+    // private void SendEmailConfirmation(int bookingId)
+    // {
+    //     currentBooking = bookings.FirstOrDefault(b => b.BookingId == bookingId);
+    //     sendConfirmMsg = true;
+    // }
+    private void SendEmailConfirmation()
+    {
+        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+#if !DEBUG
+        // Using TNZ
+        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
+        var client = new TNZApiClient(apiUser);
+
+        var reponseEmail = client.Messaging.Email.SendMessage(
+            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+            emailSubject: subjectMsg,
+            messagePlain: ConfirmBkgMsg(),
+            destination: currentBooking.Bkg_User.UserEmail
+        );
+#endif
+        //sendConfirmMsg = false;
+    }
+    private void SendCCEmailConfirmation()
+    {
+        string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+#if !DEBUG
+        // Using TNZ
+        var apiUser = new TNZApiUser()  // this should come from configuration injection
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
+        var client = new TNZApiClient(apiUser);
+
+        var reponseEmail = client.Messaging.Email.SendMessage(
+            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+            emailSubject: subjectMsg,
+            messagePlain: ConfirmBkgMsg(),
+            destination: configuration["TNZ:CCemail"]
+        );
+#endif
+        //sendConfirmMsg = false;
+    }
+    private void SendCCEmailDeleteConfirmation(string subjectMsg, string DeleteMsg)
+    {
+        // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, DeleteMsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        // " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED");
+#if !DEBUG
+        // Using TNZ
+        var apiUser = new TNZApiUser()  // this should come from configuration injection
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
+        var client = new TNZApiClient(apiUser);
+
+        var reponseEmail = client.Messaging.Email.SendMessage(
+            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+            emailSubject: subjectMsg,
+            messagePlain: subjectMsg,
+            destination: configuration["TNZ:CCemail"]
+        );
+#endif
+        //sendConfirmMsg = false;
+    }
+    private void SendTxtConfirmation()
+    {
+        SendTxtConfirmation("");
+    }
+    private void SendTxtConfirmation(string subjectMsg, string txtrept, string DeleteMsg)
+    {
+        // string subjectMsg = string.Concat(DeleteMsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        // " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED");
+
+        // if (txtrept.Length == 0)
+        // {
+        //     txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone); // there is not currentbooking at this stage.
+        // }
+        // Using TNZ
+#if !DEBUG
+        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
+        var client = new TNZApiClient(apiUser);
+
+        var response = client.Messaging.SMS.SendMessage
+            (
+                destination: txtrept,
+                messageText: subjectMsg
+            );
+#endif
+        //sendConfirmMsg = false;
+    }
+    private void SendTxtConfirmation(string txtrept)
+    {
+        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+
+        if (txtrept.Length == 0)
+        {
+            txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
+        }
+        // Using TNZ
+#if !DEBUG
+        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
+        var client = new TNZApiClient(apiUser);
+
+        var response = client.Messaging.SMS.SendMessage
+            (
+                destination: txtrept,
+                messageText: ConfirmTxtBkgMsg()
+            );
+#endif
+       // sendConfirmMsg = false;
+    }
+    private void SendTxtConfirmationNoEmail(string txtrept)
+    {
+        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+
+        if (txtrept.Length == 0)
+        {
+            txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
+        }
+        // Using TNZ
+#if !DEBUG
+        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
+        var client = new TNZApiClient(apiUser);
+
+        var response = client.Messaging.SMS.SendMessage
+            (
+                destination: txtrept,
+                messageText: ConfirmTxtBkgMsg()
+            );
+#endif
+        //sendConfirmMsg = false;
+    }
+
+
+    private string ConfirmBkgMsg()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("Kia ora ");
+        sb.Append(currentBooking.Bkg_User.UserFirstName);
+        sb.Append(" ");
+        sb.Append(currentBooking.Bkg_User.UserLastName);
+        sb.Append("\n\n");
+        sb.Append("Your booking has been confirmed, or reconfirmed for ");
+        sb.Append(currentBooking.Bkg_Property.Name);
+        sb.Append(" arriving after mid-day ");
+        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(" departing before mid-day ");
+        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append("\n\n");
+        sb.Append("Address is\r\n" +
+                  "        22 Fitzpatrick St\r\n" +
+                  "        Newlands\r\n" +
+                  "        Wellington 6037\r\n\r\n" +
+                  "Access is best from Stewart Drive. Either from the north where you would exit SH1 at Johnsonville or from the South also through Johnsonville's main street. Turn into Fitzpatrick St from Stewart Drive is best. " +
+                  "We are on the left corner of the 2nd street on the left going up Fitzpatrick St.\r\n\r\n" +
+                  "Access from Stewart Drive is also possible via Quigley St. Follow Quigley Street around until it T-intersects with Fitzpatrick St. Your park is then on the left of that intersection.\r\n\r\n" +
+                  "https://www.rvpark.nz/directions click for map from the South \r\n" +
+                  "https://www.rvpark.nz/directionsnorth click for map from the North \r\n" +
+                  "PLEASE BE AWARE: Some of the roads in Newlands are NOT suitable for RVs and larger vehicles SO DO NOT FOLLOW THE Map Apps THEY WILL GET YOU STUCK... Really We Are Not Kidding.\r\n\r\n" +
+                  "Payment is $30 for the night with NZMCA Memebrship otherwise $45 per night, payable in advance please to our bank account.\r\n" +
+                  "        Ronald Pontifex\r\n" +
+                  "        03 0525 0253043 000\r\n" +
+                  "(We have Wise Card if that suits you better.)\r\n\r\n" +
+                  "Please text us on arrival and we shall come out to meets you etc.\r\n" +
+                  "Again many thanks\r\n" +
+                  "Ron Pontifex\r\n" +
+                  "WELLINGTON New Zealand\r\n" +
+                  "Ph 027 304 2002\r\n" +
+                  "E - Mail : rvpark@pontifex.nz\r\n"); return sb.ToString();
+    }
+    private string ConfirmBkgMsgNoEmail()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("Kia ora ");
+        sb.Append(currentBooking.Bkg_User.UserFirstName);
+        sb.Append(" ");
+        sb.Append(currentBooking.Bkg_User.UserLastName);
+        sb.Append("\n\n");
+        sb.Append("Your booking has been confirmed, or reconfirmed for ");
+        sb.Append(currentBooking.Bkg_Property.Name);
+        sb.Append(" arriving after mid-day ");
+        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(" departing before mid-day ");
+        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append("\n\n");
+        sb.Append("Address is\r\n" +
+                  "        22 Fitzpatrick St\r\n" +
+                  "        Newlands\r\n" +
+                  "        Wellington 6037\r\n\r\n" +
+                  "Access is best from Stewart Drive. Either from the north where you would exit SH1 at Johnsonville or from the South also through Johnsonville's main street. Turn into Fitzpatrick St from Stewart Drive is best. " +
+                  "We are on the left corner of the 2nd street on the left going up Fitzpatrick St.\r\n\r\n" +
+                  "Access from Stewart Drive is also possible via Quigley St. Follow Quigley Street around until it T-intersects with Fitzpatrick St. Your park is then on the left of that intersection.\r\n\r\n" +
+                  "https://www.rvpark.nz/directions click for map from the South \r\n" +
+                  "https://www.rvpark.nz/directionsnorth click for map from the North \r\n" +
+                  "PLEASE BE AWARE: Some of the roads in Newlands are NOT suitable for RVs and larger vehicles SO DO NOT FOLLOW THE Map Apps THEY WILL GET YOU STUCK... Really We Are Not Kidding.\r\n\r\n" +
+                  "Payment is $30 for the night with NZMCA Memebrship otherwise $45 per night, payable in advance please to our bank account.\r\n" +
+                  "        Ronald Pontifex\r\n" +
+                  "        03 0525 0253043 000\r\n" +
+                  "(We have Wise Card if that suits you better.)\r\n\r\n" +
+                  "Please text us on arrival and we shall come out to meets you etc.\r\n" +
+                  "Again many thanks\r\n" +
+                  "Ron Pontifex\r\n" +
+                  "WELLINGTON New Zealand\r\n" +
+                  "Ph 027 304 2002\r\n" +
+                  "E - Mail : rvpark@pontifex.nz\r\n"); return sb.ToString();
+    }
+    private string ConfirmTxtBkgMsg()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("Kia ora ");
+        sb.Append(currentBooking.Bkg_User.UserFirstName);
+        sb.Append(" ");
+        sb.Append(currentBooking.Bkg_User.UserLastName);
+        sb.Append("\n\n");
+        sb.Append("Your booking has been confirmed, or reconfirmed for ");
+        sb.Append(currentBooking.Bkg_Property.Name);
+        sb.Append(" arriving after mid-day ");
+        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(" departing before mid-day ");
+        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append("\n\n");
+        sb.Append("Please refer to your Bkg confirmation Email for full Details.\r\n" +
+                 "from : rvpark@pontifex.nz\r\n"); return sb.ToString();
+    }
     private string Chk_E_164_Phone(string phne)
     {
         string srtn = string.Empty;
@@ -727,5 +1020,6 @@
         }
         return srtn;
     }
+
 
 }
