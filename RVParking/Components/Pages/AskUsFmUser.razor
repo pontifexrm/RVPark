@@ -1,4 +1,4 @@
-﻿@page "/ContactRegister"
+﻿@page "/AskUsFmUser"
 @rendermode InteractiveServer
 
 @using System.ComponentModel.DataAnnotations
@@ -25,31 +25,34 @@
 @inject RoleManager<IdentityRole> RoleManager
 @inject ApplicationDbContext ApplicationDbContext
 @inject HttpContextAccessorService httpContextAccessorService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
 
 
 <style>
 
 
     .e-switch-wrapper .e-switch-on, .e-css.e-switch-wrapper .e-switch-on {
-        background-color:  rgb(25, 135, 84);
+        background-color: rgb(25, 135, 84);
         color: #fff;
     }
- </style>
-<PageTitle>Contact Us</PageTitle>
+</style>
+<PageTitle>Ask Us</PageTitle>
 
-<h1>Ask, Check Availability, Book.</h1>
+<h1>Ask, Check Availability, maybe Book.</h1>
 
 <div class="row">
     <div class="col-lg-6">
-        @if (currentStep == 1)
-        {
-            <EditForm Model="RegistrationInput" OnValidSubmit="@SendConfirmationCodes" FormName="SendCodesForm">
+@*         @if (currentStep == 1)
+        { *@
+            <EditForm Model="ContactInput" OnValidSubmit="@ExitForm" FormName="ContactForm">
                 <DataAnnotationsValidator />
                 <ValidationSummary class="text-danger" role="alert" />
                 <span>
-                    <small>Please register, you can then view bkg-availablility. You can Opt out.<br/>
+                    <small>
+                        Please register, you can then view bkg-availablility. You can Opt out.<br />
                     </small>
-                 </span>
+                </span>
 
                 <span><i>Query Availability for RV Park or Apartment with In/Out Dates.</i></span>
 
@@ -59,110 +62,72 @@
                         <option value="">Select</option>
                         @foreach (var property in properties)
                         {
-                            <option value="@property.PropertyId">@property.Name</option>
+                        <option value="@property.PropertyId">@property.Name</option>
                         }
                     </select>
                 </div>
                 <div class="form-group" style="display:flex;flex-direction:row;">
                     <div class="form-group" style="max-width: 25%;  margin-left: 2%">
                         <label for="fmdate">From</label>
-                        <InputDate @bind-Value=RegistrationInput.Fmdate class="form-control" id="fmdate" />
-                        <ValidationMessage For="() => RegistrationInput.Fmdate" />
+                        <InputDate @bind-Value=ContactInput.Fmdate class="form-control" id="fmdate" />
+                        <ValidationMessage For="() => ContactInput.Fmdate" />
                     </div>
                     <div class="form-group" style="max-width: 25%;  margin-left: 2%">
                         <label for="todate">To</label>
-                        <InputDate @bind-Value=RegistrationInput.Todate class="form-control" id="todate" />
-                        <ValidationMessage For="() => RegistrationInput.Todate" />
+                        <InputDate @bind-Value=ContactInput.Todate class="form-control" id="todate" />
+                        <ValidationMessage For="() => ContactInput.Todate" />
                     </div>
 
                 </div>
                 <span><i>Contact Us with a message or question.</i></span>
                 <div class="form-group" style="max-width: 75%;width: 500px; margin-left: 2%">
                     <label for="subject">Subject</label>
-                    <InputText @bind-Value="RegistrationInput.Subject" class="form-control" id="subject" />
-                    <ValidationMessage For="() => RegistrationInput.Subject" />
+                    <InputText @bind-Value="ContactInput.Subject" class="form-control" id="subject" />
+                    <ValidationMessage For="() => ContactInput.Subject" />
                 </div>
                 <div class="form-group" style="max-width: 75%;width:500px;  margin-left: 2%">
                     <label for="message">Message</label>
-                    <InputTextArea @bind-Value="RegistrationInput.Message" class="form-control" id="message" />
+                    <InputTextArea @bind-Value="ContactInput.Message" class="form-control" id="message" />
 
                 </div>
+                @if(currentStep == 1)
+                {
+                    <button type="button" class="w-100 btn btn-lg btn-primary" @onclick="CheckBkgAvailable">Check Availability, Message US. </button>
+                }
+                else
+                {
+                    @if (verificationResult != null)
+                    {
+                        <p>@verificationResult</p>
+                    } 
+                    @if (bkgAvailable)
+                    {
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    }
+                    <button type="button" class="btn btn-secondary" @onclick="ExitForm">Cancel</button>
 
-                @* <hr /> *@
-                <span><i>The information we need of you.</i></span>
-                <div class="form-group" style="display:flex;flex-direction:row; max-width: 75%; margin-left: 2%">
-                    <div class="form-group" style="max-width: 100%; ">
-                        <label for="firstname">First Name</label>
-                        <InputText @bind-Value=RegistrationInput.FirstName class="form-control" id="firstname" />
-                        <ValidationMessage For="() => RegistrationInput.FirstName" />
-                    </div>
-                    <div class="form-group" style="max-width: 100%;  margin-left: 2%">
-                        <label for="lastname">Last Name</label>
-                        <InputText @bind-Value=RegistrationInput.LastName class="form-control" id="lastname" />
-                        <ValidationMessage For="() => RegistrationInput.LastName" />
-                    </div>
-                </div>
-                <div class="form-group" style="display:flex;flex-direction:row; max-width: 75%; margin-left: 2%">
-                    <div class="form-group" style="max-width: 100%; ">
-                        <label for="email">Email</label>
-                        <InputText @bind-Value=RegistrationInput.Email class="form-control" id="email" />
-                        <ValidationMessage For="() => RegistrationInput.Email" />
-                    </div>
-                    <div class="form-group" style="max-width: 100%;  margin-left: 2%">
-                        <label for="mobile">Mobile Phone</label>
-                        <InputText @bind-Value=RegistrationInput.Mobile class="form-control" id="mobile" />
-                        <ValidationMessage For="() => RegistrationInput.Mobile" />
-                    </div>
-                </div>
- 
-
-                <div class="form-group" style="display:flex;flex-direction:row; max-width: 75%; margin-left: 2%">
-                    <div class="form-group" style="max-width: 100%; ">
-                        <label for="city">City/Town</label>
-                        <InputText @bind-Value=RegistrationInput.City class="form-control" id="city" />
-                        <ValidationMessage For="() => RegistrationInput.City" />
-                    </div>
-                    <div class="form-group" style="max-width: 100%;  margin-left: 2%">
-                        <label for="country">Country</label>
-                        <InputText @bind-Value=RegistrationInput.Country class="form-control" id="country" />
-                        <ValidationMessage For="() => RegistrationInput.Country" />
-                    </div>
-                </div>
-                <div class="form-group" style="display:flex;flex-direction:row; max-width: 75%; margin-left: 2%">
-                    <div class="form-group" style="max-width: 100%; ">
-                        <label for="nzmca">NZMCA #</label>
-                        <InputText @bind-Value=RegistrationInput.NZMCA class="form-control" id="nzmca" />
-                        <ValidationMessage For="() => RegistrationInput.NZMCA" />
-                    </div>
-                    <div class="form-group" style="max-width: 100%; margin-left: 2% ">
-                        <label for="checked">Become a user?</label>
-                        <br/>
-
-                        <SfSwitch @bind-Checked="regChecked" style="margin-top:0.5pc; " id="checked"></SfSwitch>
-                    </div>
-                </div>
-                <button type="submit" class="w-100 btn btn-lg btn-primary">Check Availability, Message US and get EMAIL/SMS Confirmation Codes</button>
+                }
             </EditForm>
-        }
+        @* } *@
 
-        @if (currentStep == 2)
+@*         @if (currentStep == 2)
         {
-            @* <StatusMessage Message="@Message" /> *@
-            <span>
-                
-                If you wish to register and have your queried booking reserved, then:-<br/>
+             @* <StatusMessage Message="@Message" />             <span>
+
+                If you wish to register and have your queried booking reserved, then:-<br />
                 Please enter:-
                 <ul>
                     <li>Your password and confirm it.</li>
                     <li>The confirmation codes sent to your Email and Mobile Phone.</li>
                     <ul>
                         <li>This may take a minute or two depending on the email servers involved, so do please hang in there. Also check your spam/junk folder</li>
-                        </ul>
+                    </ul>
 
                     <li>If you do not see the email in your inbox please check your spam/junk folder.</li>
                     <li>If you do not wish to register or book just leave these fields BLANK.We get back to you shortly.</li>
                 </ul>
-                </span>
+            </span> *@
+@* 
             <EditForm Model="RegistrationInput" OnValidSubmit="@ValidateCodesAndRegister" FormName="ValidateCodesForm">
                 <DataAnnotationsValidator />
                 <ValidationSummary class="text-danger" role="alert" />
@@ -191,13 +156,14 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-100 btn btn-lg btn-success">Register and Check Availability</button>
-            </EditForm>
-            @if (verificationResult != null)
+                <button type="button" class="btn btn-secondary" @onclick="ExitForm">Cancel</button>
+                <button type="submit" class="w-100 btn btn-lg btn-success">SaveBkg and send stuff</button>
+            </EditForm> *@
+     @*        @if (verificationResult != null)
             {
                 <p>@verificationResult</p>
-            }
-        }
+            } *@
+        @* } *@
 
         @if (currentStep == 3)
         {
@@ -206,7 +172,8 @@
                 <p>@verificationResult</p>
             }
             @* <StatusMessage Message="@Message" /> *@
-            <EditForm Model="RegistrationInput" OnValidSubmit="@ExitRegisterForm" FormName="ExitRegForm">
+        
+           @*  <EditForm Model="RegistrationInput" OnValidSubmit="@ExitForm" FormName="ExitRegForm">
                 @*            <DataAnnotationsValidator />
                 <ValidationSummary class="text-danger" role="alert" />
                 <div class="form-floating mb-3">
@@ -219,14 +186,21 @@
                     <label>SMS Confirmation Code</label>
                     <ValidationMessage For="() => RegistrationInput.SmsCode" class="text-danger" />
                 </div> *@
-                <button type="submit" class="w-100 btn btn-lg btn-success">exit</button>
-            </EditForm>
+                @* <button type="submit" class="w-100 btn btn-lg btn-success">exit</button> *@
+            @* </EditForm>  *@
 
         }
+  
     </div>
 </div>
 
 @code {
+
+    private string modalTitle = string.Empty;
+    private string modalMessage = string.Empty;
+    private bool sendConfirmMsg = false;
+    private bool showModal = false;
+
     private bool isBkg_User = false;
     private bool codesSent = false;
     private bool isSubmitting = false;
@@ -245,233 +219,280 @@
 
     private List<Bkg_Property> properties = new();
 
-    private RegistrationInputModel RegistrationInput { get; set; } = new();
+    private ContactInputModel ContactInput { get; set; } = new();
     // private CodeInputModel CodeInput { get; set; } = new();
     private Bkg_Booking newBooking = new();
     private Bkg_Booking currentBooking = new();
     private Bkg_Booking orgnBkg = new();
+    private Bkg_User currentUser = new();
+
 
     private Bkg_Engine? bkg_Engine;
+    private bool bkgAvailable = false;
 
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
-    private string GenerateCode() => new Random().Next(100000, 999999).ToString();
-
-    private async Task SendConfirmationCodes()
+    // private string GenerateCode() => new Random().Next(100000, 999999).ToString();
+    private DateTime AddOneDay(DateTime date)
     {
-        if(regChecked == false)
-        {
-            // then the user does not want to register so just send the message and return to home page.
-            JustSendContactUs();
-            currentStep = 3;
-            // string fullmsg = $"From: {RegistrationInput.FirstName} {RegistrationInput.LastName}\n" +
-            //     $"Email: {RegistrationInput.Email}\n" +
-            //     $"Mobile: {RegistrationInput.Mobile}\n" +
-            //     $"City: {RegistrationInput.City}\n" +
-            //     $"Country: {RegistrationInput.Country}\n" +
-            //     $"NZMCA: {RegistrationInput.NZMCA}\n\n" +
-            //     $"Message:\n{RegistrationInput.Message}\n\n" +
-            //     $"Querying availability for property id: {searchPropertyId} from {RegistrationInput.Fmdate.ToShortDateString()} to {RegistrationInput.Todate.ToShortDateString()}.\n";
-            // SendEmailConfirmationCode(configuration["TNZ:AdminEmail"]); // send a copy to the admin email
-            // // await EmailSender.SendEmailAsync(configuration["TNZ:AdminEmail"], "Contact Us Message", fullmsg);
-            verificationResult = "✅ Your message has been sent. We will get back to you shortly. Thank you.";
-            currentStep = 3;
-            return;
-        }
-
-        generatedEmailCode = GenerateCode();
-        generatedSmsCode = GenerateCode();
-
-        // Send email code
-        // await EmailSender.SendEmailAsync(RegistrationInput.Email, "Your Email Confirmation Code", $"Your code: {generatedEmailCode}");
-        SendEmailConfirmationCode(RegistrationInput.Email);
-
-        // Send SMS code
-        // await SmsSender.SendSmsAsync(RegistrationInput.Mobile, $"Your SMS confirmation code: {generatedSmsCode}");
-        string txtrept = Chk_E_164_Phone(RegistrationInput.Mobile);
-        SendTxtConfirmationCode(txtrept);
-        await Task.Delay(500); // slight delay to allow for the messages to be sent before moving to next step
-        // send ContactUs message if needed
-        SendContactUs();
-        currentStep = 2;
-        codesSent = true;
+        return date.AddDays(1);
     }
-
-    private async Task ValidateCodesAndRegister()
+    private DateTime SubOneDay(DateTime date)
     {
-        // if (verificationResult != null)
-        // {
-        //     NavigationManager.NavigateTo("/");
-        // }
-        if (RegistrationInput.EmailCode != generatedEmailCode || RegistrationInput.SmsCode != generatedSmsCode)
-        {
-            identityErrors = new[] { new IdentityError { Description = "Invalid confirmation codes." } };
-            verificationResult = "❌ Verification failed. -- Invalid confirmation codes.";
-            currentStep = 3;
-            return;
-        }
-
-        // see if this is the first User and if so perhaps role = Admin needs to be added if it is not there so the Admin and setup features will be available to the first confirmed user.
-        var userCount = await ApplicationDbContext.GetIdentityUserCountAsync();
-        if (userCount == 0)
-        {
-            role = await ApplicationDbContext.Roles.FindAsync("Admin");
-            if (role == null)
-            {
-                role = new IdentityRole();
-                if (role != null)
-                {
-                    role.Name = "Admin";
-                    role.NormalizedName = role.Name.ToUpper();
-                    await ApplicationDbContext.Roles.AddAsync(role);
-                    await ApplicationDbContext.SaveChangesAsync();
-                }
-                else
-                {
-                    verificationResult = "❌ Verification failed. -- Role Admin, found to be needed BUT not created.";
-                    currentStep = 3;
-                    return;
-                }
-            }
-        }
-
-        // At this point we have valid codes so we can try to create the user account
-        var user = new ApplicationUser
-        {
-            Email = RegistrationInput.Email,
-            UserName = RegistrationInput.Email,
-            FirstNames = RegistrationInput.FirstName,
-            LastName = RegistrationInput.LastName,
-            PhoneNumber = RegistrationInput.Mobile,
-            City = RegistrationInput.City,
-            Country = RegistrationInput.Country,
-            NZMCA = RegistrationInput.NZMCA,
-            CreatedDte = DateTime.Now
-        };
-        var result = await UserManager.CreateAsync(user, RegistrationInput.Password);
-        // If the user already exists or other issue then we will end up here.
-        if (!result.Succeeded)
-        {
-            identityErrors = result.Errors;
-            string serr = result.Errors.FirstOrDefault()?.Description ?? string.Empty;
-            verificationResult = "❌ Verification failed. " + serr;
-            currentStep = 3;
-            return;
-        }
-
-        // If we get here then the user was created and now we create the BkgUser for this person.
-        // Populate the Bkg_User object and save it.
-        // First see if there is a Bkg_User for this email
-        var bkg_User = await ApplicationDbContext.bkg_Users.FirstOrDefaultAsync(u => u.UserEmail == user.Email);
-        if (bkg_User != null)
-        {
-            // If a Bkg_User already exists, update it Also should update the AppUSer with data from the Bkg_User, names, phone, address, NZMCA etc.
-            isBkg_User = true;
-            bkg_User.UserName = user.Email;
-            bkg_User.AppUserId = user.Id;
-            user.FirstNames = bkg_User.UserFirstName;
-            user.LastName = bkg_User.UserLastName;
-            user.NZMCA = bkg_User.UserNZMCA;
-            user.City = bkg_User.UserCity;
-            user.Country = bkg_User.UserCountry;
-            user.UserAddress = bkg_User.UserAddress;
-            user.UserState = bkg_User.UserState;
-            user.UserZip = bkg_User.UserZip;
-
-            // ApplicationDbContext.bkg_Users.Update(bkg_User);
-            // ApplicationDbContext.Users.Update(user);
-        }
-        else
-        {
-            // If no Bkg_User exists, create a new one
-            bkg_User = new Bkg_User
-            {
-                UserEmail = user.Email,
-                UserName = user.Email,
-                AppUserId = user.Id,
-                UserFirstName = RegistrationInput.FirstName,
-                UserLastName = RegistrationInput.LastName,
-                UserPhone = RegistrationInput.Mobile,
-                UserNZMCA = user.NZMCA
-            };
-        }
-        // Save bkg_User to the database
-        if (isBkg_User)
-        {
-            // If the user already exists, update the existing record
-            ApplicationDbContext.bkg_Users.Update(bkg_User);
-            ApplicationDbContext.Users.Update(user);
-        }
-        else
-        {
-            // If the user does not exist, add a new record
-            bkg_User.CreatedDte = DateTime.Now;
-            await ApplicationDbContext.bkg_Users.AddAsync(bkg_User);
-        }
-
-        await ApplicationDbContext.SaveChangesAsync();
-
-        Logger.LogInformation("User created or updated new Add account and password.");
-
-        // now generate the code
-        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-        // Now we have the code we can confirm the user which means they can sign in. They have the EmailCofirmed flag set to true.
-        var resultConfirm = await UserManager.ConfirmEmailAsync(user, code);
-
-
-        // If this is the first time a user has confirmed their email, this user may need to be added as to the Admin Role.
-        // See if there are any other users that have email confirmed and if not add this user to the Admin Role.
-        userCount = await ApplicationDbContext.CountUserConfirmedAsync();
-        if (userCount <= 1) // then this is the first confirming user so add this user to this role. Might also see if any other user has Admin
-        {
-            var role = await RoleManager.FindByNameAsync("Admin");
-            if (role != null)
-            {
-                var addResult = await UserManager.AddToRoleAsync(user, role.Name);
-                if (addResult.Succeeded)
-                {
-                    verificationResult += " Also you have been made Administrator for this App.";
-                }
-            }
-            await ApplicationDbContext.SaveChangesAsync();
-        }
-
-        // Need now to see if we are asking for a booking and if so see if it is possible and then bookin it else show appropriate message.
-        if (searchPropertyId != 0)
+        return date.AddDays(-1);
+    }
+    private async Task CheckBkgAvailable ()
+    {
+        if (searchPropertyId != 0 && ContactInput.Fmdate < ContactInput.Todate)
         {
             newBooking = new Bkg_Booking();
-            newBooking.DateArrive = RegistrationInput.Fmdate;
-            newBooking.DateDepart = RegistrationInput.Todate;
-            newBooking.UserId = bkg_User.UserId;
+            newBooking.DateArrive = ContactInput.Fmdate;
+            newBooking.DateDepart = ContactInput.Todate;
+            newBooking.UserId = currentUser.UserId;
             newBooking.PropertyId = searchPropertyId;
             newBooking.BookingStatus = "Requested";
-            newBooking.Bkg_User = bkg_User;
+            newBooking.Bkg_User = currentUser;
             //        newBooking.Bkg_Property = BkgProperties.FirstOrDefault(p => p.PropertyId == rqstPropertyId);
             currentBooking = newBooking;  // maybe ???
 
-            var isAvail = bkg_Engine.RequestBooking(newBooking);
-            if (isAvail)
+            bkgAvailable = bkg_Engine.RequestBooking(newBooking);
+            if (bkgAvailable)
             {
-                // we have a booking so create it and save it.
-                // modalTitle = "Booking Requested";
-                verificationResult = "✅ Your booking request is AVAILABLE. It has been booked for you. Please log in to see and manage this and future bookings.";
-                // allDatesAvailable = true;
-                await SaveBooking();
+                verificationResult = "✅ Your booking request is AVAILABLE. You can SAVE it if you like. Press Cancel if you do not.";
             }
             else
             {
-                // modalTitle = "Booking Request Failed";
-                verificationResult = "❌  Sorry but your booking request is not possible. Please log in to see other possible dates and manage future bookings. ";
-                // allDatesAvailable = false;
+                verificationResult = "❌  Sorry but your booking request is not possible. ";
             }
-            
         }
-        verificationResult += "✅ Verified and created! You can now use the system. Please login as normal.";
-        currentStep = 3;
-        // // await SignInManager.SignInAsync(user, isPersistent: false);
-        // NavigationManager.NavigateTo("/");
+        else
+        {
+            verificationResult = "❌  Sorry but your booking request is not possible or you have not made one. ";
+        }
+        if(ContactInput.Subject != string.Empty || ContactInput.Message != string.Empty)
+        {
+            verificationResult += " We have your message and will get back to you shortly. Meantime you will recieve an email copy of your message.";
+            JustSendContactUs();
+        }
+
+        currentStep = 2;
     }
-    private Task ExitRegisterForm()
+    // private async Task SendConfirmationCodes()
+    // {
+    //     if (regChecked == false)
+    //     {
+    //         // then the user does not want to register so just send the message and return to home page.
+    //         JustSendContactUs();
+    //         currentStep = 3;
+    //         // string fullmsg = $"From: {RegistrationInput.FirstName} {RegistrationInput.LastName}\n" +
+    //         //     $"Email: {RegistrationInput.Email}\n" +
+    //         //     $"Mobile: {RegistrationInput.Mobile}\n" +
+    //         //     $"City: {RegistrationInput.City}\n" +
+    //         //     $"Country: {RegistrationInput.Country}\n" +
+    //         //     $"NZMCA: {RegistrationInput.NZMCA}\n\n" +
+    //         //     $"Message:\n{RegistrationInput.Message}\n\n" +
+    //         //     $"Querying availability for property id: {searchPropertyId} from {RegistrationInput.Fmdate.ToShortDateString()} to {RegistrationInput.Todate.ToShortDateString()}.\n";
+    //         // SendEmailConfirmationCode(configuration["TNZ:AdminEmail"]); // send a copy to the admin email
+    //         // // await EmailSender.SendEmailAsync(configuration["TNZ:AdminEmail"], "Contact Us Message", fullmsg);
+    //         verificationResult = "✅ Your message has been sent. We will get back to you shortly. Thank you.";
+    //         currentStep = 3;
+    //         return;
+    //     }
+
+    //   //  generatedEmailCode = GenerateCode();
+    //   //  generatedSmsCode = GenerateCode();
+
+    //     // Send email code
+    //     // await EmailSender.SendEmailAsync(RegistrationInput.Email, "Your Email Confirmation Code", $"Your code: {generatedEmailCode}");
+    //     SendEmailConfirmationCode(currentUser.Email);
+
+    //     // Send SMS code
+    //     // await SmsSender.SendSmsAsync(RegistrationInput.Mobile, $"Your SMS confirmation code: {generatedSmsCode}");
+    //     string txtrept = Chk_E_164_Phone(currentUser.Mobile);
+    //     SendTxtConfirmationCode(txtrept);
+    //     await Task.Delay(500); // slight delay to allow for the messages to be sent before moving to next step
+    //     // send ContactUs message if needed
+    //    // SendContactUs();
+    //     currentStep = 2;
+    //     codesSent = true;
+    // }
+
+    // private async Task ValidateCodesAndRegister()
+    // {
+    //     // if (verificationResult != null)
+    //     // {
+    //     //     NavigationManager.NavigateTo("/");
+    //     // }
+    //     if (RegistrationInput.EmailCode != generatedEmailCode || RegistrationInput.SmsCode != generatedSmsCode)
+    //     {
+    //         identityErrors = new[] { new IdentityError { Description = "Invalid confirmation codes." } };
+    //         verificationResult = "❌ Verification failed. -- Invalid confirmation codes.";
+    //         currentStep = 3;
+    //         return;
+    //     }
+
+    //     // see if this is the first User and if so perhaps role = Admin needs to be added if it is not there so the Admin and setup features will be available to the first confirmed user.
+    //     var userCount = await ApplicationDbContext.GetIdentityUserCountAsync();
+    //     if (userCount == 0)
+    //     {
+    //         role = await ApplicationDbContext.Roles.FindAsync("Admin");
+    //         if (role == null)
+    //         {
+    //             role = new IdentityRole();
+    //             if (role != null)
+    //             {
+    //                 role.Name = "Admin";
+    //                 role.NormalizedName = role.Name.ToUpper();
+    //                 await ApplicationDbContext.Roles.AddAsync(role);
+    //                 await ApplicationDbContext.SaveChangesAsync();
+    //             }
+    //             else
+    //             {
+    //                 verificationResult = "❌ Verification failed. -- Role Admin, found to be needed BUT not created.";
+    //                 currentStep = 3;
+    //                 return;
+    //             }
+    //         }
+    //     }
+
+    //     // At this point we have valid codes so we can try to create the user account
+    //     var user = new ApplicationUser
+    //     {
+    //         Email = RegistrationInput.Email,
+    //         UserName = RegistrationInput.Email,
+    //         FirstNames = RegistrationInput.FirstName,
+    //         LastName = RegistrationInput.LastName,
+    //         PhoneNumber = RegistrationInput.Mobile,
+    //         City = RegistrationInput.City,
+    //         Country = RegistrationInput.Country,
+    //         NZMCA = RegistrationInput.NZMCA,
+    //         CreatedDte = DateTime.Now
+    //     };
+    //     var result = await UserManager.CreateAsync(user, RegistrationInput.Password);
+    //     // If the user already exists or other issue then we will end up here.
+    //     if (!result.Succeeded)
+    //     {
+    //         identityErrors = result.Errors;
+    //         string serr = result.Errors.FirstOrDefault()?.Description ?? string.Empty;
+    //         verificationResult = "❌ Verification failed. " + serr;
+    //         currentStep = 3;
+    //         return;
+    //     }
+
+    //     // If we get here then the user was created and now we create the BkgUser for this person.
+    //     // Populate the Bkg_User object and save it.
+    //     // First see if there is a Bkg_User for this email
+    //     var bkg_User = await ApplicationDbContext.bkg_Users.FirstOrDefaultAsync(u => u.UserEmail == user.Email);
+    //     if (bkg_User != null)
+    //     {
+    //         // If a Bkg_User already exists, update it Also should update the AppUSer with data from the Bkg_User, names, phone, address, NZMCA etc.
+    //         isBkg_User = true;
+    //         bkg_User.UserName = user.Email;
+    //         bkg_User.AppUserId = user.Id;
+    //         user.FirstNames = bkg_User.UserFirstName;
+    //         user.LastName = bkg_User.UserLastName;
+    //         user.NZMCA = bkg_User.UserNZMCA;
+    //         user.City = bkg_User.UserCity;
+    //         user.Country = bkg_User.UserCountry;
+    //         user.UserAddress = bkg_User.UserAddress;
+    //         user.UserState = bkg_User.UserState;
+    //         user.UserZip = bkg_User.UserZip;
+
+    //         // ApplicationDbContext.bkg_Users.Update(bkg_User);
+    //         // ApplicationDbContext.Users.Update(user);
+    //     }
+    //     else
+    //     {
+    //         // If no Bkg_User exists, create a new one
+    //         bkg_User = new Bkg_User
+    //         {
+    //             UserEmail = user.Email,
+    //             UserName = user.Email,
+    //             AppUserId = user.Id,
+    //             UserFirstName = RegistrationInput.FirstName,
+    //             UserLastName = RegistrationInput.LastName,
+    //             UserPhone = RegistrationInput.Mobile,
+    //             UserNZMCA = user.NZMCA
+    //         };
+    //     }
+    //     // Save bkg_User to the database
+    //     if (isBkg_User)
+    //     {
+    //         // If the user already exists, update the existing record
+    //         ApplicationDbContext.bkg_Users.Update(bkg_User);
+    //         ApplicationDbContext.Users.Update(user);
+    //     }
+    //     else
+    //     {
+    //         // If the user does not exist, add a new record
+    //         bkg_User.CreatedDte = DateTime.Now;
+    //         await ApplicationDbContext.bkg_Users.AddAsync(bkg_User);
+    //     }
+
+    //     await ApplicationDbContext.SaveChangesAsync();
+
+    //     Logger.LogInformation("User created or updated new Add account and password.");
+
+    //     // now generate the code
+    //     var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+    //     // Now we have the code we can confirm the user which means they can sign in. They have the EmailCofirmed flag set to true.
+    //     var resultConfirm = await UserManager.ConfirmEmailAsync(user, code);
+
+
+    //     // If this is the first time a user has confirmed their email, this user may need to be added as to the Admin Role.
+    //     // See if there are any other users that have email confirmed and if not add this user to the Admin Role.
+    //     userCount = await ApplicationDbContext.CountUserConfirmedAsync();
+    //     if (userCount <= 1) // then this is the first confirming user so add this user to this role. Might also see if any other user has Admin
+    //     {
+    //         var role = await RoleManager.FindByNameAsync("Admin");
+    //         if (role != null)
+    //         {
+    //             var addResult = await UserManager.AddToRoleAsync(user, role.Name);
+    //             if (addResult.Succeeded)
+    //             {
+    //                 verificationResult += " Also you have been made Administrator for this App.";
+    //             }
+    //         }
+    //         await ApplicationDbContext.SaveChangesAsync();
+    //     }
+
+    //     // Need now to see if we are asking for a booking and if so see if it is possible and then bookin it else show appropriate message.
+    //     if (searchPropertyId != 0)
+    //     {
+    //         newBooking = new Bkg_Booking();
+    //         newBooking.DateArrive = RegistrationInput.Fmdate;
+    //         newBooking.DateDepart = RegistrationInput.Todate;
+    //         newBooking.UserId = bkg_User.UserId;
+    //         newBooking.PropertyId = searchPropertyId;
+    //         newBooking.BookingStatus = "Requested";
+    //         newBooking.Bkg_User = bkg_User;
+    //         //        newBooking.Bkg_Property = BkgProperties.FirstOrDefault(p => p.PropertyId == rqstPropertyId);
+    //         currentBooking = newBooking;  // maybe ???
+
+    //         var isAvail = bkg_Engine.RequestBooking(newBooking);
+    //         if (isAvail)
+    //         {
+    //             // we have a booking so create it and save it.
+    //             // modalTitle = "Booking Requested";
+    //             verificationResult = "✅ Your booking request is AVAILABLE. It has been booked for you. Please log in to see and manage this and future bookings.";
+    //             // allDatesAvailable = true;
+    //             await SaveBooking();
+    //         }
+    //         else
+    //         {
+    //             // modalTitle = "Booking Request Failed";
+    //             verificationResult = "❌  Sorry but your booking request is not possible. Please log in to see other possible dates and manage future bookings. ";
+    //             // allDatesAvailable = false;
+    //         }
+
+    //     }
+    //     verificationResult += "✅ Verified and created! You can now use the system. Please login as normal.";
+    //     currentStep = 3;
+    //     // // await SignInManager.SignInAsync(user, isPersistent: false);
+    //     // NavigationManager.NavigateTo("/");
+    // }
+
+    private Task ExitForm()
     {
         NavigationManager.NavigateTo("/");
         return Task.CompletedTask;
@@ -484,6 +505,18 @@
         }
         properties = await ApplicationDbContext.bkg_Properties.ToListAsync() ?? new List<Bkg_Property>();
         userIpAddress = httpContextAccessorService.GetUserIpAddress();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            var userName = user.Identity.Name;
+            currentUser = await ApplicationDbContext.bkg_Users.FirstOrDefaultAsync(u => u.UserName == userName);
+            // Use the currentUser as needed
+        }
+        ContactInput.Fmdate = DateTime.Now.Date;
+        ContactInput.Todate = AddOneDay(ContactInput.Fmdate);
+
 
 
     }
@@ -493,7 +526,7 @@
         currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
         string s = configuration["TNZ:SMSrept"];
         string txtrept = Chk_E_164_Phone(s);
-//        currentBooking.DateArrive = Fmdate; currentBooking.DateDepart = Todate;
+        //        currentBooking.DateArrive = Fmdate; currentBooking.DateDepart = Todate;
 
         // if a new booking then we need to Create it else Change it.
         if (currentBooking.BookingId == 0) // A new booking
@@ -544,41 +577,20 @@
         // var etst = emailMessage.Name;
         if (isSubmitting)
             return;
-        if (emailMessage.HasValidMxRecord(RegistrationInput.Email) == false)  // checked to see if a valid email address
-        {
-            emailMessage.Email = string.Empty;
-            return;
-        }
+
         isSubmitting = true;
-        emailMessage.Name = RegistrationInput.FirstName + " " + RegistrationInput.LastName;
-        emailMessage.Email = RegistrationInput.Email;
-        emailMessage.Phone = RegistrationInput.Mobile;
-        emailMessage.Subject = RegistrationInput.Subject;
-        emailMessage.Message = RegistrationInput.Message;
-        emailMessage.Nzmca = RegistrationInput.NZMCA;
-        emailMessage.Fmdate = RegistrationInput.Fmdate;
-        emailMessage.Todate = RegistrationInput.Todate;
+        emailMessage.Name = currentUser.UserFirstName + " " + currentUser.UserLastName;
+        emailMessage.Email = currentUser.UserEmail;
+        emailMessage.Phone = currentUser.UserPhone;
+        emailMessage.Subject = ContactInput.Subject;
+        emailMessage.Message = ContactInput.Message;
+        emailMessage.Nzmca = currentUser.UserNZMCA;
+        emailMessage.Fmdate = ContactInput.Fmdate;
+        emailMessage.Todate = ContactInput.Todate;
         emailMessage.PropertyId = searchPropertyId;
         emailMessage.Properties = properties;
 
-
-
-        #region
-        // try
-        // {
-        //     result = "sending your request...";
-        //     await EmailSender.SendEmailAsync(emailMessage.Email, "RV Park Wgtn: " + emailMessage.Subject, emailMessage.ChkMsg);
-        // }
-        // catch (Exception ex)
-        // {
-        //     result = "Woops and Error:\n" + ex.Message;
-        // }
-        // finally
-        // {
-        //     isSubmitting = false;
-        // }
-        #endregion
-        #if !DEBUG
+#if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
         {
@@ -608,119 +620,119 @@
                     (
                         destination: rept,                     // Recipient
                         messageText: emailMessage.smsMsg + " " + userIpAddress      // SMS Message
-                    //sendMode: Enums.SendModeType.Test           // TEST Mode - Remove this to send live traffic
+                                                                                    //sendMode: Enums.SendModeType.Test           // TEST Mode - Remove this to send live traffic
                     );
-        #endif
-        verificationResult = "Thanks we have your message and we'll be in contact very soon. Meantime you will recieve an email copy of your message.";
-        // sendConfirmMsg = true;
-    }
-    private void SendContactUs()
-    {
-        // var etst = emailMessage.Name;
-        if (isSubmitting)
-            return;
-        if (emailMessage.HasValidMxRecord(RegistrationInput.Email) == false)  // checked to see if a valid email address
-        {
-            return;
-        }
-        if (searchPropertyId == 0 && RegistrationInput.Subject == string.Empty && RegistrationInput.Message == string.Empty)
-        {
-            // only send the contact us if the user has entered any fields for it
-            return;
-        }
-        isSubmitting = true;
-        emailMessage.Name = RegistrationInput.FirstName + " " + RegistrationInput.LastName;
-        emailMessage.Email = RegistrationInput.Email;
-        emailMessage.Phone = RegistrationInput.Mobile;
-        emailMessage.Subject = RegistrationInput.Subject;
-        emailMessage.Message = RegistrationInput.Message;
-        emailMessage.Nzmca = RegistrationInput.NZMCA;
-        emailMessage.Fmdate = RegistrationInput.Fmdate;
-        emailMessage.Todate = RegistrationInput.Todate;
-        emailMessage.PropertyId = searchPropertyId;
-        emailMessage.Properties = properties;
-
-        #if !DEBUG
-        // Using TNZ
-        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-        {
-            AuthToken = configuration["TNZ:AuthToken"]
-        };
-        var client = new TNZApiClient(apiUser);
-
-
-        var reponseEmail = client.Messaging.Email.SendMessage(
-            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-            emailSubject: RegistrationInput.Subject,
-            messagePlain: emailMessage.ChkMsg,
-            destination: RegistrationInput.Email
-        );
-        var reponseEmailcc = client.Messaging.Email.SendMessage(
-            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-            emailSubject: "cc'd msg re: " + emailMessage.Email + "|" + emailMessage.Subject,
-            messagePlain: emailMessage.ChkMsg + " " + userIpAddress,
-            destination: configuration["TNZ:CCemail"]
-        );
-
-        // next send an SMS to admin to say we have a contact.
-        // emailMessage.Phone = "";
-        string rept = configuration["TNZ:SMSrept"]; //"+64273042002";    // this shoild come from configuration injection
-        //const string txtmsg = "From RVPark using TNZ API out of Blazor";
-        var response = client.Messaging.SMS.SendMessage
-                    (
-                        destination: rept,                     // Recipient
-                        messageText: emailMessage.smsMsg + " " + userIpAddress      // SMS Message
-                    //sendMode: Enums.SendModeType.Test           // TEST Mode - Remove this to send live traffic
-                    );
-        #endif
+#endif
         //verificationResult = "Thanks we have your message and we'll be in contact very soon. Meantime you will recieve an email copy of your message.";
         // sendConfirmMsg = true;
-        return;
     }
+// //     private void SendContactUs()
+//     {
+//         // var etst = emailMessage.Name;
+//         if (isSubmitting)
+//             return;
+//         if (emailMessage.HasValidMxRecord(RegistrationInput.Email) == false)  // checked to see if a valid email address
+//         {
+//             return;
+//         }
+//         if (searchPropertyId == 0 && RegistrationInput.Subject == string.Empty && RegistrationInput.Message == string.Empty)
+//         {
+//             // only send the contact us if the user has entered any fields for it
+//             return;
+//         }
+//         isSubmitting = true;
+//         emailMessage.Name = RegistrationInput.FirstName + " " + RegistrationInput.LastName;
+//         emailMessage.Email = RegistrationInput.Email;
+//         emailMessage.Phone = RegistrationInput.Mobile;
+//         emailMessage.Subject = RegistrationInput.Subject;
+//         emailMessage.Message = RegistrationInput.Message;
+//         emailMessage.Nzmca = RegistrationInput.NZMCA;
+//         emailMessage.Fmdate = RegistrationInput.Fmdate;
+//         emailMessage.Todate = RegistrationInput.Todate;
+//         emailMessage.PropertyId = searchPropertyId;
+//         emailMessage.Properties = properties;
+
+// #if !DEBUG
+//         // Using TNZ
+//         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+//         {
+//             AuthToken = configuration["TNZ:AuthToken"]
+//         };
+//         var client = new TNZApiClient(apiUser);
 
 
-    private sealed class RegistrationInputModel
+//         var reponseEmail = client.Messaging.Email.SendMessage(
+//             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+//             emailSubject: RegistrationInput.Subject,
+//             messagePlain: emailMessage.ChkMsg,
+//             destination: RegistrationInput.Email
+//         );
+//         var reponseEmailcc = client.Messaging.Email.SendMessage(
+//             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+//             emailSubject: "cc'd msg re: " + emailMessage.Email + "|" + emailMessage.Subject,
+//             messagePlain: emailMessage.ChkMsg + " " + userIpAddress,
+//             destination: configuration["TNZ:CCemail"]
+//         );
+
+//         // next send an SMS to admin to say we have a contact.
+//         // emailMessage.Phone = "";
+//         string rept = configuration["TNZ:SMSrept"]; //"+64273042002";    // this shoild come from configuration injection
+//         //const string txtmsg = "From RVPark using TNZ API out of Blazor";
+//         var response = client.Messaging.SMS.SendMessage
+//                     (
+//                         destination: rept,                     // Recipient
+//                         messageText: emailMessage.smsMsg + " " + userIpAddress      // SMS Message
+//                                                                                     //sendMode: Enums.SendModeType.Test           // TEST Mode - Remove this to send live traffic
+//                     );
+// #endif
+//         //verificationResult = "Thanks we have your message and we'll be in contact very soon. Meantime you will recieve an email copy of your message.";
+//         // sendConfirmMsg = true;
+//         return;
+//     }
+
+
+    private sealed class ContactInputModel
     {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; } = "";
+        // @*[Required]*@
+        // @*[EmailAddress]*@
+        // public string Email { get; set; } = "";
 
-        [Required]
-        public string FirstName { get; set; } = "";
+        // @*[Required]*@
+        // public string FirstName { get; set; } = "";
 
-        [Required]
-        public string LastName { get; set; } = "";
+        // @*[Required]*@
+        // public string LastName { get; set; } = "";
 
-        [Required]
-        [RegularExpression(@"^\+?[0-9]\d{1,14}$", ErrorMessage = "The phone number is not valid.")]
-        [DataType(DataType.PhoneNumber)]
-        public string Mobile { get; set; } = "";
+        // @*[Required]*@
+        // [RegularExpression(@"^\+?[0-9]\d{1,14}$", ErrorMessage = "The phone number is not valid.")]
+        // [DataType(DataType.PhoneNumber)]
+        // public string Mobile { get; set; } = "";
 
-        [Required]
-        public string City { get; set; } = "";
+        // @*[Required]*@
+        // public string City { get; set; } = "";
 
-        [Required]
-        public string Country { get; set; } = "";
+        // @*[Required]*@
+        // public string Country { get; set; } = "";
 
-        // [Required]
-        public string NZMCA { get; set; } = "";
+        // // [Required]
+        // public string NZMCA { get; set; } = "";
 
 
         // [StringLength(100, MinimumLength = 0)]
-        [DataType(DataType.Password)]
-        public string Password { get; set; } = "";
+        // @*[DataType(DataType.Password)]*@
+        // public string Password { get; set; } = "";
 
-        [DataType(DataType.Password)]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-        public string ConfirmPassword { get; set; } = "";
+        // @*[DataType(DataType.Password)]*@
+        // [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        // public string ConfirmPassword { get; set; } = "";
 
         public DateTime Fmdate { get; set; } = DateTime.Now.Date;
         public DateTime Todate { get; set; } = DateTime.Now.Date;
         public string Subject { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
 
-        public string EmailCode { get; set; } = "";
-        public string SmsCode { get; set; } = "";
+        // public string EmailCode { get; set; } = "";
+        // public string SmsCode { get; set; } = "";
     }
 
     private void SendEmailConfirmationCode(string emailTo)
@@ -885,7 +897,7 @@
                 messageText: ConfirmTxtBkgMsg()
             );
 #endif
-       // sendConfirmMsg = false;
+        // sendConfirmMsg = false;
     }
     private void SendTxtConfirmationNoEmail(string txtrept)
     {
