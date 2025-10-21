@@ -56,8 +56,23 @@
                         }
                     </select>
                 </div>
+
                 <div class="form-group" style="display:flex;flex-direction:row;">
-                    <div class="form-group" style="max-width: 25%;  margin-left: 2%">
+                    <div class="form-group" style=" text-align:center; width: 180px; margin-left: 1%">
+                        <label for="fmdate">Arriving</label>
+                        <SfDatePicker TValue="DateTime?" Value="@Fmdate" Placeholder='Choose a Date' ID="fmdate">
+                            <DatePickerEvents TValue="DateTime?" ValueChange="DteAriveChnge"></DatePickerEvents>
+                        </SfDatePicker>
+                    </div>
+
+                    <div class="form-group" style=" text-align:center; width: 180px; margin-left: 1%">
+                        <label for="tmdate">Departing</label>
+                        <SfDatePicker TValue="DateTime?" Value="@Todate" Placeholder='Choose a Date' ID="todate">
+                            <DatePickerEvents TValue="DateTime?" ValueChange="DteDepartChnge"></DatePickerEvents>
+                        </SfDatePicker>
+                    </div>
+
+@*                     <div class="form-group" style="max-width: 25%;  margin-left: 2%">
                         <label for="fmdate">From</label>
                         <InputDate @bind-Value=ContactInput.Fmdate class="form-control" id="fmdate" />
                         <ValidationMessage For="() => ContactInput.Fmdate" />
@@ -66,7 +81,7 @@
                         <label for="todate">To</label>
                         <InputDate @bind-Value=ContactInput.Todate class="form-control" id="todate" />
                         <ValidationMessage For="() => ContactInput.Todate" />
-                    </div>
+                    </div> *@
 
                 </div>
                 <span><i>Contact Us with a message or question.</i></span>
@@ -120,7 +135,8 @@
     private Bkg_Booking orgnBkg = new();
     private Bkg_User currentUser = new();
 
-
+    public DateTime Fmdate { get; set; } = DateTime.Now.Date;
+    public DateTime Todate { get; set; } = DateTime.Now.Date;
     private Bkg_Engine? bkg_Engine;
     private bool bkgAvailable = false;
 
@@ -151,6 +167,8 @@
         }
         ContactInput.Fmdate = DateTime.Now.Date;
         ContactInput.Todate = AddOneDay(ContactInput.Fmdate);
+        Todate = ContactInput.Todate;
+        Fmdate = ContactInput.Fmdate;   
 
 
 
@@ -505,6 +523,7 @@
         }
         return srtn;
     }
+
     private DateTime AddOneDay(DateTime date)
     {
         return date.AddDays(1);
@@ -512,6 +531,30 @@
     private DateTime SubOneDay(DateTime date)
     {
         return date.AddDays(-1);
+    }
+    private void DteAriveChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
+    {
+        Fmdate = args.Value ?? DateTime.Now.Date;
+        if (Todate <= Fmdate)
+        {
+            Todate = AddOneDay(Fmdate);
+            ContactInput.Fmdate = Fmdate;
+            ContactInput.Todate = Todate;
+            StateHasChanged();
+        }
+    }
+    private void DteDepartChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
+    {
+        Todate = args.Value ?? DateTime.Now.Date;
+        if (Todate <= Fmdate)
+        {
+
+            Fmdate = SubOneDay(Todate);
+            ContactInput.Fmdate = Fmdate;
+            ContactInput.Todate = Todate;
+
+            StateHasChanged();
+        }
     }
 
 

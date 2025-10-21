@@ -286,6 +286,23 @@
         </div>
     </div>
 }
+<!-- Modal Dialog for Sending Email Confirmation -->
+@if (msgSent)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog" stype=" width: 900px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@modalTitle</h5>
+                    @* <small>Normally to the Bkg User but can email to the logged in user or txt or email to another that you enter.</small> *@
+                    <button type="button" class="btn-close" @onclick="CloseConfirmModal"></button>
+                </div>
+                <div class="modal-header" style="color:midnightblue">@modalMessage</div>                  
+                <button type="button" class="btn btn-secondary" @onclick="CloseMessage">Close</button>
+            </div>
+        </div>
+    </div>
+}
 
 
 @code {
@@ -306,6 +323,7 @@
 
     private bool showModal = false;
     private bool sendConfirmMsg = false;
+    private bool msgSent = false;
     private bool allDatesAvailable = true;
     private bool bAllBkgs = false;
     private string modalTitle = string.Empty;
@@ -567,6 +585,12 @@
     {
         sendConfirmMsg = false;
     }
+    private void CloseMessage()
+    {
+        msgSent = false;
+        modalTitle = "";
+        modalMessage = "";
+    }
 
     private async Task SearchBookings()
     {
@@ -732,6 +756,7 @@
 
         bool isEmail = true;
         string sendtoWho = string.Empty;
+        bool sentOK = false;
         // if Me then send to the logged in user
         if (adhocConfirm.ToLower() == "me" || adhocConfirm.Length == 0)
         {
