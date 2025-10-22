@@ -280,6 +280,25 @@
     </div>
 }
 
+@if (confirmSent)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmation has been sent!</h5>
+                    <button type="button" class="btn-close" @onclick="CloseSent"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Emails may take many minutes to arrive depending on the email server delay they encounter. Do Please Wait.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseSent">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 @code {
     private string BkgType = "RVPark On Fitz";
     private string isAvail = "Yes";
@@ -302,6 +321,7 @@
     private string modalMessage = string.Empty;
     private bool sendConfirmMsg = false;
     private bool showModal = false;
+    private bool confirmSent = false;
 
     private List<Bkg_Booking> bookings = new();
     private List<Bkg_User> users = new();
@@ -466,6 +486,10 @@
     {
         sendConfirmMsg = false;
     }
+    private void CloseSent()
+    {
+        confirmSent = false;
+    }
     private async Task SaveBooking()
     { 
         currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
@@ -518,6 +542,7 @@
         }
 
         showModal = false;
+        confirmSent = true;
         await LoadBookings();
         StateHasChanged();
     }

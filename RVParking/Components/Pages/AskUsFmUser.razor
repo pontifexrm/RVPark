@@ -114,6 +114,25 @@
             </EditForm>
     </div>
 </div>
+@if (confirmSent)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmation has been sent!</h5>
+                    <button type="button" class="btn-close" @onclick="CloseSent"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Emails may take many minutes to arrive depending on the email server delay they encounter. Do Please Wait.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseSent">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
     private bool isSubmitting = false;
@@ -139,7 +158,12 @@
     public DateTime Todate { get; set; } = DateTime.Now.Date;
     private Bkg_Engine? bkg_Engine;
     private bool bkgAvailable = false;
-
+    private bool confirmSent = false;
+    private void CloseSent()
+    {
+        confirmSent = false;
+        ExitForm();
+    }
     private sealed class ContactInputModel
     {
         public DateTime Fmdate { get; set; } = DateTime.Now.Date;
@@ -262,9 +286,9 @@
             }
 
         }
-
+        confirmSent = true;
         StateHasChanged();
-        ExitForm();
+        //ExitForm();
     }
     private void JustSendContactUs()
     {

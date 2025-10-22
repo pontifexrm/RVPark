@@ -241,10 +241,32 @@
     </div>
 </div>
 
+@if (confirmSent)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmation has been sent!</h5>
+                    <button type="button" class="btn-close" @onclick="CloseSent"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Emails may take many minutes to arrive depending on the email server delay they encounter. Do Please Wait.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseSent">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
 @code {
     private bool isBkg_User = false;
     private bool codesSent = false;
     private bool isSubmitting = false;
+    private bool confirmSent = false;
     private int currentStep = 1;
     private string? generatedEmailCode;
     private string? generatedSmsCode;
@@ -555,10 +577,16 @@
             }
 
         }
+        confirmSent = true;
 
         StateHasChanged();
     }
 
+    private void CloseSent()
+    {
+        confirmSent = false;
+        // ExitForm();
+    }
 
     private void JustSendContactUs()
     {
@@ -713,7 +741,7 @@
         public string LastName { get; set; } = "";
 
         [Required]
-        [RegularExpression(@"^\+?[0-9]\d{1,14}$", ErrorMessage = "The phone number is not valid.")]
+        // [RegularExpression(@"^\+?[0-9]\d{1,14}$", ErrorMessage = "The phone number is not valid.")]
         [DataType(DataType.PhoneNumber)]
         public string Mobile { get; set; } = "";
 
@@ -742,6 +770,26 @@
 
         public string EmailCode { get; set; } = "";
         public string SmsCode { get; set; } = "";
+        public string E_164_Phone  //IntPhoneFmt //The proper E.164 format is [+] [country code] [area code] [subscriber number].
+        {
+            get
+            {
+                // purpose of this return is to gie the phone number in the +64nnnnnnnnnn format if it is not already.
+                string srtn = string.Empty;
+                if (this.Mobile.Length > 0)
+                {
+                    if (Mobile.StartsWith("+")) // then likely in the corect format already
+                    {
+                        srtn = Mobile.Trim();
+                    }
+                    else if (Mobile.StartsWith("0"))// then likely miss country code so remove the "0" and add "+64"
+                    {
+                        srtn = string.Concat("+64" + Mobile[1..]); // this prefix should be a configurable for the ountry the app is being run in.
+                    }
+                }
+                return srtn;
+            }
+        }
     }
 
     private void SendEmailConfirmationCode(string emailTo)
