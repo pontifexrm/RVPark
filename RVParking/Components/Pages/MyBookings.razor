@@ -256,6 +256,7 @@
     </div>
 }
 
+
 @if (sendConfirmMsg)
 {
     <div class="modal show" tabindex="-1" style="display: block;">
@@ -280,6 +281,7 @@
     </div>
 }
 
+
 @if (confirmSent)
 {
     <div class="modal show" tabindex="-1" style="display: block;">
@@ -299,6 +301,33 @@
         </div>
     </div>
 }
+
+
+@if (confirmDelete)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">About to DELETE this Booking! Confirm or Cancel as you wish?</h5>
+                    <button type="button" class="btn-close" @onclick="CancelDelete"></button>
+                </div>
+                <div class="modal-header">
+                    <div class="form-group" style="display: block;">
+                        @* <label>Confirm DELETE</label> *@
+                        <button type="button" class="btn btn-secondary" @onclick="ConfirmDelete">DELETE</button>
+                    </div>
+                    <div class="form-group" style="display: block;">
+                        @* <label>Cancel Delete</label> *@
+                        <button type="button" class="btn btn-secondary" @onclick="CancelDelete">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
 @code {
     private string BkgType = "RVPark On Fitz";
     private string isAvail = "Yes";
@@ -322,11 +351,14 @@
     private bool sendConfirmMsg = false;
     private bool showModal = false;
     private bool confirmSent = false;
+    private bool confirmDelete = false;
 
     private List<Bkg_Booking> bookings = new();
     private List<Bkg_User> users = new();
     private Bkg_User currentUser = new();
     private Bkg_Engine? bkg_Engine;
+
+    private int curBkgId = 0;
 
     //    public EmailMessage emailMessage { get; set; } = new EmailMessage();
     //    public EmailMessage emailMessage  = new ();
@@ -445,9 +477,51 @@
         allDatesAvailable = true;
         showModal = true;
     }
-    private async Task DeleteBooking(int bookingId)
+
+    private void DeleteBooking(int bookingId)
     {
-        var booking = await ApplicationDbContext.bkg_Bookings.FindAsync(bookingId);
+        curBkgId = bookingId;
+        confirmDelete = true;
+
+        // var booking = await ApplicationDbContext.bkg_Bookings.FindAsync(bookingId);
+        // if (booking != null)
+        // {
+        //     try
+        //     {
+        //         string subjectMsg = string.Concat("WARNING", " BkgRef: ", booking.BookingId.ToString(), " for ", booking.Bkg_Property.Name,
+        //         " from ", booking.DateArrive.Date.ToString("d"), " to ", booking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED");
+
+        //         string CCMsg = string.Concat("CC msg of email to:", booking.Bkg_User.UserEmail, " Warning BkgRef: ", booking.BookingId.ToString(),
+        //         " for ", booking.Bkg_Property.Name, " from ", booking.DateArrive.Date.ToString("d"), " to ", booking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED");
+
+        //         await bkg_Engine.DeleteBookingAsync(booking);
+        //         await LoadBookings();
+        //         string s = configuration["TNZ:SMSrept"];
+        //         string txtrept = Chk_E_164_Phone(s);
+        //         SendTxtConfirmation(subjectMsg, txtrept, "WARNING");
+        //         // Need to send a cc'd to rvpark@pontifex.nz
+        //         SendCCEmailDeleteConfirmation(CCMsg, "Warning");
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         modalTitle = "Error found deleting this Booking";
+        //         modalMessage = ex.ToString();
+        //         allDatesAvailable = false;
+        //         showModal = true;
+        //     }
+
+        //     // await LoadBookings();
+        // }
+    }
+    private void CancelDelete()
+    {
+        confirmDelete = false;
+        curBkgId = 0;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        var booking = await ApplicationDbContext.bkg_Bookings.FindAsync(curBkgId);
         if (booking != null)
         {
             try
@@ -473,7 +547,8 @@
                 allDatesAvailable = false;
                 showModal = true;
             }
-
+            curBkgId = 0;
+            confirmDelete = false;  
             // await LoadBookings();
         }
     }

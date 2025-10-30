@@ -187,6 +187,7 @@
                         <InputText type="password" @bind-Value=RegistrationInput.Password class="form-control" id="password" />
                         <ValidationMessage For="() => RegistrationInput.Password" />
                     </div>
+                    <span> &nbsp; &nbsp; </span>
                     <div class="form-group" style="max-width: 100%;  margin-left: 2%">
                         <label for="confirmpassword">Confirm Password</label>
                         <InputText type="password" @bind-Value=RegistrationInput.ConfirmPassword class="form-control" id="confirmpassword" />
@@ -199,6 +200,7 @@
                         <InputText @bind-Value=RegistrationInput.SmsCode class="form-control" id="smscode" />
                         <ValidationMessage For="() => RegistrationInput.SmsCode" />
                     </div>
+                    or
                     <div class="form-group" style="max-width: 100%;  margin-left: 2%">
                         <label for="emailcode">Email Confirmation code</label>
                         <InputText @bind-Value=RegistrationInput.EmailCode class="form-control" id="emailcode" />
@@ -689,7 +691,7 @@
         emailMessage.PropertyId = searchPropertyId;
         emailMessage.Properties = properties;
 
-        #if !DEBUG
+        #if !Debug  
         // Using TNZ
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
         {
