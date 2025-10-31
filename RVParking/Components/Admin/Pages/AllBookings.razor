@@ -1,4 +1,4 @@
-﻿@page "/Admin/Allbookings"
+﻿@page "/Admin/allbookings"
 @rendermode InteractiveServer
 <PageTitle>RV Park Administration</PageTitle>
 
@@ -35,7 +35,7 @@
 
 
 @inject IConfiguration configuration
-<AuthorizeView Roles="Admin" Context="authContext">
+<AuthorizeView>
     <Authorized>
         <!-- Page header with title and button to add a new Booking -->
         <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
@@ -47,7 +47,7 @@
             </div>
         </div>
     </Authorized>
-    <NotAuthorized> 
+    <NotAuthorized>
         <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
             <div>
                 <h4>- You are NOT AUTHORIZED -</h4>
@@ -55,7 +55,7 @@
         </div>
     </NotAuthorized>
 </AuthorizeView>
-<AuthorizeView Roles="Admin" Context="authContext">
+<AuthorizeView>
     <Authorized>
         <!-- Search Bar -->
         <div class="search-bar" style="display:flex; flex-wrap: wrap; gap: 4px;">
@@ -73,23 +73,23 @@
             @* <label for="All Bkgs"> All Bkgs</label> *@
 
             <button class="bi form-control" style="flex: 0 0 40px; height: 32px; margin-left: 4px;" ALL
-            @onclick="ClearSearch">
-                <i class="bi bi-x-lg"></i> 
+                    @onclick="ClearSearch">
+                <i class="bi bi-x-lg"></i>
             </button>
             <button class="bi form-control" style="flex: 0 0 40px; height: 32px; margin-left: 4px;"
-            @onclick="SearchAllBks">
+                    @onclick="SearchAllBks">
                 @* <i class="bi bi-arrow-bar-left-nav-menu"></i> *@
                 All
             </button>
             <button class="bi form-control" style="flex: 0 0 40px; height: 32px; margin-left: 4px;"
-            @onclick="SearchBookings">
+                    @onclick="SearchBookings">
                 <i class="bi bi-search"></i>
             </button>
         </div>
-        <br /> 
+        <br />
     </Authorized>
 </AuthorizeView>
-<AuthorizeView Roles="Admin" Context="authContext">
+<AuthorizeView>
     <Authorized>
         <!-- Load Table of all open bookings Bookings -->
         @if (bookings == null)
@@ -286,6 +286,48 @@
         </div>
     </div>
 }
+<!-- Modal Dialog for Sending Email Confirmation -->
+@if (msgSent)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog" stype=" width: 900px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@modalTitle</h5>
+                    @* <small>Normally to the Bkg User but can email to the logged in user or txt or email to another that you enter.</small> *@
+                    <button type="button" class="btn-close" @onclick="CloseConfirmModal"></button>
+                </div>
+                <div class="modal-header" style="color:midnightblue">@modalMessage</div>
+                <button type="button" class="btn btn-secondary" @onclick="CloseMessage">Close</button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (confirmDelete)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">About to DELETE this Booking! Confirm or Cancel as you wish?</h5>
+                    <button type="button" class="btn-close" @onclick="CancelDelete"></button>
+                </div>
+                <div class="modal-header">
+                    <div class="form-group" style="display: block;">
+                        @* <label>Confirm DELETE</label> *@
+                        <button type="button" class="btn btn-secondary" @onclick="ConfirmDelete">DELETE</button>
+                    </div>
+                    <div class="form-group" style="display: block;">
+                        @* <label>Cancel Delete</label> *@
+                        <button type="button" class="btn btn-secondary" @onclick="CancelDelete">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 
 
 @code {
@@ -306,6 +348,10 @@
 
     private bool showModal = false;
     private bool sendConfirmMsg = false;
+    private bool msgSent = false;
+    private bool confirmDelete = false;
+
+
     private bool allDatesAvailable = true;
     private bool bAllBkgs = false;
     private string modalTitle = string.Empty;
@@ -316,6 +362,7 @@
     private DateTime? searchToDate;
     private int? searchPropertyId;
     private string adhocConfirm = string.Empty;
+    private int curBkgId = 0; // used for confirmed delete
 
 
 
@@ -354,7 +401,7 @@
         var query = ApplicationDbContext.bkg_Bookings
                     .Include(b => b.Bkg_User)
                     .Include(b => b.Bkg_Property)
-                    .Where(b => b.BookingStatus != "Closed" )
+                    .Where(b => b.BookingStatus != "Closed")
                     .AsQueryable();
 
         // Order by a specific field, for example, DateArrive
@@ -490,18 +537,18 @@
                 if (currentBooking.DateArrive != orgnBkg.DateArrive)
                 {
                     chngmsg = string.Concat("Arrival Date Changed from ", orgnBkg.DateArrive.ToString("d"), " to ", currentBooking.DateArrive.ToString("d"));
-                }   
+                }
                 if (currentBooking.DateDepart != orgnBkg.DateDepart)
                 {
                     chngmsg = string.Concat(chngmsg, " Departure Date Changed from ", orgnBkg.DateDepart.ToString("d"), " to ", currentBooking.DateDepart.ToString("d"));
                 }
                 if (currentBooking.PropertyId != orgnBkg.PropertyId)
                 {
-                    chngmsg = string.Concat(chngmsg, " Property Changed from [", orgnBkg.Bkg_Property.Name, "] to [", currentBooking.Bkg_Property.Name,"]");
+                    chngmsg = string.Concat(chngmsg, " Property Changed from [", orgnBkg.Bkg_Property.Name, "] to [", currentBooking.Bkg_Property.Name, "]");
                 }
                 if (currentBooking.BookingStatus != orgnBkg.BookingStatus)
                 {
-                    chngmsg = string.Concat(chngmsg, " Status Changed from [", orgnBkg.BookingStatus, "] to [", currentBooking.BookingStatus,"]");
+                    chngmsg = string.Concat(chngmsg, " Status Changed from [", orgnBkg.BookingStatus, "] to [", currentBooking.BookingStatus, "]");
                 }
                 if (currentBooking.BookingComments != orgnBkg.BookingComments)
                 {
@@ -526,35 +573,43 @@
 
     }
 
-    private async Task DeleteBooking(int bookingId)
+    private void DeleteBooking(int bookingId)
     {
-        var booking = await ApplicationDbContext.bkg_Bookings.FindAsync(bookingId);
-        if (booking != null)
+        curBkgId = bookingId;
+        confirmDelete = true;
+    }
+    private void CancelDelete()
+    {
+        confirmDelete = false;
+        curBkgId = 0;
+    }
+    private async Task ConfirmDelete()
+    {
+        Bkg_Engine bkg_Engine = new Bkg_Engine(ApplicationDbContext);
+        var bookingToDelete = await ApplicationDbContext.bkg_Bookings
+            .Include(b => b.Bkg_User)
+            .Include(b => b.Bkg_Property)
+            .FirstOrDefaultAsync(b => b.BookingId == curBkgId);
+        if (bookingToDelete != null)
         {
-            string subjectMsg = string.Concat("WARNING", " BkgRef: ", booking.BookingId.ToString(), " for ", booking.Bkg_Property.Name,
-                                " from ", booking.DateArrive.Date.ToString("d"), " to ", booking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED");
-
-            string CCMsg = string.Concat("CC msg of email to:", booking.Bkg_User.UserEmail, " Warning BkgRef: ", booking.BookingId.ToString(),
-                                " for ", booking.Bkg_Property.Name, " from ", booking.DateArrive.Date.ToString("d"), " to ", booking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED"); try
+            var deletedOK = await bkg_Engine.DeleteBookingAsync(bookingToDelete);
+            if (!deletedOK)
             {
-                await bkg_Engine.DeleteBookingAsync(booking);
-                await LoadBookings();
-                // Need to send a cc'd to rvpark@pontifex.nz
-                SendCCEmailDeleteConfirmation(CCMsg, "Warning");
-
+                modalTitle = "Could not delete this Booking";
+                modalMessage = "Likely because it is not allowed as per business rules.";
+                msgSent = true;
             }
-            catch (Exception ex)
+            else
             {
-                modalTitle = "Error found deleting this Booking";
-                modalMessage = ex.ToString();
-                // allDatesAvailable = false;
-                showModal = true;
+                modalTitle = "Booking Deleted";
+                modalMessage = "The Booking has been successfully deleted.";
+                msgSent = true;
             }
-
-            // await LoadBookings();
         }
+        confirmDelete = false;
+        curBkgId = 0;
 
-
+        await LoadBookings();
     }
 
     private void CloseModal()
@@ -566,6 +621,12 @@
     private void CloseConfirmModal()
     {
         sendConfirmMsg = false;
+    }
+    private void CloseMessage()
+    {
+        msgSent = false;
+        modalTitle = "";
+        modalMessage = "";
     }
 
     private async Task SearchBookings()
@@ -710,9 +771,9 @@
 #if !DEBUG
 
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
         var client = new TNZApiClient(apiUser);
 
         var reponseEmail = client.Messaging.Email.SendMessage(
@@ -732,6 +793,7 @@
 
         bool isEmail = true;
         string sendtoWho = string.Empty;
+        bool sentOK = false;
         // if Me then send to the logged in user
         if (adhocConfirm.ToLower() == "me" || adhocConfirm.Length == 0)
         {
@@ -779,9 +841,9 @@
 #if !Debug
         // Using TNZ
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
         var client = new TNZApiClient(apiUser);
 
         var reponseEmail = client.Messaging.Email.SendMessage(
@@ -800,9 +862,9 @@
 #if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this should come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
         var client = new TNZApiClient(apiUser);
 
         var reponseEmail = client.Messaging.Email.SendMessage(
@@ -822,12 +884,12 @@
         CCMsg += "\r\n" + ConfirmBkgMsg();
 
         // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, chngmsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-    #if !DEBUG
+#if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this should come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
         var client = new TNZApiClient(apiUser);
         var reponseEmail = client.Messaging.Email.SendMessage(
             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
@@ -835,7 +897,7 @@
             messagePlain: CCMsg,
             destination: configuration["TNZ:CCemail"]
         );
-    #endif
+#endif
         sendConfirmMsg = false;
     }
 
@@ -846,9 +908,9 @@
 #if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this should come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
         var client = new TNZApiClient(apiUser);
 
         var reponseEmail = client.Messaging.Email.SendMessage(
@@ -870,11 +932,11 @@
 
         // emailMessage.Subject = subjectMsg;
         // Using TNZ
-//#if !DEBUG
+        //#if !DEBUG
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
         var client = new TNZApiClient(apiUser);
 
         var response = client.Messaging.SMS.SendMessage
@@ -882,7 +944,7 @@
                 destination: txtrept,
                 messageText: ConfirmTxtBkgMsg()
             );
-//#endif
+        //#endif
         sendConfirmMsg = false;
     }
     private void SendTxtConfirmationNoEmail(string txtrept) // txtrept is a phone number in E.164 format and this message is FULL LENGTH expensive.
@@ -897,9 +959,9 @@
         // Using TNZ
 #if !DEBUG
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
         var client = new TNZApiClient(apiUser);
 
         var response = client.Messaging.SMS.SendMessage
@@ -922,9 +984,9 @@
         // Using TNZ
 #if !DEBUG
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
+        {
+            AuthToken = configuration["TNZ:AuthToken"]
+        };
         var client = new TNZApiClient(apiUser);
 
         var response = client.Messaging.SMS.SendMessage
@@ -939,10 +1001,10 @@
     {
         StringBuilder sb = new StringBuilder();
         sb.Append("Kia ora ");
-//        sb.Append(currentUser.UserFirstName);
+        //        sb.Append(currentUser.UserFirstName);
         sb.Append(currentBooking.Bkg_User.UserFirstName);
         sb.Append(" ");
-//        sb.Append(currentUser.UserLastName);
+        //        sb.Append(currentUser.UserLastName);
         sb.Append(currentBooking.Bkg_User.UserLastName);
         sb.Append("\n\n");
         sb.Append("Your booking has been confirmed for ");

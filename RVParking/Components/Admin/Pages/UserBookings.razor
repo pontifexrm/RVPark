@@ -1,4 +1,4 @@
-﻿@page "/user-bookings"
+﻿@page "/Admin/user-bookings"
 @rendermode InteractiveServer
 
 @using RVParking.Data
@@ -107,7 +107,7 @@ else
     private List<Bkg_Booking> bookings = new();
 
     private int userCurrentPage = 1; // Current page for users
-    private int userPageSize = 12;   // Number of users per page
+    private int userPageSize = 8;   // Number of users per page
     private int userTotalPages => (int)Math.Ceiling((double)users.Count / userPageSize);
 
     private IEnumerable<Bkg_User> PaginatedUsers => users

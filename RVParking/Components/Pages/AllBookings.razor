@@ -304,6 +304,31 @@
     </div>
 }
 
+@if (confirmDelete)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">About to DELETE this Booking! Confirm or Cancel as you wish?</h5>
+                    <button type="button" class="btn-close" @onclick="CancelDelete"></button>
+                </div>
+                <div class="modal-header">
+                    <div class="form-group" style="display: block;">
+                        @* <label>Confirm DELETE</label> *@
+                        <button type="button" class="btn btn-secondary" @onclick="ConfirmDelete">DELETE</button>
+                    </div>
+                    <div class="form-group" style="display: block;">
+                        @* <label>Cancel Delete</label> *@
+                        <button type="button" class="btn btn-secondary" @onclick="CancelDelete">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
 
 @code {
     public DateTime Fmdate { get; set; } = DateTime.Now.Date;
@@ -324,6 +349,9 @@
     private bool showModal = false;
     private bool sendConfirmMsg = false;
     private bool msgSent = false;
+    private bool confirmDelete = false;
+
+
     private bool allDatesAvailable = true;
     private bool bAllBkgs = false;
     private string modalTitle = string.Empty;
@@ -334,6 +362,7 @@
     private DateTime? searchToDate;
     private int? searchPropertyId;
     private string adhocConfirm = string.Empty;
+    private int curBkgId = 0; // used for confirmed delete
 
 
 
@@ -544,35 +573,43 @@
 
     }
 
-    private async Task DeleteBooking(int bookingId)
+    private void DeleteBooking(int bookingId)
     {
-        var booking = await ApplicationDbContext.bkg_Bookings.FindAsync(bookingId);
-        if (booking != null)
+        curBkgId = bookingId;
+        confirmDelete = true;
+    }
+    private void CancelDelete()
+    {
+        confirmDelete = false;
+        curBkgId = 0;
+    }
+    private async Task ConfirmDelete()
+    {
+        Bkg_Engine bkg_Engine = new Bkg_Engine(ApplicationDbContext);
+        var bookingToDelete = await ApplicationDbContext.bkg_Bookings
+            .Include(b => b.Bkg_User)
+            .Include(b => b.Bkg_Property)
+            .FirstOrDefaultAsync(b => b.BookingId == curBkgId);
+        if (bookingToDelete != null)
         {
-            string subjectMsg = string.Concat("WARNING", " BkgRef: ", booking.BookingId.ToString(), " for ", booking.Bkg_Property.Name,
-                                " from ", booking.DateArrive.Date.ToString("d"), " to ", booking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED");
-
-            string CCMsg = string.Concat("CC msg of email to:", booking.Bkg_User.UserEmail, " Warning BkgRef: ", booking.BookingId.ToString(),
-                                " for ", booking.Bkg_Property.Name, " from ", booking.DateArrive.Date.ToString("d"), " to ", booking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED"); try
+            var deletedOK = await bkg_Engine.DeleteBookingAsync(bookingToDelete);
+            if (!deletedOK)
             {
-                await bkg_Engine.DeleteBookingAsync(booking);
-                await LoadBookings();
-                // Need to send a cc'd to rvpark@pontifex.nz
-                SendCCEmailDeleteConfirmation(CCMsg, "Warning");
-
+                modalTitle = "Could not delete this Booking";
+                modalMessage = "Likely because it is not allowed as per business rules.";
+                msgSent = true;
             }
-            catch (Exception ex)
+            else
             {
-                modalTitle = "Error found deleting this Booking";
-                modalMessage = ex.ToString();
-                // allDatesAvailable = false;
-                showModal = true;
+                modalTitle = "Booking Deleted";
+                modalMessage = "The Booking has been successfully deleted.";
+                msgSent = true;
             }
-
-            // await LoadBookings();
         }
+        confirmDelete = false;
+        curBkgId = 0;
 
-
+        await LoadBookings();
     }
 
     private void CloseModal()
