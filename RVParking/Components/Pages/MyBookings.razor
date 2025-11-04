@@ -89,6 +89,12 @@
                             <label for="userphone">Phone</label>
                             <InputText class="form-control" @bind-Value=@currentUser.UserPhone readonly="true" id="userphone" />
                         </div>
+                        <div class="form-group" style="max-width: 100%; margin-left: 2% ">
+                            <label for="checked">Show All</label>
+                            <br />
+                            <SfSwitch @bind-Checked="showAll"  style="margin-top:0.5pc;" id="checked"></SfSwitch>
+                        </div>
+
                     </div>
                 </a>
             }
@@ -358,6 +364,21 @@
     private Bkg_User currentUser = new();
     private Bkg_Engine? bkg_Engine;
 
+    private bool _showAll = true;
+    private bool showAll 
+    {
+        get => _showAll;
+        set 
+        {
+            if (_showAll != value)
+            {
+                _showAll = value;
+                // schedule the async refresh on the renderer/Sync context
+                _ = InvokeAsync(() => RefreshTable(_showAll));
+            }
+        }
+    }
+
     private int curBkgId = 0;
 
     //    public EmailMessage emailMessage { get; set; } = new EmailMessage();
@@ -386,17 +407,41 @@
     }
     private async Task LoadBookings() 
     {
-        var query = ApplicationDbContext.bkg_Bookings
-            .Include(b => b.Bkg_User)
-            .Include(b => b.Bkg_Property)
-            .Where(b => b.BookingStatus != "Closed")
-            .Where(b => b.Bkg_User.UserName.Contains(currentUser.UserName))
-            .AsQueryable();
+        if (showAll)
+        {
+            var query = ApplicationDbContext.bkg_Bookings
+                        .Include(b => b.Bkg_User)
+                        .Include(b => b.Bkg_Property)
+                        .Where(b => b.Bkg_User.UserName.Contains(currentUser.UserName))
+                        .AsQueryable();
 
-        // Order by a specific field, for example, DateArrive
-        query = query.OrderBy(b => b.DateArrive);
-        bookings = await query.ToListAsync();
+            // Order by a specific field, for example, DateArrive
+            query = query.OrderBy(b => b.DateArrive);
+            bookings = await query.ToListAsync();
 
+        }
+        else
+        {
+            var query = ApplicationDbContext.bkg_Bookings
+                        .Include(b => b.Bkg_User)
+                        .Include(b => b.Bkg_Property)
+                        .Where(b => b.BookingStatus != "Closed")
+                        .Where(b => b.Bkg_User.UserName.Contains(currentUser.UserName))
+                        .AsQueryable();
+
+            // Order by a specific field, for example, DateArrive
+            query = query.OrderBy(b => b.DateArrive);
+            bookings = await query.ToListAsync();
+
+        }
+        
+    }
+    private async Task RefreshTable(bool newValue)
+    {
+        // keep bound value in sync (bind will already set it, but keep this for clarity)
+        //showAll = newValue;
+        await LoadBookings();
+        StateHasChanged();
     }
     private DateTime AddOneDay(DateTime date)
     {

@@ -105,7 +105,7 @@ else
     private List<Bkg_User> users = new();
     private Bkg_User? selectedUser;
     private List<Bkg_Booking> bookings = new();
-
+    private bool showAll = false;
     private int userCurrentPage = 1; // Current page for users
     private int userPageSize = 8;   // Number of users per page
     private int userTotalPages => (int)Math.Ceiling((double)users.Count / userPageSize);
