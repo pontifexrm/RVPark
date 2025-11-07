@@ -1,4 +1,4 @@
-﻿@page "/availability"
+﻿@page "/availabilityrv"
 @rendermode InteractiveServer
 <PageTitle>RV Park Availability</PageTitle>
 
@@ -44,63 +44,63 @@
     <Authorized>
 
 
-<h3 style="color:darkolivegreen;">Apartment Availability - See what dates are available.</h3>
-@* <div class="form-group" style="text-align:left; max-width: 30%; min-width: 260px; margin-left: 1%;">
-    <label>Property</label>
-    <InputSelect select class="form-control" @bind-Value="@propertyID" @onclick="propertyChanged">
-        <option value="0">Select RVPark or Apartment</option>
-        @foreach (var property in BkgProperties)
-        {
-            <option value="@property.PropertyId">@property.Name</option>
-        }
-    </InputSelect>
-</div> *@
-<div class="calendar-navigation" style="display:flex;flex-direction:row; text-align:center;">
-    <div class="form-group" style="text-align:center; margin-left: 1%;">
-        <button class="btn btn-primary" @onclick="PreviousMonth">&lt;</button>
-    </div>
-    <div style="width: 140px; text-align: center;">
-       <span class="current-month" >@CurrentMonth.ToString("MMMM yyyy")</span>
-    </div>
-    <div class="form-group" style="text-align:center; margin-left: 1%;">
-        <button class="btn btn-primary" @onclick="NextMonth">&gt;</button>
-    </div>
-</div>
+        <h3 style="color:darkolivegreen;">RVPark Availability - See what dates are available.</h3>
+@*         <div class="form-group" style="text-align:left; max-width: 30%; min-width: 260px; margin-left: 1%;">
+            <label>Property</label>
+            <InputSelect select class="form-control" @bind-Value="@propertyID" @onclick="propertyChanged">
+                <option value="0">Select RVPark or Apartment</option>
+                @foreach (var property in BkgProperties)
+                {
+                    <option value="@property.PropertyId">@property.Name</option>
+                }
+            </InputSelect>
+        </div> *@
+        <div class="calendar-navigation" style="display:flex;flex-direction:row; text-align:center;">
+            <div class="form-group" style="text-align:center; margin-left: 1%;">
+                <button class="btn btn-primary" @onclick="PreviousMonth">&lt;</button>
+            </div>
+            <div style="width: 140px; text-align: center;">
+                <span class="current-month">@CurrentMonth.ToString("MMMM yyyy")</span>
+            </div>
+            <div class="form-group" style="text-align:center; margin-left: 1%;">
+                <button class="btn btn-primary" @onclick="NextMonth">&gt;</button>
+            </div>
+        </div>
 
-<div class="calendar-grid">
-    <div class="calendar-header">
-        @* set for monday start of week, else for Sunday us (var day in culture.DateTimeFormat.AbbreviatedDayNames) below *@
-       @foreach (var day in culture.DateTimeFormat.AbbreviatedDayNames.Skip(1).Concat(culture.DateTimeFormat.AbbreviatedDayNames.Take(1)))
-       {
-           <div class="calendar-day-header">@day</div>
-       }
-    </div>
+        <div class="calendar-grid">
+            <div class="calendar-header">
+                @* set for monday start of week, else for Sunday us (var day in culture.DateTimeFormat.AbbreviatedDayNames) below *@
+                @foreach (var day in culture.DateTimeFormat.AbbreviatedDayNames.Skip(1).Concat(culture.DateTimeFormat.AbbreviatedDayNames.Take(1)))
+                {
+                    <div class="calendar-day-header">@day</div>
+                }
+            </div>
 
-    <div class="calendar-body">
-        @foreach (var day in calendarDays)
+            <div class="calendar-body">
+                @foreach (var day in calendarDays)
+                {
+                    <div class="calendar-day @day.StatusCss" @onchange="() => ShowDayDetails(day)">
+                        <div class="date-number">@day.Date.Day</div>
+                        <div class="day-status">@day.Status</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @if (showDayDetail)
         {
-            <div class="calendar-day @day.StatusCss" @onchange="() => ShowDayDetails(day)">
-                <div class="date-number">@day.Date.Day</div>
-                <div class="day-status">@day.Status</div>
+            <div class="day-detail-modal">
+                <div class="modal-content">
+                    <h4>@selectedDay.Date.ToString("D")</h4>
+                    <select class="form-control" @bind="selectedDay.Status">
+                        <option value="Available">Available</option>
+                        <option value="Busy">Busy</option>
+                        <option value="Unavailable">Unavailable</option>
+                    </select>
+                    <button class="btn btn-primary mt-2" @onclick="CloseDetails">Close</button>
+                </div>
             </div>
         }
-    </div>
-</div>
-
-@if (showDayDetail)
-{
-    <div class="day-detail-modal">
-        <div class="modal-content">
-            <h4>@selectedDay.Date.ToString("D")</h4>
-            <select class="form-control" @bind="selectedDay.Status">
-                <option value="Available">Available</option>
-                <option value="Busy">Busy</option>
-                <option value="Unavailable">Unavailable</option>
-            </select>
-            <button class="btn btn-primary mt-2" @onclick="CloseDetails">Close</button>
-        </div>
-    </div>
-}
 
     </Authorized>
     <NotAuthorized>
@@ -120,7 +120,7 @@
     private bool showDayDetail = false;
     private DayEntry selectedDay = new();
     private readonly CultureInfo culture = CultureInfo.CurrentCulture;
-    private int propertyID = 2; // should be id of first in loaded properties
+    private int propertyID = 1; // should be id of first in loaded properties
 
     private bool isAdmin = false;
 
@@ -138,7 +138,7 @@
 
     }
 
-    private async Task  GenerateCalendar()
+    private async Task GenerateCalendar()
     {
         calendarDays.Clear();
         //if() when select is deselcted the property ID is still the last valus does mot go to 0
@@ -147,9 +147,9 @@
         var startDate = monthStart.AddDays(-((int)monthStart.DayOfWeek) + 1);
         if (monthStart.DayOfWeek == DayOfWeek.Sunday) startDate = monthStart.AddDays(-6);
         var endDate = monthEnd.AddDays(7 - (int)monthEnd.DayOfWeek); // 7 for mon start else 6 for Sun
-        var todaydte = DateTime.Now.Date.AddDays(-1); // Show yesterdays status to allow self arrival earlier 
+        var todaydte = DateTime.Now.Date.AddDays(-1); // Show yesterdays status to allow self arrival earlier
         // If an Admin User then allow display from the first day of the month.
-        if(isAdmin)
+        if (isAdmin)
         {
             todaydte = monthStart;
         }
@@ -174,7 +174,7 @@
                 {
                     daystatus = "Booked";
                 }
-                if (date.Month != CurrentMonth.Month) daystatus = ""; 
+                if (date.Month != CurrentMonth.Month) daystatus = "";
                 if (date < todaydte) daystatus = "";
                 calendarDays.Add(new DayEntry
                 {
@@ -186,13 +186,13 @@
         }
         StateHasChanged();
     }
-    private  async Task GetAvailability(DateTime dteStart, DateTime dteEnd)
+    private async Task GetAvailability(DateTime dteStart, DateTime dteEnd)
     {
         var query = ApplicationDbContext.bkg_Availabilities
                .Include(a => a.Bkg_Property)
                .AsQueryable();
 
-        if (currentBooking.PropertyId!=null)
+        if (currentBooking.PropertyId != null)
         {
             query = query.Where(a => a.Bkg_PropertyId == propertyID);
         }
@@ -217,13 +217,14 @@
         //     bool isAvailable = searchIsAvail == "Yes";
         //     query = query.Where(a => a.Available == isAvailable);
         // }
-        try{
-            
-                availabilities = await query.AsNoTracking().ToListAsync();
-        }
-            catch (Exception ex)
+        try
         {
-           // Console.WriteLine($"Error ordering availability: {ex.Message}");
+
+            availabilities = await query.AsNoTracking().ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            // Console.WriteLine($"Error ordering availability: {ex.Message}");
         }
         //availabilities = await query.AsNoTracking().ToListAsync();   // Simulate getting availability status
         // return GetRandomStatus();
@@ -265,7 +266,7 @@
     }
     private async Task propertyChanged()
     {
-         await GenerateCalendar();
+        await GenerateCalendar();
     }
     private async Task PreviousMonth()
     {
