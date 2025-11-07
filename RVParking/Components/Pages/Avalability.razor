@@ -79,7 +79,7 @@
     <div class="calendar-body">
         @foreach (var day in calendarDays)
         {
-            <div class="calendar-day @day.StatusCss" @onclick="() => ShowDayDetails(day)">
+            <div class="calendar-day @day.StatusCss" @onchange="() => ShowDayDetails(day)">
                 <div class="date-number">@day.Date.Day</div>
                 <div class="day-status">@day.Status</div>
             </div>

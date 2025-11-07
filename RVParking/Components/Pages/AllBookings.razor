@@ -113,7 +113,7 @@
                             <th style="border: 1px solid #929292;">Paid</th>
                             <th style="border: 1px solid #929292;">Status</th>
                             <th style="border: 1px solid #929292;">Comments</th>
-                            <th style="border: 1px solid #929292;">Bkg Username</th>
+                            <th style="border: 1px solid #929292;">Bkg Username/Email</th>
                             <th style="border: 1px solid #929292;">Created-Updates</th>
                         </tr>
                     </thead>
@@ -145,7 +145,7 @@
                                 <td style="border: 1px solid #929292;">@(booking.Paid ? "Y" : "N")</td>
                                 <td style="border: 1px solid #929292;">@booking.BookingStatus</td>
                                 <td style="border: 1px solid #929292;">@booking.BookingComments</td>
-                                <td style="border: 1px solid #929292;">@booking.Bkg_User.UserName</td>
+                                <td style="border: 1px solid #929292;">@booking.Bkg_User.UserNmeOrEmail</td>
                                 <td style="border: 1px solid #929292;">c:@booking.CreatedDte.ToShortDateString() u:@booking.UpdatedDte.ToString("dd/MM/yy HH:mm")</td>
                             </tr>
                         }

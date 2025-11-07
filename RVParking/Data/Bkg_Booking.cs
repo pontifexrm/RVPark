@@ -25,5 +25,6 @@ namespace RVParking.Data
         public Bkg_User Bkg_User { get; set; }
         public Bkg_Property Bkg_Property { get; set; }
         public int Nights => (DateDepart - DateArrive).Days;
+      
     }
 }

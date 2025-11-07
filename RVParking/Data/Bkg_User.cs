@@ -29,5 +29,21 @@ namespace RVParking.Data
         public ICollection<Bkg_Booking> Bkg_Bookings { get; set; }
         public ICollection<Bkg_Review> Bkg_Reviews { get; set; }
         public ICollection<Bkg_Payment> Bkg_Payments { get; set; }
+
+        public string UserNmeOrEmail
+        {
+            get
+            {
+                if( UserName != UserEmail)
+                {
+                    return UserEmail;
+                }
+                else
+                {
+                    return UserEmail;
+                }
+               
+            }
+        }
     }
 }
