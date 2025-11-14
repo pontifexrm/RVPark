@@ -58,4 +58,8 @@
     <PackageReference Include="TNZAPI.NET" Version="2.4.1.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Components\Pages\Components\" />
+  </ItemGroup>
+
 </Project>

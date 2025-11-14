@@ -1,6 +1,8 @@
 ﻿@using Syncfusion.Blazor.Navigations
 @using Syncfusion.Blazor.SplitButtons
 @using Syncfusion.Blazor.Buttons    
+@using Microsoft.AspNetCore.Components.Routing
+
 @implements IDisposable
 
 @inject NavigationManager NavigationManager 
@@ -71,6 +73,12 @@
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="mybookings">
                         <span class="bi bi-book-nav-menu" aria-hidden="true"></span> New / My Bkgs 
+                    </NavLink>
+                </div>
+                 
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="availabilityrv">
+                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Availability Menu
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
@@ -155,130 +163,19 @@
                         <span class="bi bi-database-nav-menu" aria-hidden="true"></span> Admin Tools
                     </NavLink>
                 </div>
-@*                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="user-bookings">
-                        <span class="bi bi-person-circle-nav-menu" aria-hidden="true"></span> User Bookings
-                    </NavLink>
-                </div> *@
-@*                 <SfDropDownButton Content="Admin Tools">
-                    <DropDownMenuItems>
-                        <DropDownMenuItem Text="Bkg User Admin" Url="/bkg_user_admin" />
-                        <DropDownMenuItem Text="AppUser Admin" Url="/aspnetuser_admin" />
-                    </DropDownMenuItems>
-                </SfDropDownButton> *@
-
-@*                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="bkg_user_admin">
-                        <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span> Bkg User Admin
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="aspnetuser_admin">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span>AppUser Admin
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="bookingavailability">
-                        <span class="bi bi-book-nav-menu" aria-hidden="true"></span> Booking Avail_Mnt
-                    </NavLink>
-                </div>
- *@                @*                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Admin" >  
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-gear" viewBox="0 0 16 16">  
-                            <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0" />  
-                            <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z" />  
-                        </svg>  
-                        Admin / Setup  
-                    </NavLink>  
-                </div> *@
- @*                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="bkgproperty_admin">
-                        <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>Property Admin
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="asprole_admin">
-                        <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>Role Admin
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3"> 
-                    <NavLink class="nav-link" href="aspuserrole_admin">
-                        <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>User to Role Admin
-                    </NavLink>
-                </div>*@
-          @*       <ul class="nav flex-column">
-                    <!-- Top-level item -->
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href="/">Home</NavLink>
-                    </li>
-
-                    <!-- First dropdown section -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle"
-                           href="#"
-                           id="section1"
-                           role="button"
-                           data-bs-toggle="dropdown"
-                           aria-expanded="false">
-                            Admin Tasks
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="section1">
-                            <li>
-                                <NavLink class="dropdown-item" href="/bkg_user_admin">Bkg User Admin</NavLink>
-                            </li>
-                            <li>
-                                <NavLink class="dropdown-item" href="/aspnetuser_admin">AppUser Admin</NavLink>
-                            </li>
-                        </ul>
-                    </li>
-
-                    <!-- Section with nested dropdown -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle"
-                           href="#"
-                           id="section2"
-                           role="button"
-                           data-bs-toggle="dropdown"
-                           aria-expanded="false">
-                            Section 2
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="section2">
-                            <li>
-                                <NavLink class="dropdown-item" href="/sub3">Subpage 3</NavLink>
-                            </li>
-                            <!-- Nested submenu -->
-                            <li class="dropdown-submenu">
-                                <a class="dropdown-item dropdown-toggle" href="#">More…</a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <NavLink class="dropdown-item" href="/sub3a">Sub-subpage A</NavLink>
-                                    </li>
-                                    <li>
-                                        <NavLink class="dropdown-item" href="/sub3b">Sub-subpage B</NavLink>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul> *@
-
-
-
-
-
-
             </Authorized>
         </AuthorizeView>
 
     </nav>
 
-    <div style="font-size: 0.6em; color: aliceblue; text-align:center;"><br /><br />Ver: 1.0.52 2025-11-08</div>
+    <div style="font-size: 0.6em; color: aliceblue; text-align:center;"><br /><br />Ver: 1.0.53 2025-11-15</div>
 </div>
 
 @code {
     private string? currentUrl;
     private bool showAdminItems = false;
-
+    private bool _expandSubNav = false;
+    public bool expandSubNav { set; get; } = false;
     protected override void OnInitialized()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
