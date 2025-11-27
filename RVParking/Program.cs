@@ -49,9 +49,10 @@ builder.Configuration
     .AddEnvironmentVariables();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//    options.UseMySql((connectionString), new MySqlServerVersion(new Version(8, 0, 40))), ServiceLifetime.Scoped);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql((connectionString), new MySqlServerVersion(new Version(8, 0, 40))), ServiceLifetime.Scoped);
-
+    options.UseSqlServer(connectionString));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -71,11 +72,11 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<HttpContextAccessorService>();
 
 // Add AutoMapper
-builder.Services.AddAutoMapper(typeof(MappingProfile));
+//builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 // Blazor Syncfusion
-builder.Services.AddSyncfusionBlazor(options => { });
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MzY4MDQ1MkAzMjM4MmUzMDJlMzBDUHhySWJRUXNxcEdLWjN4MER0UTFBL05uRnRJZ0VQTlNEVnpSWnkxanh3PQ==");
+builder.Services.AddSyncfusionBlazor(options => { }); 
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JFaF5cXGRCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWH5cd3RWRmRdV0NwX0dWYEg= ");
 
 var app = builder.Build();
 

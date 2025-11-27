@@ -6,6 +6,34 @@
 
 <PageTitle>RV Park - Home</PageTitle>
 
+@* Plan (pseudocode):
+   1. Add a scoped CSS block to this component defining a class that forces white bold text and removes underline.
+      - Class name: link-no-underline
+      - Rules: color: white; font-weight: 700; text-decoration: none;
+      - Also ensure hover and focus states do not add an underline and preserve color.
+   2. Apply the class to the anchor that links to /ContactRegister.
+   3. Keep existing markup and styling otherwise unchanged.
+   4. Ensure the <b> tag is not required for bold but leave it for minimal change; CSS will enforce color and no underline.
+*@
+
+<style>
+    /* Component-local styles: ensure link text is bold, white, and never underlined */
+    .link-no-underline,
+    .link-no-underline b {
+        color: white !important;
+        font-weight: 700 !important;
+        text-decoration: none !important;
+    }
+
+    .link-no-underline:hover,
+    .link-no-underline:focus,
+    .link-no-underline:active {
+        color: white !important;
+        text-decoration: none !important;
+        outline: none;
+    }
+</style>
+
 <div>
     <a class="row" > @*This picture has a title within it.*@
         <img src="images/WgtnGoodDayE.jpg" >
@@ -23,7 +51,8 @@
         @* Or a rest-up before setting out north.... YES THAT's GOOD TOO! *@
         Looking for an RV Park going to or from the Wellington Cook Strait Ferries?<br />
         Or perhaps a comfortable stay inside, no need to unpack just for one night?<br />
-        Then Try &nbsp;&nbsp; <b>RV Park on Fitz.</b>  &nbsp;&nbsp; or  &nbsp;&nbsp; <b>Apartment on Fitz.</b>
+        Then Try &nbsp;&nbsp; <a href="/ContactRegister" class="link-no-underline"><b>RV Park on Fitz.</b></a>  &nbsp;&nbsp; 
+        or  &nbsp;&nbsp; <a href="/ContactRegister" class="link-no-underline"><b>Apartment on Fitz.</b></a>
         @* <p style="text-align: center">THEN TRY      RV Park on Fitz.</p> *@
     </div>
     <div class="column" style="background-color: darkolivegreen; color:antiquewhite; text-align: center;" max-width:10%">
@@ -31,11 +60,6 @@
     </div>
 </div>
 @*Next make some cards with other photos of how to get here and maybe the pad in card style etc*@
-@* <div class="row">
-    <div class="column" style="background-color:#aaa;">Column</div>
-    <div class="column" style="background-color:#bbb;">Column</div>
-    <div class="column" style="background-color:#ccc;">Column</div>
-</div> *@
 
 <section class="card-list product-list">
     <a class="card">
@@ -98,4 +122,3 @@
     <a href="images/DirectionMapRVParkOnFitz.jpg">From the South to RV Park on Fitz. </a>
     <a href="images/DirectionMapFromNorth.jpg">From the North to RV Park on Fitz. </a>
 </div> *@
-Y

@@ -50,12 +50,13 @@
                     <small>Please register, you can then view bkg-availablility. You can Opt out.<br/>
                     </small>
                  </span>
-
-                <span><i>Query Availability for RV Park or Apartment with In/Out Dates.</i></span>
-
+                <br />
+                <span><i><b>Query Availability for RV Park or Apartment with In/Out Dates.</b></i></span>
+                
+               
                 <div class="form-group" style="text-align:left; max-width: 75%; margin-left: 2%;">
                     <label>RVPark/Apartment</label>
-                    <select style="flex: 1 1 600px;  margin-left: 2%;" @bind="searchPropertyId">
+                    <select style="flex: 1 1 660px;  margin-left: 2%;" @bind="searchPropertyId">
                         <option value="">Select</option>
                         @foreach (var property in properties)
                         {
@@ -90,7 +91,8 @@
                     </div>
  *@
                 </div>
-                <span><i>Contact Us with a message or question.</i></span>
+                <br />
+                <span><i><b>Contact Us with a message or question.</b></i></span>
                 <div class="form-group" style="max-width: 75%;width: 500px; margin-left: 2%">
                     <label for="subject">Subject</label>
                     <InputText @bind-Value="RegistrationInput.Subject" class="form-control" id="subject" />
@@ -101,9 +103,9 @@
                     <InputTextArea @bind-Value="RegistrationInput.Message" class="form-control" id="message" />
 
                 </div>
-
+                <br/>
                 @* <hr /> *@
-                <span><i>The information we need of you.</i></span>
+                <span><i><b>The information we need of you.</b></i></span>
                 <div class="form-group" style="display:flex;flex-direction:row; max-width: 75%; margin-left: 2%">
                     <div class="form-group" style="max-width: 100%; ">
                         <label for="firstname">First Name</label>
@@ -140,6 +142,11 @@
                         <label for="country">Country</label>
                         <InputText @bind-Value=RegistrationInput.Country class="form-control" id="country" />
                         <ValidationMessage For="() => RegistrationInput.Country" />
+                    </div>
+                    <div class="form-group" style="display: none; margin-left: 2%" >
+                        @* <label for="country">Country</label> *@
+                        <InputText @bind-Value=RegistrationInput.hiddenField class="form-control" id="hiddenField" />
+                        @* <ValidationMessage For="() => RegistrationInput.Country" /> *@
                     </div>
                 </div>
                 <div class="form-group" style="display:flex;flex-direction:row; max-width: 75%; margin-left: 2%">
@@ -300,6 +307,11 @@
 
     private async Task SendConfirmationCodes()
     {
+        if(RegistrationInput.hiddenField !="")
+        {
+            return; // we have a bot so go no further.
+        }
+            
         if(regChecked == false)
         {
             // then the user does not want to register so just send the message and return to home page.
@@ -792,6 +804,7 @@
                 return srtn;
             }
         }
+        public string hiddenField { get; set; } = ""; // to help trap bots
     }
 
     private void SendEmailConfirmationCode(string emailTo)

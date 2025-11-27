@@ -335,10 +335,11 @@
     public DateTime Todate { get; set; } = DateTime.Now.Date;
 
     private ApplicationUser user = default!;
+    [PersistentState]
+    public List<Bkg_Booking>? bookings { get; set; }
 
-    private List<Bkg_Booking> bookings = new();
     private List<Bkg_User> users = new();
-    private List<Bkg_Property> properties = new();
+    public List<Bkg_Property>? properties {get; set; }
     private Bkg_Booking currentBooking = new();
     private Bkg_Booking originalBooking = new();
     private Bkg_Booking orgnBkg = new();
@@ -881,7 +882,7 @@
         string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " Changed! And Now is - BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
         string CCMsg = string.Concat(subjectMsg, " Changes are:-", chngmsg);
-        CCMsg += "\r\n" + ConfirmBkgMsg();
+        // CCMsg += "\r\n" + ConfirmBkgMsg();
 
         // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, chngmsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
 #if !DEBUG

@@ -335,10 +335,11 @@
     public DateTime Todate { get; set; } = DateTime.Now.Date;
 
     private ApplicationUser user = default!;
-
-    private List<Bkg_Booking> bookings = new();
+    [PersistentState]
+    public List<Bkg_Booking>? bookings { get; set; } 
     private List<Bkg_User> users = new();
-    private List<Bkg_Property> properties = new();
+    
+    public List<Bkg_Property>? properties { get; set; } = new();
     private Bkg_Booking currentBooking = new();
     private Bkg_Booking originalBooking = new();
     private Bkg_Booking orgnBkg = new();
@@ -392,7 +393,11 @@
         }
         Todate = Fmdate.AddDays(1);
         users = await ApplicationDbContext.bkg_Users.ToListAsync() ?? new List<Bkg_User>();
-        properties = await ApplicationDbContext.bkg_Properties.ToListAsync() ?? new List<Bkg_Property>();
+        if (properties == null )
+        {
+            properties =   await ApplicationDbContext.bkg_Properties.ToListAsync() ?? new List<Bkg_Property>();
+        }  
+        
         await LoadBookings();
     }
 
@@ -585,6 +590,7 @@
     }
     private async Task ConfirmDelete()
     {
+        
         Bkg_Engine bkg_Engine = new Bkg_Engine(ApplicationDbContext);
         var bookingToDelete = await ApplicationDbContext.bkg_Bookings
             .Include(b => b.Bkg_User)
@@ -881,7 +887,7 @@
         string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " Changed! And Now is - BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
         string CCMsg = string.Concat(subjectMsg, " Changes are:-", chngmsg);
-        CCMsg += "\r\n" + ConfirmBkgMsg();
+        // CCMsg += "\r\n" + ConfirmBkgMsg();
 
         // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, chngmsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
     #if !DEBUG
