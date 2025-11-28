@@ -135,7 +135,7 @@
                         @foreach (var booking in bookings)
                         {
                             <tr>
-                                <td style="border: 1px solid #929292;">@booking.DateArrive.ToShortDateString() to @booking.DateDepart.ToShortDateString()</td>
+                                <td style="border: 1px solid #929292;">@booking.DateArrive.ToString("dd/MM/yyyy") to @booking.DateDepart.ToString("dd/MM/yyyy")</td>
                                 <td style="border: 1px solid #929292;">@booking.Bkg_User.UserFirstName</td>
                                 <td style="border: 1px solid #929292;">@booking.Bkg_User.UserLastName</td>
                                 <td style="border: 1px solid #929292;">@booking.Bkg_Property.Name</td>
@@ -572,10 +572,10 @@
             try
             {
                 string subjectMsg = string.Concat("WARNING", " BkgRef: ", booking.BookingId.ToString(), " for ", booking.Bkg_Property.Name,
-                " from ", booking.DateArrive.Date.ToString("d"), " to ", booking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED");
+                " from ", booking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", booking.DateDepart.Date.ToString("dd/MM/yyyy"), " HAS BEEN DELETED");
 
                 string CCMsg = string.Concat("CC msg of email to:", booking.Bkg_User.UserEmail, " Warning BkgRef: ", booking.BookingId.ToString(),
-                " for ", booking.Bkg_Property.Name, " from ", booking.DateArrive.Date.ToString("d"), " to ", booking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED");
+                " for ", booking.Bkg_Property.Name, " from ", booking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", booking.DateDepart.Date.ToString("dd/MM/yyyy"), " HAS BEEN DELETED");
 
                 await bkg_Engine.DeleteBookingAsync(booking);
                 await LoadBookings();
@@ -674,7 +674,7 @@
     private void SendEmailConfirmation()
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 #if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
@@ -695,7 +695,7 @@
     private void SendCCEmailConfirmation()
     {
         string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 #if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this should come from configuration injection
@@ -766,7 +766,7 @@
     private void SendTxtConfirmation(string txtrept)
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 
         if (txtrept.Length == 0)
         {
@@ -791,7 +791,7 @@
     private void SendTxtConfirmationNoEmail(string txtrept)
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 
         if (txtrept.Length == 0)
         {
@@ -826,9 +826,9 @@
         sb.Append("Your booking has been confirmed, or reconfirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
-        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
         sb.Append(" departing before mid-day ");
-        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append(currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
         sb.Append("\n\n");
         sb.Append("Address is\r\n" +
                   "        22 Fitzpatrick St\r\n" +
@@ -862,9 +862,9 @@
         sb.Append("Your booking has been confirmed, or reconfirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
-        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
         sb.Append(" departing before mid-day ");
-        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append(currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
         sb.Append("\n\n");
         sb.Append("Address is\r\n" +
                   "        22 Fitzpatrick St\r\n" +
@@ -898,9 +898,9 @@
         sb.Append("Your booking has been confirmed, or reconfirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
-        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
         sb.Append(" departing before mid-day ");
-        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append(currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
         sb.Append("\n\n");
         sb.Append("Please refer to your Bkg confirmation Email for full Details.\r\n" +
                  "from : rvpark@pontifex.nz\r\n");return sb.ToString();

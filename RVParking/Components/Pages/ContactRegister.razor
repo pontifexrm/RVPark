@@ -311,7 +311,12 @@
         {
             return; // we have a bot so go no further.
         }
-            
+        if (!IsValidNzMobile(RegistrationInput.Mobile)) return;
+        if (!IsValidName(RegistrationInput.FirstName) || !IsValidName(RegistrationInput.LastName))
+        {
+            // invalid name(s) — stop processing
+            return;
+        }
         if(regChecked == false)
         {
             // then the user does not want to register so just send the message and return to home page.
@@ -517,7 +522,7 @@
                 verificationResult = "❌  Sorry but your booking request is not possible. Please log in to see other possible dates and manage future bookings. ";
                 // allDatesAvailable = false;
             }
-            
+
         }
         verificationResult += "✅ Verified and created! You can now use the system. Please login as normal.";
         currentStep = 3;
@@ -550,7 +555,7 @@
         currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
         string s = configuration["TNZ:SMSrept"];
         string txtrept = Chk_E_164_Phone(s);
-//        currentBooking.DateArrive = Fmdate; currentBooking.DateDepart = Todate;
+        //        currentBooking.DateArrive = Fmdate; currentBooking.DateDepart = Todate;
 
         // if a new booking then we need to Create it else Change it.
         if (currentBooking.BookingId == 0) // A new booking
@@ -612,6 +617,7 @@
             emailMessage.Email = string.Empty;
             return;
         }
+
         isSubmitting = true;
         emailMessage.Name = RegistrationInput.FirstName + " " + RegistrationInput.LastName;
         emailMessage.Email = RegistrationInput.Email;
@@ -754,8 +760,8 @@
         [Required]
         public string LastName { get; set; } = "";
 
-        [Required]
-        // [RegularExpression(@"^\+?[0-9]\d{1,14}$", ErrorMessage = "The phone number is not valid.")]
+        [Required] 
+        [RegularExpression(@"^\+?[0-9]\d{1,14}$", ErrorMessage = "The phone number is not valid.")]
         [DataType(DataType.PhoneNumber)]
         public string Mobile { get; set; } = "";
 
@@ -805,8 +811,80 @@
             }
         }
         public string hiddenField { get; set; } = ""; // to help trap bots
-    }
 
+
+
+    }
+    private static bool IsValidNzMobile(string? mobile)
+    {
+        if (string.IsNullOrWhiteSpace(mobile))
+            return false;
+
+        var s = mobile.Trim();
+
+        // International format: starts with '+' and followed by at least 3 digits -> accept
+        if (s.StartsWith('+'))
+        {
+            if (s.Length >= 4 && s.Skip(1).Take(3).All(char.IsDigit))
+                return true;
+            return false;
+        }
+
+        // Starts with digit but not '+' or '0' -> invalid
+        if (char.IsDigit(s[0]) && s[0] != '0')
+            return false;
+
+        // Starts with '0' -> next character must be '2'
+        if (s[0] == '0')
+        {
+            return s.Length >= 2 && s[1] == '2';
+        }
+
+        return false;
+    }
+    private static bool IsValidName(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return false;
+
+        var s = name.Trim();
+
+        // Reject any digits or symbols — allow only letters and spaces
+        foreach (var ch in s)
+        {
+            if (!(char.IsLetter(ch) || ch == ' '))
+                return false;
+        }
+
+        // Reject names with no vowels (a, e, i, o, u)
+        string vowels = "aeiouAEIOU";
+        if (!s.Any(c => char.IsLetter(c) && vowels.IndexOf(c) >= 0))
+            return false;
+
+        // Reject names with >3 consecutive consonants (4 or more)
+        int consecConsonants = 0;
+        foreach (var ch in s)
+        {
+            if (!char.IsLetter(ch))
+            {
+                consecConsonants = 0;
+                continue;
+            }
+
+            if (vowels.IndexOf(ch) >= 0)
+            {
+                consecConsonants = 0;
+            }
+            else
+            {
+                consecConsonants++;
+                if (consecConsonants > 3)
+                    return false;
+            }
+        }
+
+        return true;
+    }
     private void SendEmailConfirmationCode(string emailTo)
     {
         string subjectMsg = "Email Confirmation Code";
@@ -857,7 +935,7 @@
     private void SendEmailConfirmation()
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 #if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
@@ -878,7 +956,7 @@
     private void SendCCEmailConfirmation()
     {
         string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 #if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
@@ -899,7 +977,7 @@
     private void SendCCEmailDeleteConfirmation(string subjectMsg, string DeleteMsg)
     {
         // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, DeleteMsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        // " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED");
+        // " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"), " HAS BEEN DELETED");
 #if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
@@ -924,7 +1002,7 @@
     private void SendTxtConfirmation(string subjectMsg, string txtrept, string DeleteMsg)
     {
         // string subjectMsg = string.Concat(DeleteMsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        // " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED");
+        // " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"), " HAS BEEN DELETED");
 
         // if (txtrept.Length == 0)
         // {
@@ -949,7 +1027,7 @@
     private void SendTxtConfirmation(string txtrept)
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 
         if (txtrept.Length == 0)
         {
@@ -974,7 +1052,7 @@
     private void SendTxtConfirmationNoEmail(string txtrept)
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 
         if (txtrept.Length == 0)
         {
@@ -1009,9 +1087,9 @@
         sb.Append("Your booking has been confirmed, or reconfirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
-        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
         sb.Append(" departing before mid-day ");
-        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append(currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
         sb.Append("\n\n");
         sb.Append("Address is\r\n" +
                   "        22 Fitzpatrick St\r\n" +
@@ -1045,9 +1123,9 @@
         sb.Append("Your booking has been confirmed, or reconfirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
-        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
         sb.Append(" departing before mid-day ");
-        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append(currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
         sb.Append("\n\n");
         sb.Append("Address is\r\n" +
                   "        22 Fitzpatrick St\r\n" +
@@ -1081,9 +1159,9 @@
         sb.Append("Your booking has been confirmed, or reconfirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
-        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
         sb.Append(" departing before mid-day ");
-        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append(currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
         sb.Append("\n\n");
         sb.Append("Please refer to your Bkg confirmation Email for full Details.\r\n" +
                  "from : rvpark@pontifex.nz\r\n"); return sb.ToString();

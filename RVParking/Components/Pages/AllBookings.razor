@@ -200,16 +200,16 @@
                         <div class="form-group" style="display:flex;flex-direction:row;">
                             <div class="form-group" style=" text-align:center; width: 160px; margin-left: 1%">
                                 <label for="fmdate">Arriving</label>
-                                <SfDatePicker TValue="DateTime?" Value="@Fmdate" Placeholder='Choose a Date' ID="fmdate">
+                                <SfDatePicker TValue="DateTime ?" Value="@Fmdate" Placeholder='Choose a Date' ID="fmdate" Format="dd/MM/yyyy" Locale="en-NZ">
                                     <DatePickerEvents TValue="DateTime?" ValueChange="DteAriveChnge"></DatePickerEvents>
                                 </SfDatePicker>
 
-                                @* <SfDatePicker TValue="DateTime?" Value="@currentBooking.DateArrive" Placeholder='Choose a Date' ID="fmdate"> </SfDatePicker> *@
+                                @* <SfDatePicker TValue="DateTime?" Value="@currentBooking.DateArrive" Placeholder='Choose a Date' ID="fmdate" Format="dd/MM/yyyy" Locale="en-NZ"> </SfDatePicker> *@
                             </div>
 
                             <div class="form-group" style=" text-align:center; width: 160px; margin-left: 1%">
                                 <label for="tmdate">Departing</label>
-                                <SfDatePicker TValue="DateTime?" Value="@Todate" Placeholder='Choose a Date' ID="todate">
+                                <SfDatePicker TValue="DateTime ?" Value="@Todate" Placeholder='Choose a Date' ID="todate" Format="dd/MM/yyyy" Locale="en-NZ">
                                     <DatePickerEvents TValue="DateTime?" ValueChange="DteDepartChnge"></DatePickerEvents>
                                 </SfDatePicker>
                                 @* <SfDatePicker TValue="DateTime?" Value="@currentBooking.DateDepart" Placeholder='Choose a Date' ID="todate"></SfDatePicker> *@
@@ -541,11 +541,11 @@
                 string chngmsg = string.Empty;
                 if (currentBooking.DateArrive != orgnBkg.DateArrive)
                 {
-                    chngmsg = string.Concat("Arrival Date Changed from ", orgnBkg.DateArrive.ToString("d"), " to ", currentBooking.DateArrive.ToString("d"));
+                    chngmsg = string.Concat("Arrival Date Changed from ", orgnBkg.DateArrive.ToString("dd/MM/yyyy"), " to ", currentBooking.DateArrive.ToString("dd/MM/yyyy"));
                 }   
                 if (currentBooking.DateDepart != orgnBkg.DateDepart)
                 {
-                    chngmsg = string.Concat(chngmsg, " Departure Date Changed from ", orgnBkg.DateDepart.ToString("d"), " to ", currentBooking.DateDepart.ToString("d"));
+                    chngmsg = string.Concat(chngmsg, " Departure Date Changed from ", orgnBkg.DateDepart.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.ToString("dd/MM/yyyy"));
                 }
                 if (currentBooking.PropertyId != orgnBkg.PropertyId)
                 {
@@ -768,7 +768,7 @@
     private void SendEmailConfirmation(string emailTo)
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-    " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+    " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
         // emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
         //     "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentBooking.Bkg_User);
 
@@ -839,7 +839,7 @@
     private void SendEmailAdhocConfirmation(string emailTo)
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-    " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+    " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
         // emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
         //     "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentBooking.Bkg_User);
 
@@ -864,7 +864,7 @@
     private void SendCCEmailConfirmation()
     {
         string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 #if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this should come from configuration injection
@@ -885,7 +885,7 @@
     private void SendCCEmailConfirmation(string chngmsg)
     {
         string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " Changed! And Now is - BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
         string CCMsg = string.Concat(subjectMsg, " Changes are:-", chngmsg);
         // CCMsg += "\r\n" + ConfirmBkgMsg();
 
@@ -910,7 +910,7 @@
     private void SendCCEmailDeleteConfirmation(string subjectMsg, string DeleteMsg)
     {
         // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, DeleteMsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        // " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED");
+        // " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"), " HAS BEEN DELETED");
 #if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this should come from configuration injection
@@ -931,7 +931,7 @@
     private void SendTxtConfirmation(string txtrept)
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 
         // emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
         //     "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentBooking.Bkg_User);
@@ -956,7 +956,7 @@
     private void SendTxtConfirmationNoEmail(string txtrept) // txtrept is a phone number in E.164 format and this message is FULL LENGTH expensive.
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 
         // emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
         //     "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentBooking.Bkg_User);
@@ -981,7 +981,7 @@
     private void SendTxtAdhocConfirmation(string txtrept) // txtrept is a phone number in E.164 format and this message is SHORTER than normal to save service charges.
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 
         // emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
         //     "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentBooking.Bkg_User);
@@ -1016,9 +1016,9 @@
         sb.Append("Your booking has been confirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
-        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
         sb.Append(" departing before mid-day ");
-        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append(currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
         sb.Append("\n\n");
         sb.Append("Address is\r\n" +
                  "        22 Fitzpatrick St\r\n" +
@@ -1064,9 +1064,9 @@
         sb.Append("Your booking has been confirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
-        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
         sb.Append(" departing before mid-day ");
-        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append(currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
         sb.Append("\n\n");
         sb.Append("Address is\r\n" +
                  "        22 Fitzpatrick St\r\n" +
@@ -1103,9 +1103,9 @@
         sb.Append("Your booking has been confirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
-        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
         sb.Append(" departing before mid-day ");
-        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append(currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
         sb.Append("\n\n");
         sb.Append("Please refer to your Bkg confirmation Email for full Details.\r\n" +
                  "from : rvpark@pontifex.nz\r\n");
@@ -1124,9 +1124,9 @@
         sb.Append("Your booking has been confirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
-        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
         sb.Append(" departing before mid-day ");
-        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append(currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
         sb.Append("\n\n");
         sb.Append("Address is\r\n" +
                      "        22 Fitzpatrick St\r\n" +
@@ -1172,9 +1172,9 @@
         sb.Append("Your booking has been confirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
-        sb.Append(currentBooking.DateArrive.Date.ToString("d"));
+        sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
         sb.Append(" departing before mid-day ");
-        sb.Append(currentBooking.DateDepart.Date.ToString("d"));
+        sb.Append(currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
         sb.Append("\n\n");
         sb.Append("Please refer to your Bkg confirmation Email for full Details.\r\n" +
                  "from : rvpark@pontifex.nz\r\n");
