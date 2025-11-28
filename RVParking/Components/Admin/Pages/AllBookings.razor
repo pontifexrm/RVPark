@@ -60,8 +60,8 @@
         <!-- Search Bar -->
         <div class="search-bar" style="display:flex; flex-wrap: wrap; gap: 4px;">
             <input type="text" style="flex: 1 1 200px;" placeholder="Search by Client or Bkg Ref:" @bind="searchUsername" />
-            <input type="date" style="flex: 1 1 200px;" @bind="searchFromDate" />
-            <input type="date" style="flex: 1 1 200px;" @bind="searchToDate" />
+            <input type="date" style="flex: 1 1 200px;" @bind="searchFromDate" Format="dd/MM/yyyy" Locale="en-NZ" />
+            <input type="date" style="flex: 1 1 200px;" @bind="searchToDate" Format="dd/MM/yyyy" Locale="en-NZ" />
             <select style="flex: 1 1 200px;" @bind="searchPropertyId">
                 <option value="">Select Property</option>
                 @foreach (var property in properties)
@@ -121,7 +121,7 @@
                         @foreach (var booking in bookings)
                         {
                             <tr>
-                                <td style="border: 1px solid #929292;">@booking.DateArrive.ToShortDateString() to @booking.DateDepart.ToShortDateString()</td>
+                                <td style="border: 1px solid #929292;">@booking.DateArrive.ToString("dd/MM/yyyy") to @booking.DateDepart.ToString("dd/MM/yyyy")</td>
                                 <td style="border: 1px solid #929292;">@booking.Bkg_User.UserFirstName</td>
                                 <td style="border: 1px solid #929292;">@booking.Bkg_User.UserLastName</td>
                                 <td style="border: 1px solid #929292;">
@@ -146,7 +146,7 @@
                                 <td style="border: 1px solid #929292;">@booking.BookingStatus</td>
                                 <td style="border: 1px solid #929292;">@booking.BookingComments</td>
                                 <td style="border: 1px solid #929292;">@booking.Bkg_User.UserNmeOrEmail</td>
-                                <td style="border: 1px solid #929292;">c:@booking.CreatedDte.ToShortDateString() u:@booking.UpdatedDte.ToString("dd/MM/yy HH:mm")</td>
+                                <td style="border: 1px solid #929292;">c:@booking.CreatedDte.ToString("dd/MM/yy HH:mm") u:@booking.UpdatedDte.ToString("dd/MM/yy HH:mm")</td>
                             </tr>
                         }
                     </tbody>
