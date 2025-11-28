@@ -156,8 +156,8 @@
     private Bkg_Booking orgnBkg = new();
     private Bkg_User currentUser = new();
 
-    public DateTime Fmdate { get; set; } = DateTime.Now.Date;
-    public DateTime Todate { get; set; } = DateTime.Now.Date;
+    public DateTime Fmdate { get; set; } = DateHelper.GetCurrentDateInNZ();
+    public DateTime Todate { get; set; } = DateHelper.GetCurrentDateInNZ();
     private Bkg_Engine? bkg_Engine;
     private bool bkgAvailable = false;
     private bool confirmSent = false;
@@ -168,8 +168,8 @@
     }
     private sealed class ContactInputModel
     {
-        public DateTime Fmdate { get; set; } = DateTime.Now.Date;
-        public DateTime Todate { get; set; } = DateTime.Now.Date;
+        public DateTime Fmdate { get; set; } = DateHelper.GetCurrentDateInNZ();
+        public DateTime Todate { get; set; } = DateHelper.GetCurrentDateInNZ();
         public string Subject { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
     }
@@ -191,7 +191,7 @@
             currentUser = await ApplicationDbContext.bkg_Users.FirstOrDefaultAsync(u => u.UserName == userName);
             // Use the currentUser as needed
         }
-        ContactInput.Fmdate = DateTime.Now.Date;
+        ContactInput.Fmdate = DateHelper.GetCurrentDateInNZ();;
         ContactInput.Todate = AddOneDay(ContactInput.Fmdate);
         Todate = ContactInput.Todate;
         Fmdate = ContactInput.Fmdate;   
@@ -560,7 +560,7 @@
     }
     private void DteAriveChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Fmdate = args.Value ?? DateTime.Now.Date;
+        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ();;
         if (Todate <= Fmdate)
         {
             Todate = AddOneDay(Fmdate);
@@ -571,7 +571,7 @@
     }
     private void DteDepartChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Todate = args.Value ?? DateTime.Now.Date;
+        Todate = args.Value ?? DateHelper.GetCurrentDateInNZ();;
         if (Todate <= Fmdate)
         {
 

@@ -337,8 +337,8 @@
 @code {
     private string BkgType = "RVPark On Fitz";
     private string isAvail = "Yes";
-    public DateTime Fmdate { get; set; } = DateTime.Now.Date;
-    public DateTime Todate { get; set; } = DateTime.Now.Date;
+    public DateTime Fmdate { get; set; } = DateHelper.GetCurrentDateInNZ();
+    public DateTime Todate { get; set; } = DateHelper.GetCurrentDateInNZ();
     private bool allDatesAvailable = false;
     private string toDelete = "no";
     private string status = string.Empty;
@@ -454,7 +454,7 @@
 
     private void DteAriveChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Fmdate = args.Value ?? DateTime.Now.Date;
+        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ();;
         if (Todate <= Fmdate)
         {
             Todate = AddOneDay(Fmdate);
@@ -465,7 +465,7 @@
     }
     private void DteDepartChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Todate = args.Value ?? DateTime.Now.Date;
+        Todate = args.Value ?? DateHelper.GetCurrentDateInNZ();;
         if (Todate <= Fmdate)
         {
 

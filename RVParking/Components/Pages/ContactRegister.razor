@@ -298,8 +298,8 @@
     private Bkg_Booking orgnBkg = new();
 
     private Bkg_Engine? bkg_Engine;
-    public DateTime Fmdate { get; set; } = DateTime.Now.Date;
-    public DateTime Todate { get; set; } = DateTime.Now.Date;
+    public DateTime Fmdate { get; set; } = DateHelper.GetCurrentDateInNZ(); //DateHelper.GetCurrentDateInNZ();;
+    public DateTime Todate { get; set; } = DateHelper.GetCurrentDateInNZ();
 
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
@@ -543,7 +543,7 @@
         properties = await ApplicationDbContext.bkg_Properties.ToListAsync() ?? new List<Bkg_Property>();
         userIpAddress = httpContextAccessorService.GetUserIpAddress();
 
-        RegistrationInput.Fmdate = DateTime.Now.Date;
+        RegistrationInput.Fmdate = DateHelper.GetCurrentDateInNZ();;
         RegistrationInput.Todate = AddOneDay(RegistrationInput.Fmdate);
         Todate = RegistrationInput.Todate;
         Fmdate = RegistrationInput.Fmdate;
@@ -783,8 +783,8 @@
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; } = "";
 
-        public DateTime Fmdate { get; set; } = DateTime.Now.Date;
-        public DateTime Todate { get; set; } = DateTime.Now.Date;
+        public DateTime Fmdate { get; set; } = DateHelper.GetCurrentDateInNZ();
+        public DateTime Todate { get; set; } = DateHelper.GetCurrentDateInNZ();
         public string Subject { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
 
@@ -1193,7 +1193,7 @@
     }
     private void DteAriveChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Fmdate = args.Value ?? DateTime.Now.Date;
+        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ();;
         if (Todate <= Fmdate)
         {
             Todate = AddOneDay(Fmdate);
@@ -1204,7 +1204,7 @@
     }
     private void DteDepartChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Todate = args.Value ?? DateTime.Now.Date;
+        Todate = args.Value ?? DateHelper.GetCurrentDateInNZ();;
         if (Todate <= Fmdate)
         {
 

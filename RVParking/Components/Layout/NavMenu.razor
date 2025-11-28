@@ -176,7 +176,12 @@
         @* <a href="https://www.SmarterASP.NET/index?r=PontifexRM">
             <img src="https://www.SmarterASP.NET/affiliate/234x60.gif" border="0"></a> *@
     </div>
-
+    <div class="nav-item px-3 nav-bottom">
+            
+        <a href="https://www.SmarterASP.NET/index?r=PontifexRM">
+            <img src="https://www.SmarterASP.NET/affiliate/234x60.gif" border="0">
+        </a>
+    </div>
 </div>
 
 @code {
@@ -203,4 +208,19 @@
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }
+
+<style>
+html, body, #app {
+  height: 100%;
+}
+
+.nav-scrollable {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 56px);
+}
+
+.nav-scrollable nav { flex: 1 1 auto; overflow: auto; }
+.nav-scrollable .nav-bottom { margin-top: auto; text-align:center; }
+</style>
 

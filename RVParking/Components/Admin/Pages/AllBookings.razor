@@ -331,8 +331,8 @@
 
 
 @code {
-    public DateTime Fmdate { get; set; } = DateTime.Now.Date;
-    public DateTime Todate { get; set; } = DateTime.Now.Date;
+    public DateTime Fmdate { get; set; } = DateHelper.GetCurrentDateInNZ();
+    public DateTime Todate { get; set; } = DateHelper.GetCurrentDateInNZ();
 
     private ApplicationUser user = default!;
     [PersistentState]
@@ -427,7 +427,7 @@
 
     private void DteAriveChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Fmdate = args.Value ?? DateTime.Now.Date;
+        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ();;
         if (Todate <= Fmdate)
         {
             Todate = AddOneDay(Fmdate);
@@ -438,7 +438,7 @@
     }
     private void DteDepartChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Todate = args.Value ?? DateTime.Now.Date;
+        Todate = args.Value ?? DateHelper.GetCurrentDateInNZ();;
         if (Todate <= Fmdate)
         {
 
@@ -474,8 +474,8 @@
     private void OpenAddModal()
     {
         currentBooking = new Bkg_Booking();
-        currentBooking.DateArrive = DateTime.Now.Date;
-        currentBooking.DateDepart = DateTime.Now.Date.AddDays(1);
+        currentBooking.DateArrive = DateHelper.GetCurrentDateInNZ();
+        currentBooking.DateDepart = DateHelper.GetCurrentDateInNZ().AddDays(1);
         //perhaps need to
 
         modalTitle = "Add New Booking";
