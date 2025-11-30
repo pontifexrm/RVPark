@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Identity
 @using System.Text
 @using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.SignalR
 @using Microsoft.AspNetCore.WebUtilities
 @using RVParking.Data
 @using RVParking.Components.Account
@@ -16,6 +17,8 @@
 @using Syncfusion.Blazor.Buttons
 @inject IConfiguration configuration
 @inject ApplicationDbContext ApplicationDbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContext
+
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject HttpContextAccessorService httpContextAccessorService

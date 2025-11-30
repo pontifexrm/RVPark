@@ -14,7 +14,7 @@ namespace RVParking.Data
             DateTime utcNow = DateTime.UtcNow;
             DateTime nzNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, nzTimeZone);
 
-            return nzNow;
+            return nzNow.Date;
         }
     }
 

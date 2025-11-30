@@ -24,6 +24,8 @@
 @inject IConfiguration configuration
 @inject RoleManager<IdentityRole> RoleManager
 @inject ApplicationDbContext ApplicationDbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContext
+
 @inject HttpContextAccessorService httpContextAccessorService
 
 
@@ -498,8 +500,8 @@
         if (searchPropertyId != 0)
         {
             newBooking = new Bkg_Booking();
-            newBooking.DateArrive = RegistrationInput.Fmdate;
-            newBooking.DateDepart = RegistrationInput.Todate;
+            newBooking.DateArrive = RegistrationInput.Fmdate.Date;
+            newBooking.DateDepart = RegistrationInput.Todate.Date;
             newBooking.UserId = bkg_User.UserId;
             newBooking.PropertyId = searchPropertyId;
             newBooking.BookingStatus = "Requested";

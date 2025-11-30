@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Routing;
 //using Microsoft.CodeAnalysis.Operations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
+
 //using Microsoft.VisualStudio.TextTemplating;
 using RVParking.Components.Pages;
 using System;
@@ -128,7 +130,7 @@ namespace RVParking.Data
                     {
                         // for each Bkg_availability record that is part of the new booking
                         // set the availability to false and the status to "Booked" and Stats to string.Empty
-                        var dte = newBooking.DateArrive;
+                        var dte = newBooking.DateArrive.Date;
                         while (dte < newBooking.DateDepart)
                         {
                             var avail = _context.bkg_Availabilities?
@@ -418,7 +420,7 @@ namespace RVParking.Data
         public bool IsAvailable(Bkg_Booking bkg)
         {
             bool result = false;
-            var dte = bkg.DateArrive;
+            var dte = bkg.DateArrive.Date;
             while (dte < bkg.DateDepart)
             {
                 var avail = _context.bkg_Availabilities?

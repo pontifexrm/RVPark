@@ -29,6 +29,8 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 @inject ApplicationDbContext ApplicationDbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContext
+
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
@@ -339,7 +341,7 @@
     public List<Bkg_Booking>? bookings { get; set; }
 
     private List<Bkg_User> users = new();
-    public List<Bkg_Property>? properties {get; set; }
+    public List<Bkg_Property>? properties { get; set; } = new List<Bkg_Property>();
     private Bkg_Booking currentBooking = new();
     private Bkg_Booking originalBooking = new();
     private Bkg_Booking orgnBkg = new();
@@ -427,18 +429,19 @@
 
     private void DteAriveChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ();;
+        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ();Fmdate = Fmdate.Date;
+
         if (Todate <= Fmdate)
         {
             Todate = AddOneDay(Fmdate);
-            currentBooking.DateArrive = Fmdate;
-            currentBooking.DateDepart = Todate;
+            currentBooking.DateArrive = Fmdate.Date;
+            currentBooking.DateDepart = Todate.Date;
             StateHasChanged();
         }
     }
     private void DteDepartChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Todate = args.Value ?? DateHelper.GetCurrentDateInNZ();;
+        Todate = args.Value ?? DateHelper.GetCurrentDateInNZ(); Todate = Todate.Date;
         if (Todate <= Fmdate)
         {
 
@@ -456,8 +459,8 @@
         orgnBkg = new();
 
         currentBooking = booking;
-        orgnBkg.DateArrive = currentBooking.DateArrive; Fmdate = booking.DateArrive;
-        orgnBkg.DateDepart = currentBooking.DateDepart; Todate = booking.DateDepart;
+        orgnBkg.DateArrive = currentBooking.DateArrive.Date; Fmdate = booking.DateArrive.Date;
+        orgnBkg.DateDepart = currentBooking.DateDepart.Date; Todate = booking.DateDepart.Date;
         orgnBkg.PropertyId = currentBooking.PropertyId;
         orgnBkg.BookingStatus = currentBooking.BookingStatus;
         orgnBkg.UserId = currentBooking.UserId;
@@ -486,7 +489,7 @@
     {
         currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
         currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
-        currentBooking.DateArrive = Fmdate; currentBooking.DateDepart = Todate;
+        currentBooking.DateArrive = Fmdate.Date; currentBooking.DateDepart = Todate.Date;
 
 
 
@@ -521,8 +524,8 @@
             {
                 modalMessage = "Could not save changes to this Booking";
                 // need to return the currentBooking to the orgnBkg.
-                currentBooking.DateArrive = orgnBkg.DateArrive;
-                currentBooking.DateDepart = orgnBkg.DateDepart;
+                currentBooking.DateArrive = orgnBkg.DateArrive.Date;
+                currentBooking.DateDepart = orgnBkg.DateDepart.Date;
                 currentBooking.PropertyId = orgnBkg.PropertyId;
                 currentBooking.BookingStatus = orgnBkg.BookingStatus;
                 currentBooking.BookingComments = orgnBkg.BookingComments;

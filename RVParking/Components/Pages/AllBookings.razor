@@ -29,6 +29,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 @inject ApplicationDbContext ApplicationDbContext
+@* @inject IDbContextFactory<ApplicationDbContext> DbContext *@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
@@ -337,8 +338,8 @@
     [PersistentState]
     public List<Bkg_Booking>? bookings { get; set; } 
     private List<Bkg_User> users = new();
-    
-    public List<Bkg_Property>? properties { get; set; } = new();
+
+    public List<Bkg_Property>? properties { get; set; } = new List<Bkg_Property>();
     private Bkg_Booking currentBooking = new();
     private Bkg_Booking originalBooking = new();
     private Bkg_Booking orgnBkg = new();
@@ -392,10 +393,13 @@
         }
         Todate = Fmdate.AddDays(1);
         users = await ApplicationDbContext.bkg_Users.ToListAsync() ?? new List<Bkg_User>();
-        if (properties == null )
-        {
-            properties =   await ApplicationDbContext.bkg_Properties.ToListAsync() ?? new List<Bkg_Property>();
-        }  
+        properties = await ApplicationDbContext.bkg_Properties.ToListAsync();
+
+        // if (properties == null )
+        // {
+        //     properties =   await ApplicationDbContext.bkg_Properties.ToListAsync() ?? new List<Bkg_Property>();
+            
+        // }  
         
         await LoadBookings();
     }

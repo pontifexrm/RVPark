@@ -11,6 +11,7 @@ using RVParking.Components;
 using RVParking.Components.Account;
 using RVParking.Data;
 using Syncfusion.Blazor;
+using System;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -65,8 +66,28 @@ builder.Configuration
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 //builder.Services.AddDbContext<ApplicationDbContext>(options =>
 //    options.UseMySql((connectionString), new MySqlServerVersion(new Version(8, 0, 40))), ServiceLifetime.Scoped);
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+// Make DbContextOptions a singleton so the singleton IDbContextFactory can consume it,
+// while keeping the actual DbContext as scoped for request/Identity usage.
+builder.Services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
+    options.UseSqlServer(connectionString),
+    contextLifetime: ServiceLifetime.Scoped,
+    optionsLifetime: ServiceLifetime.Singleton);
+
+//builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+//    options.UseSqlServer(connectionString));
+
+// Primary registration - DbContextFactory
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Secondary registration for scaffolding
+//builder.Services.AddDbContext<ApplicationDbContext>((services, options) =>
+//{
+//    var factory = services.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
+//    using var context = factory.CreateDbContext();
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+//}, ServiceLifetime.Scoped);
+
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 

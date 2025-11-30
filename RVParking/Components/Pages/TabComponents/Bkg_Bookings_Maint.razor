@@ -24,6 +24,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 @inject ApplicationDbContext ApplicationDbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 
 @inject IConfiguration configuration
 <!-- Page header with title and button to add a new Booking -->
@@ -170,6 +171,7 @@ else
                                 <SfDatePicker TValue="DateTime?" Value="@currentBooking.DateDepart" Placeholder='Choose a Date' ID="todate"></SfDatePicker>
                             </div>
                         </div>
+
 
 
 
@@ -346,25 +348,50 @@ else
         showModal = true;
     }
 
+    // PSEUDOCODE / PLAN:
+    // 1. Create a new DbContext instance from DbContextFactory (async).
+    // 2. Use that local context to fetch the Bkg_User and Bkg_Property referenced by currentBooking.UserId and PropertyId.
+    // 3. Ensure the page-level bkg_Engine is initialized (do not shadow the field).
+    // 4. Call CreateBookingAsync for new bookings or EditBookingAsync for updates.
+    // 5. Preserve existing error handling and modal flags.
+    // 6. Dispose the local context (use await using) and then reload bookings.
     private async Task SaveBooking()
     {
-        currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
-        currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
-        // if a new booking then we need to Create it else Change it.
-        Bkg_Engine bkg_Engine = new Bkg_Engine(ApplicationDbContext);
+        // create a scoped context from the factory
+        await using var ctx = await DbContextFactory.CreateDbContextAsync();
 
-        // currentBooking.DateArrive = Fmdate; currentBooking.DateDepart = Todate;
+        // load navigation properties from the scoped context (if ids provided)
+        if (currentBooking.UserId != 0)
+        {
+            currentBooking.Bkg_User = await ctx.bkg_Users.FindAsync(currentBooking.UserId);
+        }
+        else
+        {
+            currentBooking.Bkg_User = null;
+        }
+
+        if (currentBooking.PropertyId != 0)
+        {
+            currentBooking.Bkg_Property = await ctx.bkg_Properties.FindAsync(currentBooking.PropertyId);
+        }
+        else
+        {
+            currentBooking.Bkg_Property = null;
+        }
+
+        // initialize engine if needed (use the field, do not shadow)
+        bkg_Engine ??= new Bkg_Engine(ApplicationDbContext);
 
         if (currentBooking.BookingId == 0) // A new booking
         {
-            var savedOK = await bkg_Engine.CreateBookingAsync(currentBooking);
+            var savedOK = await bkg_Engine.CreateBookingAsync( currentBooking);
             if (!savedOK)
             {
                 modalMessage = "Booking Not possible - Likely date not available!";
                 allDatesAvailable = false;
                 showModal = true;
             }
-            else  
+            else
             {
                 showModal = false;
                 modalMessage = "";
@@ -376,7 +403,7 @@ else
             if (!savedOK)
             {
                 modalMessage = "Could not save changes to this Booking";
-                // need to return the currentBooking to the orgnBkg.
+                // restore original values
                 currentBooking.DateArrive = orgnBkg.DateArrive;
                 currentBooking.DateDepart = orgnBkg.DateDepart;
                 currentBooking.PropertyId = orgnBkg.PropertyId;
@@ -391,37 +418,9 @@ else
                 showModal = false;
                 modalMessage = "";
             }
-
         }
 
-        //  showModal = false;
         await LoadBookings();
-        // StateHasChanged();
-
-
-
-        // if (isAvailable())
-        // {
-        //     currentBooking.BookingStatus = "Confirmed";
-        // }
-        // else
-        // {
-        //     currentBooking.BookingStatus = "Requested";
-        // }
-        // currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
-        // currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
-
-        // if (currentBooking.BookingId == 0)
-        // {
-        //     ApplicationDbContext.bkg_Bookings.Add(currentBooking);
-        // }
-        // else
-        // {
-        //     ApplicationDbContext.bkg_Bookings.Update(currentBooking);
-        // }
-        // await ApplicationDbContext.SaveChangesAsync();
-        // await LoadBookings();
-        // showModal = false;
     }
 
     private async Task DeleteBooking(int bookingId)
@@ -598,6 +597,12 @@ else
     //     {
     //         ApplicationDbContext.bkg_Bookings.Update(currentBooking);
     //     }
+
+
+
+
+
+
 
 
 

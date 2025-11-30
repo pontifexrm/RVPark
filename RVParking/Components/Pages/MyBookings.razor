@@ -25,6 +25,8 @@
 @inject IEmailSender<ApplicationUser> EmailSender
 @inject NavigationManager NavigationManager
 @inject ApplicationDbContext ApplicationDbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContext
+
 
 @inject IConfiguration configuration
 
@@ -337,8 +339,8 @@
 @code {
     private string BkgType = "RVPark On Fitz";
     private string isAvail = "Yes";
-    public DateTime Fmdate { get; set; } = DateHelper.GetCurrentDateInNZ();
-    public DateTime Todate { get; set; } = DateHelper.GetCurrentDateInNZ();
+    public DateTime Fmdate { get; set; } = DateHelper.GetCurrentDateInNZ().Date;
+    public DateTime Todate { get; set; } = DateHelper.GetCurrentDateInNZ().Date;
     private bool allDatesAvailable = false;
     private string toDelete = "no";
     private string status = string.Empty;
@@ -454,18 +456,18 @@
 
     private void DteAriveChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ();;
+        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ(); Fmdate = Fmdate.Date;
         if (Todate <= Fmdate)
         {
             Todate = AddOneDay(Fmdate);
-            currentBooking.DateArrive = Fmdate;
-            currentBooking.DateDepart = Todate;
+            currentBooking.DateArrive = Fmdate.Date;
+            currentBooking.DateDepart = Todate.Date;
             StateHasChanged();
         }
     }
     private void DteDepartChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Todate = args.Value ?? DateHelper.GetCurrentDateInNZ();;
+        Todate = args.Value ?? DateHelper.GetCurrentDateInNZ(); Todate = Todate.Date;
         if (Todate <= Fmdate)
         {
 
@@ -483,8 +485,8 @@
         //var result =  Bkg_UserService.Bkg_AvailableAllSync(Fmdate, Todate);
 
         newBooking = new Bkg_Booking();
-        newBooking.DateArrive = Fmdate; 
-        newBooking.DateDepart = Todate;
+        newBooking.DateArrive = Fmdate.Date; 
+        newBooking.DateDepart = Todate.Date;
         newBooking.UserId = currentUser.UserId;
         newBooking.PropertyId = currentBooking.PropertyId;
         newBooking.BookingStatus = "Requested";
@@ -513,8 +515,8 @@
     {
         orgnBkg = new();
 
-        orgnBkg.DateArrive = booking.DateArrive; Fmdate = booking.DateArrive;
-        orgnBkg.DateDepart = booking.DateDepart; Todate = booking.DateDepart;
+        orgnBkg.DateArrive = booking.DateArrive.Date; Fmdate = booking.DateArrive.Date;
+        orgnBkg.DateDepart = booking.DateDepart.Date; Todate = booking.DateDepart.Date;
         orgnBkg.PropertyId = booking.PropertyId;
         currentBooking = booking;
         modalTitle = "Edit Booking";
