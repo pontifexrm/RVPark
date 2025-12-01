@@ -519,7 +519,7 @@
                 showModal = false;
                 modalMessage = "";
                 // Need to send a cc'd to rvpark@pontifex.nz For New Booking
-                SendCCEmailConfirmation();
+                await SendCCEmailConfirmation();
 
             }
         }
@@ -575,7 +575,7 @@
                 }
 
                 // Need to send a cc'd to rvpark@pontifex.nz  For Edit Booking showing Changes made if possible.
-                SendCCEmailConfirmation(chngmsg);
+                await SendCCEmailConfirmation(chngmsg);
 
             }
 
@@ -771,7 +771,7 @@
             SendTxtConfirmationNoEmail(txtrept);
         }
     }
-    private void SendEmailConfirmation(string emailTo)
+    private async Task SendEmailConfirmation(string emailTo)
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
     " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
@@ -780,21 +780,23 @@
 
         // emailMessage.Subject = subjectMsg;
         // Using TNZ
-#if !DEBUG
+        var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, ConfirmBkgMsg());
+        if (resultMsg) {
+            modalTitle = "Adhoc Email Sent"; modalMessage = string.Concat("Adhoc Email Confirmation sent to ", emailTo);}
+        else {
+            modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);}
 
-        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
-        var client = new TNZApiClient(apiUser);
-
-        var reponseEmail = client.Messaging.Email.SendMessage(
-            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-            emailSubject: subjectMsg,
-            messagePlain: ConfirmBkgMsg(),
-            destination: emailTo
-        );
-#endif
+        // #if !DEBUG
+        //         var apiUser = new TNZApiUser()  
+        //             { AuthToken = configuration["TNZ:AuthToken"] };
+        //         var client = new TNZApiClient(apiUser);
+        //         var reponseEmail = client.Messaging.Email.SendMessage(
+        //             fromEmail: configuration["TNZ:fromEmail"],  
+        //             emailSubject: subjectMsg,
+        //             messagePlain: ConfirmBkgMsg(),
+        //             destination: emailTo
+        //         );
+        // #endif
         sendConfirmMsg = false;
     }
     private void SendAdhocConfirmation()
@@ -851,20 +853,107 @@
 
         // emailMessage.Subject = subjectMsg;
         var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, ConfirmAdHocBkgMsg(emailTo));
+        if (resultMsg){
+            modalTitle = "Adhoc Email Sent"; modalMessage = string.Concat("Adhoc Email Confirmation sent to ", emailTo); }
+        else {
+            modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);    }
+
+        // #if !Debug
+        //         // Using TNZ
+        //         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+        //             {
+        //                 AuthToken = configuration["TNZ:AuthToken"]
+        //             };
+        //         var client = new TNZApiClient(apiUser);
+
+        //         var reponseEmail = client.Messaging.Email.SendMessage(
+        //             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+        //             emailSubject: subjectMsg,
+        //             messagePlain: ConfirmAdHocBkgMsg(emailTo),
+        //             destination: emailTo
+        //         );
+        // #endif
+        sendConfirmMsg = false;
+    }
+    private async Task SendCCEmailConfirmation()
+    { // this is a CC email to the configured CC email address for New Bookings CC ToEmail
+        string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
+        string emailTo = configuration["TNZ:CCemail"];
+        var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, ConfirmBkgMsg());
+        if (resultMsg) {
+            modalTitle = "Adhoc Email Sent"; modalMessage = string.Concat("Adhoc Email Confirmation sent to ", emailTo);}
+        else {
+            modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);}
+
+        // #if !DEBUG
+        //         // Using TNZ
+        //         var apiUser = new TNZApiUser()  // this should come from configuration injection
+        //             {
+        //                 AuthToken = configuration["TNZ:AuthToken"]
+        //             };
+        //         var client = new TNZApiClient(apiUser);
+
+        //         var reponseEmail = client.Messaging.Email.SendMessage(
+        //             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+        //             emailSubject: subjectMsg,
+        //             messagePlain: ConfirmBkgMsg(),
+        //             destination: configuration["TNZ:CCemail"]
+        //         );
+        // #endif
+        sendConfirmMsg = false;
+    }
+    private async Task SendCCEmailConfirmation(string chngmsg)
+    {
+        string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " Changed! And Now is - BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
+        string CCMsg = string.Concat(subjectMsg, " Changes are:-", chngmsg);
+        // CCMsg += "\r\n" + ConfirmBkgMsg();
+
+        // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, chngmsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        string emailTo = configuration["TNZ:CCemail"];
+        var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, CCMsg);
+        if (resultMsg) {
+            modalTitle = "Adhoc Email Sent"; modalMessage = string.Concat("Adhoc Email Confirmation sent to ", emailTo);}
+        else {
+            modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);}
+
+    //     #if !DEBUG
+    //     // Using TNZ
+    //     var apiUser = new TNZApiUser()  // this should come from configuration injection
+    //         {
+    //             AuthToken = configuration["TNZ:AuthToken"]
+    //         };
+    //     var client = new TNZApiClient(apiUser);
+    //     var reponseEmail = client.Messaging.Email.SendMessage(
+    //         fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+    //         emailSubject: subjectMsg,
+    //         messagePlain: CCMsg,
+    //         destination: configuration["TNZ:CCemail"]
+    //     );
+    // #endif
+        sendConfirmMsg = false;
+    }
+
+    private async Task SendCCEmailDeleteConfirmation(string subjectMsg, string DeleteMsg)
+    {
+        // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, DeleteMsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        // " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"), " HAS BEEN DELETED");
+        string emailTo = configuration["TNZ:CCemail"];
+        var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, DeleteMsg);
         if (resultMsg)
         {
-            modalTitle = "Adhoc Email Sent";
-            modalMessage = string.Concat("Adhoc Email Confirmation sent to ", emailTo);
+            modalTitle = "Adhoc Email Sent"; modalMessage = string.Concat("Adhoc Email Confirmation sent to ", emailTo);
         }
         else
         {
-            modalTitle = "Adhoc Email NOT Sent";
-            modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);
+            modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);
         }
 
-// #if !Debug
+
+// #if !DEBUG
 //         // Using TNZ
-//         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+//         var apiUser = new TNZApiUser()  // this should come from configuration injection
 //             {
 //                 AuthToken = configuration["TNZ:AuthToken"]
 //             };
@@ -873,77 +962,10 @@
 //         var reponseEmail = client.Messaging.Email.SendMessage(
 //             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
 //             emailSubject: subjectMsg,
-//             messagePlain: ConfirmAdHocBkgMsg(emailTo),
-//             destination: emailTo
+//             messagePlain: subjectMsg,
+//             destination: configuration["TNZ:CCemail"]
 //         );
 // #endif
-        sendConfirmMsg = false;
-    }
-    private void SendCCEmailConfirmation()
-    {
-        string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
-#if !DEBUG
-        // Using TNZ
-        var apiUser = new TNZApiUser()  // this should come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
-        var client = new TNZApiClient(apiUser);
-
-        var reponseEmail = client.Messaging.Email.SendMessage(
-            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-            emailSubject: subjectMsg,
-            messagePlain: ConfirmBkgMsg(),
-            destination: configuration["TNZ:CCemail"]
-        );
-#endif
-        sendConfirmMsg = false;
-    }
-    private void SendCCEmailConfirmation(string chngmsg)
-    {
-        string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " Changed! And Now is - BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
-        string CCMsg = string.Concat(subjectMsg, " Changes are:-", chngmsg);
-        // CCMsg += "\r\n" + ConfirmBkgMsg();
-
-        // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, chngmsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-    #if !DEBUG
-        // Using TNZ
-        var apiUser = new TNZApiUser()  // this should come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
-        var client = new TNZApiClient(apiUser);
-        var reponseEmail = client.Messaging.Email.SendMessage(
-            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-            emailSubject: subjectMsg,
-            messagePlain: CCMsg,
-            destination: configuration["TNZ:CCemail"]
-        );
-    #endif
-        sendConfirmMsg = false;
-    }
-
-    private void SendCCEmailDeleteConfirmation(string subjectMsg, string DeleteMsg)
-    {
-        // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, DeleteMsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        // " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"), " HAS BEEN DELETED");
-#if !DEBUG
-        // Using TNZ
-        var apiUser = new TNZApiUser()  // this should come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
-        var client = new TNZApiClient(apiUser);
-
-        var reponseEmail = client.Messaging.Email.SendMessage(
-            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-            emailSubject: subjectMsg,
-            messagePlain: subjectMsg,
-            destination: configuration["TNZ:CCemail"]
-        );
-#endif
         sendConfirmMsg = false;
     }
     private void SendTxtConfirmation(string txtrept)
