@@ -879,7 +879,7 @@
     { // this is a CC email to the configured CC email address for New Bookings CC ToEmail
         string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
-        string emailTo = configuration["TNZ:CCemail"];
+        string emailTo = configuration["EmailSettings:CCEmail"];
         var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, ConfirmBkgMsg());
         if (resultMsg) {
             modalTitle = "Adhoc Email Sent"; modalMessage = string.Concat("Adhoc Email Confirmation sent to ", emailTo);}
@@ -898,7 +898,7 @@
         //             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
         //             emailSubject: subjectMsg,
         //             messagePlain: ConfirmBkgMsg(),
-        //             destination: configuration["TNZ:CCemail"]
+        //             destination: configuration["EmailSettings:CCEmail"]
         //         );
         // #endif
         sendConfirmMsg = false;
@@ -911,7 +911,7 @@
         // CCMsg += "\r\n" + ConfirmBkgMsg();
 
         // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, chngmsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        string emailTo = configuration["TNZ:CCemail"];
+        string emailTo = configuration["EmailSettings:CCEmail"];
         var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, CCMsg);
         if (resultMsg) {
             modalTitle = "Adhoc Email Sent"; modalMessage = string.Concat("Adhoc Email Confirmation sent to ", emailTo);}
@@ -929,7 +929,7 @@
     //         fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
     //         emailSubject: subjectMsg,
     //         messagePlain: CCMsg,
-    //         destination: configuration["TNZ:CCemail"]
+    //         destination: configuration["EmailSettings:CCEmail"]
     //     );
     // #endif
         sendConfirmMsg = false;
@@ -939,7 +939,7 @@
     {
         // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, DeleteMsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         // " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"), " HAS BEEN DELETED");
-        string emailTo = configuration["TNZ:CCemail"];
+        string emailTo = configuration["EmailSettings:CCEmail"];
         var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, DeleteMsg);
         if (resultMsg)
         {
@@ -963,7 +963,7 @@
 //             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
 //             emailSubject: subjectMsg,
 //             messagePlain: subjectMsg,
-//             destination: configuration["TNZ:CCemail"]
+//             destination: configuration["EmailSettings:CCEmail"]
 //         );
 // #endif
         sendConfirmMsg = false;
