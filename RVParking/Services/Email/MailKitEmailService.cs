@@ -23,23 +23,26 @@ namespace RVParking.Services.Email
             try
             {
                 var email = new MimeMessage();
-                email.From.Add(new MailboxAddress(_settings.Name, _settings.From));
-                email.To.Add(new MailboxAddress("", message.Email));
+                email.From.Add(new MailboxAddress(_settings.DisplayName, _settings.From));
+                email.To.Add(new MailboxAddress("", message.To));
                 email.Subject = message.Subject;
 
                 email.Body = new TextPart(message.IsHtml ? TextFormat.Html : TextFormat.Plain)
                 {
-                    Text = message.Message
+                    Text = message.Body
                 };
 
-                using var client = new SmtpClient();
+                using var client = new MailKit.Net.Smtp.SmtpClient();
+                // Ignore certificate validation errors
+                client.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
+
 
                 // Configure SSL/TLS based on settings
                 var secureSocketOptions = _settings.EnableSsl
                     ? (_settings.Port == 465 ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls)
                     : SecureSocketOptions.None;
 
-                await client.ConnectAsync(_settings.Server, _settings.Port, secureSocketOptions);
+                await client.ConnectAsync(_settings.Host, _settings.Port, secureSocketOptions);
 
                 // Note: MailKit doesn't use UseDefaultCredentials like System.Net.Mail
                 if (!string.IsNullOrEmpty(_settings.Username))
@@ -67,19 +70,19 @@ namespace RVParking.Services.Email
                 To = to,
                 Subject = subject,
                 Body = body,
-                IsHtml = true
+                IsHtml = false
             });
         }
     }
 
     public class MailKitSettings
     {
-        public string Server { get; set; } = "smtp.gmail.com";
+        public string Host { get; set; } = string.Empty;
         public int Port { get; set; } = 587;
         public string? Username { get; set; }
         public string? Password { get; set; }
         public string From { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
         public bool EnableSsl { get; set; } = true;
         public bool IsHtml { get; set; } = true;
     }
