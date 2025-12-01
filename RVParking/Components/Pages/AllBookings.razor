@@ -13,9 +13,11 @@
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
+@using System.Threading.Tasks
 @using TNZAPI.NET;
 @using TNZAPI.NET.Core;
 @using TNZAPI.NET.Api.Addressbook.Contact.Dto;
+@using RVParking.Services.Email;
 
 @* Is Being Used *@
 
@@ -33,6 +35,7 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
+@inject IEmailService EmailService
 
 
 @inject IConfiguration configuration
@@ -398,9 +401,9 @@
         // if (properties == null )
         // {
         //     properties =   await ApplicationDbContext.bkg_Properties.ToListAsync() ?? new List<Bkg_Property>();
-            
+
         // }  
-        
+
         await LoadBookings();
     }
 
@@ -593,7 +596,7 @@
     }
     private async Task ConfirmDelete()
     {
-        
+
         Bkg_Engine bkg_Engine = new Bkg_Engine(ApplicationDbContext);
         var bookingToDelete = await ApplicationDbContext.bkg_Bookings
             .Include(b => b.Bkg_User)
@@ -839,7 +842,7 @@
         sendConfirmMsg = false;
 
     }
-    private void SendEmailAdhocConfirmation(string emailTo)
+    private async Task SendEmailAdhocConfirmation(string emailTo)
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
     " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
@@ -847,21 +850,33 @@
         //     "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentBooking.Bkg_User);
 
         // emailMessage.Subject = subjectMsg;
-#if !Debug
-        // Using TNZ
-        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
-        var client = new TNZApiClient(apiUser);
+        var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, ConfirmAdHocBkgMsg(emailTo));
+        if (resultMsg)
+        {
+            modalTitle = "Adhoc Email Sent";
+            modalMessage = string.Concat("Adhoc Email Confirmation sent to ", emailTo);
+        }
+        else
+        {
+            modalTitle = "Adhoc Email NOT Sent";
+            modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);
+        }
 
-        var reponseEmail = client.Messaging.Email.SendMessage(
-            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-            emailSubject: subjectMsg,
-            messagePlain: ConfirmAdHocBkgMsg(emailTo),
-            destination: emailTo
-        );
-#endif
+// #if !Debug
+//         // Using TNZ
+//         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+//             {
+//                 AuthToken = configuration["TNZ:AuthToken"]
+//             };
+//         var client = new TNZApiClient(apiUser);
+
+//         var reponseEmail = client.Messaging.Email.SendMessage(
+//             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+//             emailSubject: subjectMsg,
+//             messagePlain: ConfirmAdHocBkgMsg(emailTo),
+//             destination: emailTo
+//         );
+// #endif
         sendConfirmMsg = false;
     }
     private void SendCCEmailConfirmation()

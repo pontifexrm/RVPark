@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RVParking.Components;
 using RVParking.Components.Account;
 using RVParking.Data;
+using RVParking.Services;
 using Syncfusion.Blazor;
 using System;
 using System.Globalization;
@@ -79,6 +80,43 @@ builder.Services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =
 // Primary registration - DbContextFactory
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Select email provider from configuration
+var emailProvider = builder.Configuration["EmailSettings:Provider"]?.Trim() ?? "Mock";
+switch (emailProvider.ToLowerInvariant())
+{
+    case "smtp":
+        builder.Services.AddSmtpEmailService();
+        break;
+
+    case "mailkit":
+        builder.Services.AddMailKitEmailService();
+        break;
+
+    case "tnz":
+        builder.Services.AddTNZEmailService();
+        break;
+
+    default:
+        builder.Services.AddMockEmailService();
+        break;
+}
+
+
+
+
+// Register email service (choose ONE implementation)
+//if (builder.Environment.IsProduction())
+//{
+//    builder.Services.AddMockEmailService(); // Use mock in development
+//} else {
+//    // Choose one for production:
+//    //builder.Services.AddSmtpEmailService();
+//    // OR
+//    // builder.Services.AddSendGridEmailService(builder.Configuration);
+//    // OR
+//    builder.Services.AddTNZEmailService();
+//}
 
 // Secondary registration for scaffolding
 //builder.Services.AddDbContext<ApplicationDbContext>((services, options) =>

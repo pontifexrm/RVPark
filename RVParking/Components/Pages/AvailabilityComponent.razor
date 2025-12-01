@@ -126,6 +126,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        CurrentMonth = DateHelper.GetCurrentDateInNZ();
+
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 

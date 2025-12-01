@@ -21,7 +21,15 @@ public class EmailMessage
     public EmailMessage()
     {
     }
+    #region Email Provider Properties required/used to send email
+    public string To { get; set; } = string.Empty;
+    public string From { get; set; } = string.Empty;
+    public string SubjectProvider { get; set; } = string.Empty;
+    public string Body { get; set; } = string.Empty;
+    public bool IsHtml { get; set; } = false;
+    #endregion
 
+    #region Properties used in composing email message and are Application Specific
     [Required, EmailAddress,MaxLength(48)]
     public string Email { get; set; } = string.Empty;
 
@@ -302,5 +310,6 @@ public class EmailMessage
             return false;
         }
     }
+    #endregion
 
 }

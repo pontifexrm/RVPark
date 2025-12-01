@@ -178,7 +178,7 @@
     
     protected override async Task OnInitializedAsync()
     {
-
+        CurrentMonth = DateHelper.GetCurrentDateInNZ();
         BkgProperties = await ApplicationDbContext.bkg_Properties.ToListAsync();
         //  await LoadBookings();
         GenerateCalendar();
