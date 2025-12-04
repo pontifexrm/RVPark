@@ -115,7 +115,7 @@
     private List<Bkg_Property> BkgProperties = new List<Bkg_Property>();
     private List<Bkg_Availability> availabilities = new List<Bkg_Availability>();
 
-    private DateTime CurrentMonth = DateTime.Today;
+    private DateTime CurrentMonth = DateHelper.GetCurrentDateInNZ(); //DateTime.Today;
     private List<DayEntry> calendarDays = new();
     private bool showDayDetail = false;
     private DayEntry selectedDay = new();
@@ -149,7 +149,9 @@
         var startDate = monthStart.AddDays(-((int)monthStart.DayOfWeek) + 1);
         if (monthStart.DayOfWeek == DayOfWeek.Sunday) startDate = monthStart.AddDays(-6);
         var endDate = monthEnd.AddDays(7 - (int)monthEnd.DayOfWeek); // 7 for mon start else 6 for Sun
-        var todaydte = DateTime.Now.Date.AddDays(-1); // Show yesterdays status to allow self arrival earlier
+        //var todaydte = DateTime.Now.Date.AddDays(-1); // Show yesterdays status to allow self arrival earlier
+        var todaydte = DateHelper.GetCurrentDateInNZ().Date.AddDays(-1); // Show yesterdays status to allow self arrival earlier
+
         // If an Admin User then allow display from the first day of the month.
         if (isAdmin)
         {

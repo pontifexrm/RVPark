@@ -20,7 +20,7 @@ namespace RVParking.Services.Email
             return true;
         }
 
-        public Task<bool> SendEmailAsync(string to, string subject, string body)
+        public async Task<bool> SendEmailAsync(string to, string subject, string body)
         {
             // Using TNZ
             var apiUser = new TNZApiUser()  // this shoild come from configuration injection
@@ -35,7 +35,7 @@ namespace RVParking.Services.Email
                 messagePlain: body,
                 destination: to
             );
-            return Task.FromResult( true );
+            return true;
         }
     }
     public class TNZSettings

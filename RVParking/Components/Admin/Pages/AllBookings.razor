@@ -18,6 +18,7 @@
 @using TNZAPI.NET.Core;
 @using TNZAPI.NET.Api.Addressbook.Contact.Dto;
 @using RVParking.Services.Email;
+@using RVParking.Services.SMS;
 
 @* Is Being Used *@
 
@@ -36,6 +37,8 @@
 @inject IdentityRedirectManager RedirectManager
 
 @inject IEmailService EmailService
+@inject ISmsService SmsService
+
 
 
 @inject IConfiguration configuration
@@ -984,7 +987,7 @@
         // #endif
         sendConfirmMsg = false;
     }
-    private void SendTxtConfirmation(string txtrept)
+    private async Task SendTxtConfirmation(string txtrept)
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
@@ -994,22 +997,38 @@
 
         // emailMessage.Subject = subjectMsg;
         // Using TNZ
-        //#if !DEBUG
-        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-        {
-            AuthToken = configuration["TNZ:AuthToken"]
-        };
-        var client = new TNZApiClient(apiUser);
 
-        var response = client.Messaging.SMS.SendMessage
-            (
-                destination: txtrept,
-                messageText: ConfirmTxtBkgMsg()
-            );
-        //#endif
+        var smsrqst = new SmsRequest
+        {
+            To = txtrept,
+            Message = ConfirmTxtBkgMsg()
+        };
+        SmsResponse resultMsg = await SmsService.SendSmsAsync(smsrqst);
+        if (resultMsg.Success)
+        {
+            modalTitle = "SMS Msg Sent"; modalMessage = string.Concat("SMS Msg Confirmation sent to ", txtrept);
+        }
+        else
+        {
+            modalTitle = "SMS Msg NOT Sent"; modalMessage = string.Concat("SMS Msg Confirmation could NOT be sent to ", txtrept);
+        }
+
+        // //#if !DEBUG
+        //         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+        //             {
+        //                 AuthToken = configuration["TNZ:AuthToken"]
+        //             };
+        //         var client = new TNZApiClient(apiUser);
+
+        //         var response = client.Messaging.SMS.SendMessage
+        //             (
+        //                 destination: txtrept,
+        //                 messageText: ConfirmTxtBkgMsg()
+        //             );
+        // //#endif
         sendConfirmMsg = false;
     }
-    private void SendTxtConfirmationNoEmail(string txtrept) // txtrept is a phone number in E.164 format and this message is FULL LENGTH expensive.
+    private async Task SendTxtConfirmationNoEmail(string txtrept) // txtrept is a phone number in E.164 format and this message is FULL LENGTH expensive.
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
@@ -1019,22 +1038,40 @@
 
         // emailMessage.Subject = subjectMsg;
         // Using TNZ
-#if !DEBUG
-        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-        {
-            AuthToken = configuration["TNZ:AuthToken"]
-        };
-        var client = new TNZApiClient(apiUser);
 
-        var response = client.Messaging.SMS.SendMessage
-            (
-                destination: txtrept,
-                messageText: ConfirmTxtNoEmailBkgMsg()
-            );
+        var smsrqst = new SmsRequest
+        {
+            To = txtrept,
+            Message = ConfirmBkgMsg()
+        };
+        SmsResponse resultMsg = await SmsService.SendSmsAsync(smsrqst);
+        if (resultMsg.Success)
+        {
+            modalTitle = "SMS Msg Sent"; modalMessage = string.Concat("SMS Msg Confirmation sent to ", txtrept);
+        }
+        else
+        {
+            modalTitle = "SMS Msg NOT Sent"; modalMessage = string.Concat("SMS Msg Confirmation could NOT be sent to ", txtrept);
+        }
+
+
+
+        #if !DEBUG
+        // var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+        //     {
+        //         AuthToken = configuration["TNZ:AuthToken"]
+        //     };
+        // var client = new TNZApiClient(apiUser);
+
+        // var response = client.Messaging.SMS.SendMessage
+        //     (
+        //         destination: txtrept,
+        //         messageText: ConfirmTxtNoEmailBkgMsg()
+        //     );
 #endif
         sendConfirmMsg = false;
     }
-    private void SendTxtAdhocConfirmation(string txtrept) // txtrept is a phone number in E.164 format and this message is SHORTER than normal to save service charges.
+    private async Task SendTxtAdhocConfirmation(string txtrept) // txtrept is a phone number in E.164 format and this message is SHORTER than normal to save service charges.
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
@@ -1044,19 +1081,34 @@
 
         // emailMessage.Subject = subjectMsg;
         // Using TNZ
-#if !DEBUG
-        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-        {
-            AuthToken = configuration["TNZ:AuthToken"]
-        };
-        var client = new TNZApiClient(apiUser);
 
-        var response = client.Messaging.SMS.SendMessage
-            (
-                destination: txtrept,
-                messageText: ConfirmTxtAdHocBkgMsg(txtrept)
-            );
-#endif
+        var smsrqst = new SmsRequest
+        {
+            To = txtrept,
+            Message = ConfirmTxtAdHocBkgMsg(txtrept)
+        };
+        SmsResponse resultMsg = await SmsService.SendSmsAsync(smsrqst);
+        if (resultMsg.Success)
+        {
+            modalTitle = "Adhoc Email Sent"; modalMessage = string.Concat("Adhoc Email Confirmation sent to ", txtrept);
+        }
+        else
+        {
+            modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", txtrept);
+        }
+        // #if !DEBUG
+        //         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+        //             {
+        //                 AuthToken = configuration["TNZ:AuthToken"]
+        //             };
+        //         var client = new TNZApiClient(apiUser);
+
+        //         var response = client.Messaging.SMS.SendMessage
+        //             (
+        //                 destination: txtrept,
+        //                 messageText: ConfirmTxtAdHocBkgMsg(txtrept)
+        //             );
+        // #endif
         sendConfirmMsg = false;
     }
     private string ConfirmBkgMsg()  // Uses Bkg_User Names

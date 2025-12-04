@@ -16,6 +16,7 @@
 @using TNZAPI.NET.Core;
 @using TNZAPI.NET.Api.Addressbook.Contact.Dto;
 @using RVParking.Services.Email;
+@using RVParking.Services.SMS;
 
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -31,6 +32,8 @@
 
 @inject IConfiguration configuration
 @inject IEmailService EmailService
+@inject ISmsService SmsService
+
 
 <AuthorizeView>
     <Authorized>
@@ -384,9 +387,6 @@
     }
 
     private int curBkgId = 0;
-
-    //    public EmailMessage emailMessage { get; set; } = new EmailMessage();
-    //    public EmailMessage emailMessage  = new ();
 
 
     protected override async Task OnInitializedAsync()
@@ -759,102 +759,84 @@
             modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);
         }
 
-// #if !DEBUG
-//         // Using TNZ
-//         var apiUser = new TNZApiUser()  // this should come from configuration injection
-//             {
-//                 AuthToken = configuration["TNZ:AuthToken"]
-//             };
-//         var client = new TNZApiClient(apiUser);
-
-//         var reponseEmail = client.Messaging.Email.SendMessage(
-//             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-//             emailSubject: subjectMsg,
-//             messagePlain: subjectMsg,
-//             destination: configuration["EmailSettings:CCEmail"]
-//         );
-// #endif
         sendConfirmMsg = false;
+        StateHasChanged();
     }
     private void SendTxtConfirmation()
     {
         SendTxtConfirmation("");
     }
-    private void SendTxtConfirmation(string subjectMsg, string txtrept, string DeleteMsg)
+    private async Task SendTxtConfirmation(string subjectMsg, string txtrept, string DeleteMsg)
     {
-        // string subjectMsg = string.Concat(DeleteMsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        // " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED");
-
-        // if (txtrept.Length == 0)
-        // {
-        //     txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone); // there is not currentbooking at this stage.
-        // }
-        // Using TNZ
-
-#if !DEBUG
-        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
-        var client = new TNZApiClient(apiUser);
-
-        var response = client.Messaging.SMS.SendMessage
-            (
-                destination: txtrept,
-                messageText: subjectMsg
-            );
-#endif
-        sendConfirmMsg = false;
-    }
-    private void SendTxtConfirmation(string txtrept)
-    {
-        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
-
-        if (txtrept.Length == 0)
+        var smsrqst = new SmsRequest
         {
-            txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
-        }
-        // Using TNZ
-#if !DEBUG
-        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
-        var client = new TNZApiClient(apiUser);
-
-        var response = client.Messaging.SMS.SendMessage
-            (
-                destination: txtrept,                    
-                messageText: ConfirmTxtBkgMsg()
-            );
-#endif
-        sendConfirmMsg = false;
-    }
-    private void SendTxtConfirmationNoEmail(string txtrept)
-    {
-        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
-
-        if (txtrept.Length == 0)
-        {
-            txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
-        }
-        // Using TNZ
-#if !DEBUG
-        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-        {
-            AuthToken = configuration["TNZ:AuthToken"]
+            To = txtrept,
+            Message = subjectMsg
         };
-        var client = new TNZApiClient(apiUser);
+        SmsResponse resultMsg = await SmsService.SendSmsAsync(smsrqst);
+        if (resultMsg.Success)
+        {
+            modalTitle = "SMS Msg Sent"; modalMessage = string.Concat("SMS Msg Confirmation sent to ", txtrept);
+        }
+        else
+        {
+            modalTitle = "SMS Msg NOT Sent"; modalMessage = string.Concat("SMS Msg could NOT be sent to ", txtrept);
+        }
 
-        var response = client.Messaging.SMS.SendMessage
-            (
-                destination: txtrept,
-                messageText: ConfirmTxtBkgMsg()
-            );
-#endif
+        sendConfirmMsg = false; 
+        StateHasChanged();
+    }
+    private async Task SendTxtConfirmation(string txtrept)
+    {
+        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
+
+        if (txtrept.Length == 0)
+        {
+            txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
+        }
+        var smsrqst = new SmsRequest
+        {
+            To = txtrept,
+            Message = ConfirmTxtBkgMsg()
+        };
+        SmsResponse resultMsg = await SmsService.SendSmsAsync(smsrqst);
+        if (resultMsg.Success)
+        {
+            modalTitle = "SMS Msg Sent"; modalMessage = string.Concat("SMS Msg Confirmation sent to ", txtrept);
+        }
+        else
+        {
+            modalTitle = "SMS Msg NOT Sent"; modalMessage = string.Concat("SMS Msg Confirmation could NOT be sent to ", txtrept);
+        }
         sendConfirmMsg = false;
+        StateHasChanged();
+    }
+    private async Task SendTxtConfirmationNoEmail(string txtrept)
+    {
+        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
+
+        if (txtrept.Length == 0)
+        {
+            txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
+        }
+        var smsrqst = new SmsRequest
+        {
+            To = txtrept,
+            Message = ConfirmBkgMsg()
+        };
+        SmsResponse resultMsg = await SmsService.SendSmsAsync(smsrqst);
+        if (resultMsg.Success)
+        {
+            modalTitle = "SMS Msg Sent"; modalMessage = string.Concat("SMS Msg Confirmation sent to ", txtrept);
+        }
+        else
+        {
+            modalTitle = "SMS Msg NOT Sent"; modalMessage = string.Concat("SMS Msg Confirmation could NOT be sent to ", txtrept);
+        }
+        sendConfirmMsg = false;
+        StateHasChanged();
     }
 
 

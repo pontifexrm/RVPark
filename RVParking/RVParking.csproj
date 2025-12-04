@@ -61,7 +61,6 @@
   <ItemGroup>
     <Folder Include="Components\Pages\Components\" />
     <Folder Include="Migrations\" />
-    <Folder Include="Services\SMS\" />
   </ItemGroup>
 
 </Project>

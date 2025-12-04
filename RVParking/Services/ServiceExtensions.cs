@@ -1,4 +1,6 @@
-﻿using RVParking.Services.Email;
+﻿using Microsoft.Extensions.Configuration;
+using RVParking.Services.Email;
+using RVParking.Services.SMS;
 
 namespace RVParking.Services
 {
@@ -20,6 +22,25 @@ namespace RVParking.Services
         {
 //            var settings = configuration.GetSection("MailKitSettings").Get<MailKitSettings>();
             services.AddScoped<IEmailService, MailKitEmailService>();
+            return services;
+        }
+        public static IServiceCollection AddSmsTNZService(this IServiceCollection services)
+        {
+            services.AddScoped<ISmsService, SmsTNZService>();
+            return services;
+        }
+        public static IServiceCollection AddSmsEveryoneService(this IServiceCollection services, IConfiguration configuration)
+        {
+            // Bind options from configuration section "SmsEveryone"
+            services.Configure<SmsEveryoneSettings>(configuration.GetSection("SmsEveryone"));
+
+            // Register the typed HTTP client which will resolve IOptions<SmsEveryoneSettings> in SmsEveryoneService
+            services.AddHttpClient<ISmsService, SmsEveryoneService>();
+            return services;
+        }
+        public static IServiceCollection AddSmsMockService(this IServiceCollection services)
+        {
+            services.AddScoped<ISmsService, SmsMockService>();
             return services;
         }
 

@@ -11,6 +11,8 @@ using RVParking.Components;
 using RVParking.Components.Account;
 using RVParking.Data;
 using RVParking.Services;
+using RVParking.Services.Email;
+using RVParking.Services.SMS;
 using Syncfusion.Blazor;
 using System;
 using System.Globalization;
@@ -101,7 +103,22 @@ switch (emailProvider.ToLowerInvariant())
         builder.Services.AddMockEmailService();
         break;
 }
+// Select emSMSail provider from configuration
+var smsProvider = builder.Configuration["SmsSettings:Provider"]?.Trim() ?? "Mock";
+switch (smsProvider.ToLowerInvariant())
+{
+    case "smseveryone":
+        builder.Services.AddSmsEveryoneService(builder.Configuration);
+        break;
 
+    case "smstnz":
+        builder.Services.AddSmsTNZService();
+        break;
+
+    default:
+        builder.Services.AddSmsMockService();
+        break;
+}
 
 
 
