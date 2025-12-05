@@ -14,11 +14,14 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using System.Threading.Tasks
+@using RVParking.Services
 @using TNZAPI.NET;
 @using TNZAPI.NET.Core;
 @using TNZAPI.NET.Api.Addressbook.Contact.Dto;
 @using RVParking.Services.Email;
 @using RVParking.Services.SMS;
+@inject IAppLogger AppLogger
+
 
 @* Is Being Used *@
 
@@ -477,6 +480,8 @@
         orgnBkg.BookingId = currentBooking.BookingId;
         orgnBkg.BookingComments = currentBooking.BookingComments;
         orgnBkg.Paid = currentBooking.Paid;
+        orgnBkg.Bkg_User = currentBooking.Bkg_User;
+        orgnBkg.Bkg_Property = currentBooking.Bkg_Property;
 
 
         modalTitle = "Edit Booking";
@@ -519,16 +524,20 @@
             }
             else
             {
+                var logmsg = string.Concat("New Bkg. Ref: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+                                    " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
                 showModal = false;
                 modalMessage = "";
                 // Need to send a cc'd to rvpark@pontifex.nz For New Booking
                 await SendCCEmailConfirmation();
+                await AppLogger.LogAsync("AllBookingAdmin", logmsg, currentUser.UserName);
 
             }
         }
         else // editing existing bkg
         {
-            currentBooking.UpdatedDte = DateTime.Now;
+            string subjectMsg = string.Concat("Bkg Changed for:", currentBooking.Bkg_User.UserEmail, " Changed! And Now is - BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+                                " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
             var savedOK = await bkg_Engine.EditBookingAsync(orgnBkg, currentBooking);
             if (!savedOK)
             {
@@ -539,6 +548,8 @@
                 currentBooking.PropertyId = orgnBkg.PropertyId;
                 currentBooking.BookingStatus = orgnBkg.BookingStatus;
                 currentBooking.BookingComments = orgnBkg.BookingComments;
+                currentBooking.Bkg_Property = orgnBkg.Bkg_Property;
+                currentBooking.Bkg_User = orgnBkg.Bkg_User;
                 currentBooking.UserId = orgnBkg.UserId;
                 allDatesAvailable = false;
                 showModal = true;
@@ -576,6 +587,8 @@
                 {
                     chngmsg = string.Concat(chngmsg, " Paid Changed from [", orgnBkg.Paid.ToString(), "] to [", currentBooking.Paid.ToString(), "]");
                 }
+                string CCMsg = string.Concat(subjectMsg, " Changes are:-", chngmsg);
+                await AppLogger.LogAsync("AllBookingAdmin", CCMsg, currentUser.UserName);
 
                 // Need to send a cc'd to rvpark@pontifex.nz  For Edit Booking showing Changes made if possible.
                 await SendCCEmailConfirmation(chngmsg);
@@ -607,6 +620,12 @@
             .FirstOrDefaultAsync(b => b.BookingId == curBkgId);
         if (bookingToDelete != null)
         {
+            var logmsg = string.Concat("Booking Deleted: BkgRef ", bookingToDelete.BookingId.ToString(),
+            " for ", bookingToDelete.Bkg_User.UserName,
+            " at ", bookingToDelete.Bkg_Property.Name,
+            " from ", bookingToDelete.DateArrive.ToString("dd/MM/yyyy"),
+            " to ", bookingToDelete.DateDepart.ToString("dd/MM/yyyy"));
+
             var deletedOK = await bkg_Engine.DeleteBookingAsync(bookingToDelete);
             if (!deletedOK)
             {
@@ -616,6 +635,8 @@
             }
             else
             {
+                await AppLogger.LogAsync("AllBookingAdmin", logmsg, currentUser.UserName);
+
                 modalTitle = "Booking Deleted";
                 modalMessage = "The Booking has been successfully deleted.";
                 msgSent = true;

@@ -12,6 +12,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity.EntityFrameworkCore
 
+@using RVParking.Services
 @using TNZAPI.NET;
 @using TNZAPI.NET.Core;
 @using TNZAPI.NET.Api.Addressbook.Contact.Dto;
@@ -33,6 +34,8 @@
 @inject IConfiguration configuration
 @inject IEmailService EmailService
 @inject ISmsService SmsService
+@inject IAppLogger AppLogger
+
 
 
 <AuthorizeView>
@@ -517,10 +520,20 @@
     {
         orgnBkg = new();
 
-        orgnBkg.DateArrive = booking.DateArrive.Date; Fmdate = booking.DateArrive.Date;
-        orgnBkg.DateDepart = booking.DateDepart.Date; Todate = booking.DateDepart.Date;
-        orgnBkg.PropertyId = booking.PropertyId;
         currentBooking = booking;
+        orgnBkg.DateArrive = currentBooking.DateArrive; Fmdate = booking.DateArrive;
+        orgnBkg.DateDepart = currentBooking.DateDepart; Todate = booking.DateDepart;
+        orgnBkg.PropertyId = currentBooking.PropertyId;
+        orgnBkg.BookingStatus = currentBooking.BookingStatus;
+        orgnBkg.UserId = currentBooking.UserId;
+        orgnBkg.BookingId = currentBooking.BookingId;
+        orgnBkg.BookingComments = currentBooking.BookingComments;
+        orgnBkg.Paid = currentBooking.Paid;
+        orgnBkg.Bkg_User = currentBooking.Bkg_User;
+        orgnBkg.Bkg_Property = currentBooking.Bkg_Property;
+
+
+
         modalTitle = "Edit Booking";
         modalMessage = "";
         allDatesAvailable = true;
@@ -588,6 +601,7 @@
                 SendTxtConfirmation(subjectMsg,txtrept, "WARNING");
                 // Need to send a cc'd to rvpark@pontifex.nz
                 SendCCEmailDeleteConfirmation(CCMsg, subjectMsg);
+                
             }
             catch (Exception ex)
             {

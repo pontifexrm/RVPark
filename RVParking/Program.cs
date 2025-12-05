@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using RVParking.Components;
 using RVParking.Components.Account;
 using RVParking.Data;
@@ -121,19 +122,8 @@ switch (smsProvider.ToLowerInvariant())
 }
 
 
+builder.Services.AddScoped<IAppLogger, AppLogger>();
 
-// Register email service (choose ONE implementation)
-//if (builder.Environment.IsProduction())
-//{
-//    builder.Services.AddMockEmailService(); // Use mock in development
-//} else {
-//    // Choose one for production:
-//    //builder.Services.AddSmtpEmailService();
-//    // OR
-//    // builder.Services.AddSendGridEmailService(builder.Configuration);
-//    // OR
-//    builder.Services.AddTNZEmailService();
-//}
 
 // Secondary registration for scaffolding
 //builder.Services.AddDbContext<ApplicationDbContext>((services, options) =>

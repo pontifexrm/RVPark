@@ -15,7 +15,7 @@ namespace RVParking.Data
         public DbSet<Bkg_User>? bkg_Users { get; set; }
         public DbSet<Bkg_Review>? bkg_Reviews { get; set; }
         public DbSet<Contact>? contacts { get; set; }
-
+        public DbSet<AppLog>? AppLogs { get; set; }
         public async Task<Bkg_User?> GetBkgUserByIdAsync(int userId)
         {
             return bkg_Users != null ? await bkg_Users.FirstOrDefaultAsync(u => u.UserId == userId) : null;
