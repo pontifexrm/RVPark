@@ -1,7 +1,10 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using RVParking.Data;
+using RVParking.Services.Environment;
+using RVParking.Services.Logging;
 using System.Net.Mail;
+using System.Runtime;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,6 +12,7 @@ namespace RVParking.Services.Email
 {
     public class SmtpEmailService : IEmailService
     {
+        // NOT TESTED YET <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         //public Task<bool> SendEmailAsync(EmailMessage message)
         //{
         //    // Implement SMTP email sending logic here
@@ -21,10 +25,14 @@ namespace RVParking.Services.Email
         //    return Task.FromResult(true);
         //}
         private readonly EmailConfiguration _emailConfiguration;
+        private readonly IAppLogger _appLogger;
+        private readonly IEnvironmentInfoService _env;
 
-        public SmtpEmailService(IOptions<EmailConfiguration> emailConfiguration)
+        public SmtpEmailService(IOptions<EmailConfiguration> emailConfiguration, IAppLogger appLogger, IEnvironmentInfoService env)
         {
             this._emailConfiguration = emailConfiguration.Value;
+            _appLogger = appLogger;
+            _env = env;
         }
 
         public async Task<bool> SendEmailAsync(string email, string subject, string htmlMessage)
@@ -51,7 +59,8 @@ namespace RVParking.Services.Email
             MailAddress toEmail = new MailAddress(to);
             MailAddress ccEmail = new MailAddress("ron@pontifex.nz");
             using MailMessage message = new MailMessage(sender, toEmail);
-            message.Subject = subject;
+            message.Subject = 
+                    _env.ShouldDisplayEnvInfo ? $"TEST-{subject}" : subject;
             message.Body = htmlMessage;
             message.Bcc.Add(ccEmail);
             message.HeadersEncoding = Encoding.UTF8;
@@ -71,6 +80,13 @@ namespace RVParking.Services.Email
                 try
                 {
                     await smtp.SendMailAsync(message);
+
+                    var alogMsg = $"EmailTo: {message.To} fm: {message.From} Subj: {message.Subject} Msg: {message.Body}";
+                    var sVia = _env.ShouldDisplayEnvInfo ? $"TEST-SMTP - {_emailConfiguration.Host}" : $"SMTP - {_emailConfiguration.Host}";
+                    alogMsg = _env.ShouldDisplayEnvInfo ? $"TEST-{alogMsg}" : alogMsg;
+
+                    await _appLogger.LogAsync("Info", $"{sVia}", $"Email sent Details:-{alogMsg}");
+
                 }
                 catch (Exception ex)
                 {

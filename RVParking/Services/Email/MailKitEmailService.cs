@@ -3,19 +3,30 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
 using MimeKit.Text;
+using Microsoft.Extensions.Configuration;
+using RVParking.Services.Environment;
+using RVParking.Services.Logging;
 
 namespace RVParking.Services.Email
 {
+    /// <summary>
+    /// This is used for many mail provider mainly with SMTP We have it here for SmarterASP Email Provider.
+    /// </summary>
+
     public class MailKitEmailService : IEmailService
     {
         private readonly MailKitSettings _settings;
         private readonly ILogger<MailKitEmailService> _logger;
+        private readonly IAppLogger _appLogger;
+        private IEnvironmentInfoService _env;
 
-        public MailKitEmailService(IConfiguration configuration, ILogger<MailKitEmailService> logger)
+        public MailKitEmailService(IConfiguration configuration, ILogger<MailKitEmailService> logger, IAppLogger appLogger, IEnvironmentInfoService env)
         {
             _settings = configuration.GetSection("MailKit").Get<MailKitSettings>()
                         ?? throw new InvalidOperationException("MailKit settings not configured");
             _logger = logger;
+            _appLogger = appLogger;
+            _env = env;
         }
 
         public async Task<bool> SendEmailAsync(EmailMessage message)
@@ -25,17 +36,17 @@ namespace RVParking.Services.Email
                 var email = new MimeMessage();
                 email.From.Add(new MailboxAddress(_settings.DisplayName, _settings.From));
                 email.To.Add(new MailboxAddress("", message.To));
-                email.Subject = message.Subject;
+                email.Subject = _env.ShouldDisplayEnvInfo ? $"TEST-{message.Subject}" : message.Subject;
 
                 email.Body = new TextPart(message.IsHtml ? TextFormat.Html : TextFormat.Plain)
                 {
                     Text = message.Body
                 };
 
+
                 using var client = new MailKit.Net.Smtp.SmtpClient();
                 // Ignore certificate validation errors
                 client.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
-
 
                 // Configure SSL/TLS based on settings
                 var secureSocketOptions = _settings.EnableSsl
@@ -54,6 +65,13 @@ namespace RVParking.Services.Email
                 await client.DisconnectAsync(true);
 
                 _logger.LogInformation("Email sent successfully to {Recipient}", message.To);
+
+                // prepare applog message
+                var alogMsg = $"EmailTo: {email.To} fm: {email.From} Subj: {email.Subject} Msg: {email.Body}";
+                var sVia = _env.ShouldDisplayEnvInfo ? $"TEST-MailKit - {_settings.Host}" :$"MailKit - {{_settings.Host}}";
+                alogMsg = _env.ShouldDisplayEnvInfo ? $"TEST-{alogMsg}" : alogMsg ;
+
+                await _appLogger.LogAsync("Info", $"{sVia}", $"Email sent Details:-{alogMsg}");
                 return true;
             }
             catch (Exception ex)

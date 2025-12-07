@@ -7,6 +7,11 @@
 
 @inject NavigationManager NavigationManager 
 @inject IJSRuntime JS
+@inject IWebHostEnvironment Env
+@inject IConfiguration configuration
+@inject RVParking.Services.Environment.IEnvironmentInfoService EnvInfo
+
+
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -173,13 +178,20 @@
 
     <div style="font-size: 0.6em; color: aliceblue; text-align:center;">
         <br />Ver: 1.0.57 2025-12-02<br />
-        @* <a href="https://www.SmarterASP.NET/index?r=PontifexRM">
-            <img src="https://www.SmarterASP.NET/affiliate/234x60.gif" border="0"></a> *@
     </div>
+    @if (EnvInfo.ShouldDisplayEnvInfo)
+    {
+        <div class="env-info" aria-hidden="false" style="color:hotpink" >
+            <div class="env-line env-name">Env: @EnvInfo.EnvironmentName</div>
+            <div class="env-line env-server">Svr: @EnvInfo.ServerName</div>
+            <div class="env-line env-db">DB : @EnvInfo.DatabaseName</div>
+        </div>
+    }
+    
     <br/>
     <br />
     <br />
-    <div class="nav-item px-3 nav-bottom">
+    <div class="nav-item px-3 nav-bottom center" >
             
         <a href="https://www.SmarterASP.NET/index?r=PontifexRM">
             <img src="https://www.SmarterASP.NET/affiliate/234x60.gif" border="0">
@@ -193,6 +205,142 @@
     private bool showAdminItems = false;
     private bool _expandSubNav = false;
     public bool expandSubNav { set; get; } = false;
+    // private string EnvName => Env?.EnvironmentName ?? "Unknown";
+
+    // private string EnvServer
+    // {
+    //     get
+    //     {
+    //         var (server, _) = ParseServerAndDatabase();
+    //         return string.IsNullOrEmpty(server) ? "n/a" : server;
+    //     }
+    // }
+
+    // private string EnvDatabase
+    // {
+    //     get
+    //     {
+    //         var (_, database) = ParseServerAndDatabase();
+    //         return string.IsNullOrEmpty(database) ? "n/a" : database;
+    //     }
+    // }
+    // private (string Server, string Database) ParseServerAndDatabase()
+    // {
+    //     var ccn = configuration["ConnectionStrings:DefaultConnection"] ?? "";
+    //     var server = "";
+    //     var database = "";
+
+    //     // Support both "Data Source=" and "Server=" style connection strings, and "Initial Catalog=" for DB.
+    //     var parts = ccn.Split(';', StringSplitOptions.RemoveEmptyEntries);
+    //     foreach (var part in parts)
+    //     {
+    //         var p = part.Trim();
+    //         if (p.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase) ||
+    //             p.StartsWith("Server=", StringComparison.OrdinalIgnoreCase))
+    //         {
+    //             var idx = p.IndexOf('='); if (idx >= 0) server = p[(idx + 1)..].Trim();
+    //         }
+    //         else if (p.StartsWith("Initial Catalog=", StringComparison.OrdinalIgnoreCase) ||
+    //                  p.StartsWith("Database=", StringComparison.OrdinalIgnoreCase))
+    //         {
+    //             var idx = p.IndexOf('='); if (idx >= 0) database = p[(idx + 1)..].Trim();
+    //         }
+    //     }
+
+    //     // If server includes a host:port or tcp: prefix, strip to host part for compact display.
+    //     if (!string.IsNullOrEmpty(server))
+    //     {
+    //         // remove "tcp:" prefix
+    //         if (server.StartsWith("tcp:", StringComparison.OrdinalIgnoreCase))
+    //             server = server.Substring("tcp:".Length);
+
+    //         // if contains comma or colon use substring before
+    //         var sepIdx = server.IndexOfAny(new[] { ',', ':' });
+    //         if (sepIdx > 0)
+    //             server = server.Substring(0, sepIdx);
+    //     }
+
+    //     return (server, database);
+    // }
+    // private (string Server, string Database) ParseServerAndDatabase(string sCnn)
+    // {
+    //     var server = "";
+    //     var database = "";
+
+    //     // Support both "Data Source=" and "Server=" style connection strings, and "Initial Catalog=" for DB.
+    //     var parts = sCnn.Split(';', StringSplitOptions.RemoveEmptyEntries);
+    //     foreach (var part in parts)
+    //     {
+    //         var p = part.Trim();
+    //         if (p.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase) ||
+    //             p.StartsWith("Server=", StringComparison.OrdinalIgnoreCase))
+    //         {
+    //             var idx = p.IndexOf('='); if (idx >= 0) server = p[(idx + 1)..].Trim();
+    //         }
+    //         else if (p.StartsWith("Initial Catalog=", StringComparison.OrdinalIgnoreCase) ||
+    //                  p.StartsWith("Database=", StringComparison.OrdinalIgnoreCase))
+    //         {
+    //             var idx = p.IndexOf('='); if (idx >= 0) database = p[(idx + 1)..].Trim();
+    //         }
+    //     }
+
+    //     // If server includes a host:port or tcp: prefix, strip to host part for compact display.
+    //     if (!string.IsNullOrEmpty(server))
+    //     {
+    //         // remove "tcp:" prefix
+    //         if (server.StartsWith("tcp:", StringComparison.OrdinalIgnoreCase))
+    //             server = server.Substring("tcp:".Length);
+
+    //         // if contains comma or colon use substring before
+    //         var sepIdx = server.IndexOfAny(new[] { ',', ':' });
+    //         if (sepIdx > 0)
+    //             server = server.Substring(0, sepIdx);
+    //     }
+
+    //     return (server, database);
+    // }
+
+    // private string EnvCssClass
+    // {
+    //     get
+    //     { 
+    //         var name = (Env?.EnvironmentName ?? "").ToLowerInvariant();
+    //         return name switch
+    //         {
+    //             "development" => "env-dev",
+    //             "dev" => "env-dev",
+    //             "testing" => "env-testing",
+    //             "test" => "env-testing",
+    //             "staging" => "env-staging",
+    //             "local" => "env-local",
+    //             "production" => "env-prod",
+    //             "prod" => "env-prod",
+    //             _ => "env-other"
+    //         };
+    //     }
+    // }
+
+    // private bool EnvInfoDisplayed
+    // {
+    //     // There is a config setting to show what server and database we are using in the LIVE environment and if so then EnvInfo is hiden...
+
+    //     get
+    //     {
+    //         var ccnLive = configuration["ConnectionStrings:ProductionSrvDB"] ?? "";
+            
+    //         var (prodsvr, proddb) = ParseServerAndDatabase(ccnLive);
+    //         if(prodsvr == EnvServer && proddb == EnvDatabase)
+    //         {
+    //             return false; // hide EnvInfo if we are on the live production server and database
+    //         }   else
+    //         {
+    //             return true; // show EnvInfo if not on live production server and database
+    //         }   
+    //     }
+    // }
+
+
+
     protected override void OnInitialized()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
@@ -213,17 +361,119 @@
 }
 
 <style>
-html, body, #app {
-  height: 100%;
-}
+    html, body, #app {
+      height: 100%;
+    }
 
-.nav-scrollable {
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 56px);
-}
+    .nav-scrollable {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 56px);
+    }
+    /* The nav becomes the scrollable area and sits above the pinned footer */
+    .nav-scrollable nav {
+        position: relative;
+        z-index: 2; /* ensure nav content renders above the nav-bottom */
+        flex: 1 1 auto;
+        overflow: auto;
+    }
 
-.nav-scrollable nav { flex: 1 1 auto; overflow: auto; }
-.nav-scrollable .nav-bottom { margin-top: auto; text-align:center; }
+    /* Pinned bottom item */
+    .nav-scrollable .nav-bottom {
+            position: absolute; /* pin to bottom of the .nav-scrollable container */
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1; /* lower than nav so nav items can scroll over (hide) it */
+            text-align: left; /* default: left aligned */
+            padding: 0.5rem 1rem; /* mirror nav item padding */
+            background: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+    }
+            /* Force left alignment and override other CSS that might push the item right */
+            .nav-scrollable .nav-bottom.left {
+                justify-content: flex-start !important;
+                text-align: left !important;
+            }
+
+                /* Ensure the anchor and image do not have auto margins pushing them right */
+                .nav-scrollable .nav-bottom.left a,
+                .nav-scrollable .nav-bottom.left img {
+                    margin: 0 !important;
+                }
+
+                .nav-scrollable .nav-bottom.left img {
+                    display: inline-block;
+                    height: auto;
+                    max-width: 100%;
+                }
+
+            /* Center variation, if needed later */
+            .nav-scrollable .nav-bottom.center {
+                justify-content: center;
+            }
+    .env-badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        color: #fff;
+        font-weight: 600;
+        text-transform: capitalize;
+        white-space: nowrap;
+        box-shadow: 0 0 0 1px rgba(0,0,0,0.05) inset;
+    }
+
+    .env-dev {
+        background: #198754;
+    }
+    /* green */
+    .env-testing {
+        background: #fd7e14;
+    }
+    /* orange */
+    .env-staging {
+        background: #0d6efd;
+    }
+    /* blue */
+    .env-local {
+        background: #6f42c1;
+    }
+    /* purple */
+    .env-prod {
+        background: #6c757d;
+    }
+    /* muted gray for production */
+    .env-other {
+        background: #343a40;
+    }
+    /* dark */
+        /* Environment indicator styling - closely formed rows, left-justified */
+    .env-info {
+        display: inline-block;
+        text-align: left;
+        color: aliceblue;
+        font-size: 0.62rem;
+        line-height: 1.05; /* closely formed rows */
+        margin: 1rem ;
+        padding: 0;
+        white-space: nowrap;
+    }
+
+    .env-info .env-line {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* optional color classes for other uses */
+    .env-dev { background: #198754; }
+    .env-testing { background: #fd7e14; }
+    .env-staging { background: #0d6efd; }
+    .env-local { background: #6f42c1; }
+    .env-prod { background: #6c757d; }
+    .env-other { background: #343a40; }
+    
 </style>
 

@@ -1,5 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Org.BouncyCastle.Cms;
 using RVParking.Data;
+using RVParking.Services.Environment;
+using RVParking.Services.Logging;
 using TNZAPI.NET.Core;
 
 namespace RVParking.Services.SMS
@@ -19,10 +22,16 @@ namespace RVParking.Services.SMS
     {
 
         private readonly SmsTNZSettings _settings;
-        public SmsTNZService(IConfiguration configuration)
+        private readonly IAppLogger _appLogger;
+        private readonly IEnvironmentInfoService _env;
+
+        public SmsTNZService(IConfiguration configuration,IAppLogger applogger, IEnvironmentInfoService env )
         {
             _settings = configuration.GetSection("TNZ").Get<SmsTNZSettings>()
            ?? throw new InvalidOperationException("TNZ settings not configured");
+            _appLogger = applogger;
+            _env = env;
+
         }
         public async Task<SmsResponse> SendSmsAsync(SmsRequest request)
         {
@@ -32,12 +41,17 @@ namespace RVParking.Services.SMS
                 AuthToken = _settings.AuthToken
             };
             var client = new TNZApiClient(apiUser);
-
+            request.Message = _env.ShouldDisplayEnvInfo ? $"TEST-{request.Message}" : request.Message;
             var response = client.Messaging.SMS.SendMessage
                 (
                     destination: request.To,
                     messageText: request.Message
                 );
+            // prepare applog message
+            var alogMsg = $"SmsTo: {request.To} fm: {_settings.SMSrept} Msg: {request.Message}";
+            alogMsg = _env.ShouldDisplayEnvInfo ? $"TEST-{alogMsg}" : alogMsg;
+            await _appLogger.LogAsync("Info", $"SMSEveryone", alogMsg);
+
             return await Task.FromResult(new SmsResponse
             {
                 MessageId = response.MessageID,

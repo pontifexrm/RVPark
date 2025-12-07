@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using RVParking.Data;
+using RVParking.Services.Environment;
+using RVParking.Services.Logging;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
@@ -18,17 +20,22 @@ namespace RVParking.Services.SMS
         private readonly HttpClient _httpClient;
         private readonly SmsEveryoneSettings _settings;
         private readonly ILogger<SmsEveryoneService> _logger;
+        private readonly IAppLogger _appLogger;
+        private readonly IEnvironmentInfoService _env;
 
         public SmsEveryoneService(
             HttpClient httpClient,
             IOptions<SmsEveryoneSettings> settings  ,
-            ILogger<SmsEveryoneService> logger)
+            ILogger<SmsEveryoneService> logger,
+            IAppLogger appLogger,
+            IEnvironmentInfoService env)
         {
             _httpClient = httpClient;
 
             _settings = settings.Value;
             _logger = logger;
-
+            _appLogger = appLogger;
+            _env = env;
             // Configure HTTP client
             _httpClient.BaseAddress = new Uri(_settings.BaseUrl);
             // Prefer Authorization header when ApiKey is provided as "Basic <token>" (as in Postman).
@@ -57,6 +64,7 @@ namespace RVParking.Services.SMS
                 {
                     request.To = request.To.Substring(1);
                 }
+                request.Message = _env.ShouldDisplayEnvInfo ? $"TEST-{request.Message}" : request.Message;
                 var payload = new
                 {
                     Message = request.Message,
@@ -92,10 +100,16 @@ namespace RVParking.Services.SMS
                 }
                 else
                 {
+                    // prepare applog message
+                    var alogMsg = $"SmsTo: {request.To} fm: {originator} Msg: {request.Message}";
+                    alogMsg = _env.ShouldDisplayEnvInfo ? $"TEST-{alogMsg}" : alogMsg;
+                    await _appLogger.LogAsync("Info", $"SMSEveryone", alogMsg);
+
                     return new SmsResponse
                     {
                         Success = true,
                         Message = $"HTTP {(int)response.StatusCode}: {response.ReasonPhrase}."
+
                     };
                 }
 

@@ -1,17 +1,25 @@
 ﻿using Microsoft.Extensions.Configuration;
 using RVParking.Data;
 using TNZAPI.NET.Core;
+using RVParking.Services.Environment;
+using RVParking.Services.Logging;
 
 namespace RVParking.Services.Email
 {
     public class TNZEmailService : IEmailService
     {
         private readonly TNZSettings _settings;
-        public TNZEmailService(IConfiguration configuration)
+        private readonly IAppLogger _applogger;
+        private readonly IEnvironmentInfoService _env;
+
+
+        public TNZEmailService(IConfiguration configuration, IAppLogger appLogger, IEnvironmentInfoService env)
         {
             _settings = configuration.GetSection("TNZ").Get<TNZSettings>()
            ?? throw new InvalidOperationException("TNZ settings not configured");
 
+            _applogger = appLogger;
+            _env = env;
         }
 
         public async Task<bool> SendEmailAsync(EmailMessage message)
@@ -31,10 +39,17 @@ namespace RVParking.Services.Email
 
             var reponseEmail = client.Messaging.Email.SendMessage(
                 fromEmail: _settings.fromEmail,
-                emailSubject: subject,
+                emailSubject: _env.ShouldDisplayEnvInfo ? $"TEST-{subject}" : subject,
                 messagePlain: body,
                 destination: to
             );
+            // prepare applog message
+            var alogMsg = $"EmailTo: {to} fm: {_settings.fromEmail} Subj: {subject} Msg: {body}";
+            alogMsg = _env.ShouldDisplayEnvInfo ? $"TEST-{alogMsg}" : alogMsg;
+
+            var sVia = _env.ShouldDisplayEnvInfo ? $"TEST-TNZApiUser": $"TNZApiUser";
+            await _applogger.LogAsync("Info", $"{sVia}", $"Email sent Details:-{alogMsg}");
+
             return true;
         }
     }

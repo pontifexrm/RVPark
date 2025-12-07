@@ -385,8 +385,8 @@
         }
         else
         {
-            DateTime? dte = Fmdate != null ? Fmdate : DateTime.Now.Date;
-            DateTime? dteTo = Todate != null ? Todate : DateTime.Now.Date;
+            DateTime? dte = Fmdate != null ? Fmdate : DateHelper.GetCurrentDateInNZ(); // DateTime.Now.Date;
+            DateTime? dteTo = Todate != null ? Todate : DateHelper.GetCurrentDateInNZ(); // DateTime.Now.Date;
             while (dte <= dteTo)
             {
                 DbSet<Bkg_Availability> bkg_Availabilities = ApplicationDbContext.bkg_Availabilities;

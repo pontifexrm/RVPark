@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <Compile Remove="Data\EmailSenderMailKit.cs" />
+    <Compile Remove="Services\CustomAppLoggerOLD.cs" />
   </ItemGroup>
 
   <ItemGroup>

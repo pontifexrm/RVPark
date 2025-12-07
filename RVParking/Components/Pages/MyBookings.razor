@@ -13,6 +13,7 @@
 @using Microsoft.AspNetCore.Identity.EntityFrameworkCore
 
 @using RVParking.Services
+@using RVParking.Services.Logging
 @using TNZAPI.NET;
 @using TNZAPI.NET.Core;
 @using TNZAPI.NET.Api.Addressbook.Contact.Dto;
@@ -639,8 +640,8 @@
         // if a new booking then we need to Create it else Change it.
         if (currentBooking.BookingId == 0) // A new booking
         {
-            currentBooking.CreatedDte = DateTime.Now;
-            currentBooking.UpdatedDte = DateTime.Now;
+            currentBooking.CreatedDte = DateHelper.GetCurrentDateTimeInNZ();//DateTime.Now;
+            currentBooking.UpdatedDte = DateHelper.GetCurrentDateTimeInNZ();//DateTime.Now;
             var savedOK = await bkg_Engine.CreateBookingAsync(currentBooking);
             if (!savedOK)
             {
@@ -659,7 +660,7 @@
         }
         else // editing existing bkg
         {
-            currentBooking.UpdatedDte = DateTime.Now;
+            currentBooking.UpdatedDte = DateHelper.GetCurrentDateTimeInNZ();// DateTime.Now;
 
             var savedOK = await bkg_Engine.EditBookingAsync(orgnBkg, currentBooking);
             if (!savedOK)

@@ -62,6 +62,7 @@ namespace RVParking.Services
             services.AddScoped<IEmailService, MockEmailService>();
             return services;
         }
+       
 
     }
 }

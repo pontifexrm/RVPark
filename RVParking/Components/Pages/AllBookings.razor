@@ -15,6 +15,7 @@
 @using Microsoft.AspNetCore.WebUtilities
 @using System.Threading.Tasks
 @using RVParking.Services
+@using RVParking.Services.Logging
 @using TNZAPI.NET;
 @using TNZAPI.NET.Core;
 @using TNZAPI.NET.Api.Addressbook.Contact.Dto;
@@ -509,8 +510,8 @@
 
         if (currentBooking.BookingId == 0) // A new booking
         {
-            currentBooking.CreatedDte = DateTime.Now;
-            currentBooking.UpdatedDte = DateTime.Now;
+            currentBooking.CreatedDte = DateHelper.GetCurrentDateTimeInNZ();//DateTime.Now;
+            currentBooking.UpdatedDte = DateHelper.GetCurrentDateTimeInNZ();//DateTime.Now;
             var savedOK = await bkg_Engine.CreateBookingAsync(currentBooking);
             if (!savedOK)
             {
@@ -537,7 +538,7 @@
             string subjectMsg = string.Concat("Bkg Changed for:", currentBooking.Bkg_User.UserEmail, " Changed! And Now is - BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
                     " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 
-            currentBooking.UpdatedDte = DateTime.Now;
+            currentBooking.UpdatedDte = DateHelper.GetCurrentDateTimeInNZ();//DateTime.Now;
             var savedOK = await bkg_Engine.EditBookingAsync(orgnBkg, currentBooking);
             if (!savedOK)
             {
@@ -620,7 +621,7 @@
             .FirstOrDefaultAsync(b => b.BookingId == curBkgId);
         if (bookingToDelete != null)
         { 
-            var logmsg = string.Concat("Booking Deleted: BkgRef ", bookingToDelete.BookingId.ToString(),
+            var logmsg = string.Concat("Booking Deleted by ", currentUser.UserName," BkgRef ", bookingToDelete.BookingId.ToString(),
                 " for ", bookingToDelete.Bkg_User.UserName,
                 " at ", bookingToDelete.Bkg_Property.Name,
                 " from ", bookingToDelete.DateArrive.ToString("dd/MM/yyyy"),
@@ -634,7 +635,8 @@
             }
             else
             {
-                await AppLogger.LogAsync("AllBookingAdmin", logmsg, currentUser.UserName); 
+                await AppLogger.LogAsync("AllBookingAdmin", logmsg, currentUser.UserName);
+                await SendCCEmailDeleteConfirmation("Booking Deleted", logmsg);
                 modalTitle = "Booking Deleted";
                 modalMessage = "The Booking has been successfully deleted.";
                 msgSent = true;

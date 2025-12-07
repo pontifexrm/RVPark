@@ -13,7 +13,8 @@ using RVParking.Components.Account;
 using RVParking.Data;
 using RVParking.Services;
 using RVParking.Services.Email;
-using RVParking.Services.SMS;
+using RVParking.Services.Environment;
+using RVParking.Services.Logging;
 using Syncfusion.Blazor;
 using System;
 using System.Globalization;
@@ -83,7 +84,7 @@ builder.Services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =
 // Primary registration - DbContextFactory
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+builder.Services.AddScoped<IAppLogger, AppLogger>();
 // Select email provider from configuration
 var emailProvider = builder.Configuration["EmailSettings:Provider"]?.Trim() ?? "Mock";
 switch (emailProvider.ToLowerInvariant())
@@ -122,7 +123,9 @@ switch (smsProvider.ToLowerInvariant())
 }
 
 
-builder.Services.AddScoped<IAppLogger, AppLogger>();
+builder.Services.AddSingleton<IEnvironmentInfoService, EnvironmentInfoService>();
+
+//builder.Services.AddScoped<IAppLogger, AppLogger>();
 
 
 // Secondary registration for scaffolding
