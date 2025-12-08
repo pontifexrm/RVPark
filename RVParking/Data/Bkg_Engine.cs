@@ -296,7 +296,8 @@ namespace RVParking.Data
                 {
                     try
                     {
-                        chngAvailableStatus(new_bkg.DateArrive, cur_bkg.DateArrive,  cur_bkg.PropertyId, true, string.Empty);
+// was RMP 20251208                        chngAvailableStatus(new_bkg.DateArrive, cur_bkg.DateArrive, cur_bkg.PropertyId, true, string.Empty);
+                        chngAvailableStatus(cur_bkg.DateArrive, new_bkg.DateArrive,  cur_bkg.PropertyId, true, string.Empty);
                         chngAvailableStatus(new_bkg.DateDepart, cur_bkg.DateDepart, cur_bkg.PropertyId, true, string.Empty);
                         _context.bkg_Bookings?.Update(new_bkg);
                         await _context.SaveChangesAsync();

@@ -1134,6 +1134,7 @@
         // #endif
         sendConfirmMsg = false;
     }
+
     private string ConfirmBkgMsg()  // Uses Bkg_User Names
     {
         StringBuilder sb = new StringBuilder();
@@ -1144,7 +1145,9 @@
         //        sb.Append(currentUser.UserLastName);
         sb.Append(currentBooking.Bkg_User.UserLastName);
         sb.Append("\n\n");
-        sb.Append("Your booking has been confirmed for ");
+        sb.Append("BkgRef:");
+        sb.Append(currentBooking.BookingId.ToString());
+        sb.Append(" Has been confirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
         sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
@@ -1192,7 +1195,9 @@
         //        sb.Append(currentUser.UserLastName);
         sb.Append(currentBooking.Bkg_User.UserLastName);
         sb.Append("\n\n");
-        sb.Append("Your booking has been confirmed for ");
+        sb.Append("BkgRef:");
+        sb.Append(currentBooking.BookingId.ToString());
+        sb.Append("Has been confirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
         sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
@@ -1231,7 +1236,9 @@
         //        sb.Append(currentUser.UserLastName);
         sb.Append(currentBooking.Bkg_User.UserLastName);
         sb.Append("\n\n");
-        sb.Append("Your booking has been confirmed for ");
+        sb.Append("BkgRef:");
+        sb.Append(currentBooking.BookingId.ToString());
+        sb.Append(" Has been confirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
         sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
@@ -1252,7 +1259,9 @@
         //        sb.Append(currentUser.UserLastName);
         sb.Append(currentBooking.Bkg_User.UserLastName);
         sb.Append("\n\n");
-        sb.Append("Your booking has been confirmed for ");
+        sb.Append("BkgRef:");
+        sb.Append(currentBooking.BookingId.ToString());
+        sb.Append(" Has been confirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
         sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
@@ -1300,7 +1309,9 @@
         //        sb.Append(currentUser.UserLastName);
         sb.Append(currentBooking.Bkg_User.UserLastName);
         sb.Append("\n\n");
-        sb.Append("Your booking has been confirmed for ");
+        sb.Append("BkgRef:");
+        sb.Append(currentBooking.BookingId.ToString());
+        sb.Append(" Has been confirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
         sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
@@ -1311,6 +1322,7 @@
                  "from : rvpark@pontifex.nz\r\n");
         return sb.ToString();
     }
+
 
     private string Chk_E_164_Phone(string phne)
     {

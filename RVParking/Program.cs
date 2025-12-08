@@ -196,6 +196,8 @@ using (var scope = app.Services.CreateScope())
     }
 #endif
 
+// Use request logging middleware
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 
 app.Run();

@@ -442,7 +442,7 @@
             bookings = await query.ToListAsync();
 
         }
-        
+
     }
     private async Task RefreshTable(bool newValue)
     {
@@ -602,7 +602,7 @@
                 SendTxtConfirmation(subjectMsg,txtrept, "WARNING");
                 // Need to send a cc'd to rvpark@pontifex.nz
                 SendCCEmailDeleteConfirmation(CCMsg, subjectMsg);
-                
+
             }
             catch (Exception ex)
             {
@@ -633,7 +633,7 @@
     { 
         currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
         currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
-        string s = configuration["TNZ:SMSrept"];
+        string s = configuration["SMSSettings:SMSrept"];
         string txtrept = Chk_E_164_Phone(s);
         currentBooking.DateArrive = Fmdate; currentBooking.DateDepart = Todate;
 
@@ -707,21 +707,21 @@
         }
 
 
-// #if !DEBUG
-//         // Using TNZ
-//         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-//             {
-//                 AuthToken = configuration["TNZ:AuthToken"]
-//             };
-//         var client = new TNZApiClient(apiUser);
+        // #if !DEBUG
+        //         // Using TNZ
+        //         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+        //             {
+        //                 AuthToken = configuration["TNZ:AuthToken"]
+        //             };
+        //         var client = new TNZApiClient(apiUser);
 
-//         var reponseEmail = client.Messaging.Email.SendMessage(
-//             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-//             emailSubject: subjectMsg,
-//             messagePlain: ConfirmBkgMsg(),
-//             destination: currentBooking.Bkg_User.UserEmail
-//         );
-// #endif
+        //         var reponseEmail = client.Messaging.Email.SendMessage(
+        //             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+        //             emailSubject: subjectMsg,
+        //             messagePlain: ConfirmBkgMsg(),
+        //             destination: currentBooking.Bkg_User.UserEmail
+        //         );
+        // #endif
         sendConfirmMsg = false;
     }
     private async Task SendCCEmailConfirmation()
@@ -742,21 +742,21 @@
 
 
 
-// #if !DEBUG
-//         // Using TNZ
-//         var apiUser = new TNZApiUser()  // this should come from configuration injection
-//             {
-//                 AuthToken = configuration["TNZ:AuthToken"]
-//             };
-//         var client = new TNZApiClient(apiUser);
+        // #if !DEBUG
+        //         // Using TNZ
+        //         var apiUser = new TNZApiUser()  // this should come from configuration injection
+        //             {
+        //                 AuthToken = configuration["TNZ:AuthToken"]
+        //             };
+        //         var client = new TNZApiClient(apiUser);
 
-//         var reponseEmail = client.Messaging.Email.SendMessage(
-//             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-//             emailSubject: subjectMsg,
-//             messagePlain: ConfirmBkgMsg(),
-//             destination: configuration["EmailSettings:CCEmail"]
-//         );
-// #endif
+        //         var reponseEmail = client.Messaging.Email.SendMessage(
+        //             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+        //             emailSubject: subjectMsg,
+        //             messagePlain: ConfirmBkgMsg(),
+        //             destination: configuration["EmailSettings:CCEmail"]
+        //         );
+        // #endif
         sendConfirmMsg = false;
     }
     private async Task SendCCEmailDeleteConfirmation(string subjectMsg, string DeleteMsg)
@@ -863,7 +863,9 @@
         sb.Append(" ");
         sb.Append(currentUser.UserLastName);
         sb.Append("\n\n");
-        sb.Append("Your booking has been confirmed, or reconfirmed for ");
+        sb.Append("BkgRef:");
+        sb.Append(currentBooking.BookingId.ToString());
+        sb.Append(" Has been confirmed, or reconfirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
         sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
@@ -899,7 +901,10 @@
         sb.Append(" ");
         sb.Append(currentUser.UserLastName);
         sb.Append("\n\n");
-        sb.Append("Your booking has been confirmed, or reconfirmed for ");
+        sb.Append("BkgRef:");
+        sb.Append(currentBooking.BookingId.ToString());
+
+        sb.Append(" Has been confirmed, or reconfirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
         sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
@@ -935,7 +940,9 @@
         sb.Append(" ");
         sb.Append(currentUser.UserLastName);
         sb.Append("\n\n");
-        sb.Append("Your booking has been confirmed, or reconfirmed for ");
+        sb.Append("BkgRef:");
+        sb.Append(currentBooking.BookingId.ToString());
+        sb.Append(" Has been confirmed, or reconfirmed for ");
         sb.Append(currentBooking.Bkg_Property.Name);
         sb.Append(" arriving after mid-day ");
         sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));

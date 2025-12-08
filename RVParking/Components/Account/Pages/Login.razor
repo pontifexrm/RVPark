@@ -6,6 +6,7 @@
 @using RVParking.Data
 
 @inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> _userManager
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
@@ -90,6 +91,24 @@
         // This doesn't count login failures towards account lockout
         // To enable password failures to trigger account lockout, set lockoutOnFailure: true
         var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+
+        // Log the result of the login attempt both successful and unsuccessful
+        using var scope = HttpContext.RequestServices.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        var loginLog = new LoginLog
+        {
+            UserId = (result.Succeeded) ? (await _userManager.FindByEmailAsync(Input.Email)).Id : null,
+            IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            Success = result.Succeeded,
+            Timestamp = DateTimeOffset.UtcNow
+        };
+
+        db.LoginLogs.Add(loginLog);
+        await db.SaveChangesAsync();
+
+
+
         if (result.Succeeded)
         {
             Logger.LogInformation("User logged in.");
