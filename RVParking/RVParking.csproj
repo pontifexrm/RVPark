@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Remove="Data\EmailSenderMailKit.cs" />
     <Compile Remove="Services\CustomAppLoggerOLD.cs" />
+    <Compile Remove="Services\Logging\SiteStatsService.cs" />
   </ItemGroup>
 
   <ItemGroup>

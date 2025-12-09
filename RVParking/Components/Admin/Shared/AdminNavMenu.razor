@@ -1,4 +1,4 @@
-﻿@* <AuthorizeView Roles="Admin">
+﻿<AuthorizeView Roles="Admin">
     <NotAuthorized> 
         <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
             <div>
@@ -7,7 +7,7 @@
         </div>
     </NotAuthorized>
     <Authorized>
-	<!--  --> *@
+	<!--  -->
         <ul class="nav nav-pills flex-column">
             <li class="nav-item" >
                 <NavLink class="nav-link" style="color: darkolivegreen;" href="admin/allbookings">
@@ -50,12 +50,17 @@
                     <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>User to Role Admin
                 </NavLink>
             </li>
-            </ul>
+            <li class="nav-item">
+        <NavLink class="nav-link" style="color: darkolivegreen;" href="admin/sitestats">
+                    <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>Site Statistics
+                </NavLink>
+            </li>
+        </ul>
 
 
 
-@*     </Authorized>
-</AuthorizeView> *@
+    </Authorized>
+</AuthorizeView>
 
 
 
