@@ -1,10 +1,14 @@
-﻿
-@page "/admin/sitestats"
+﻿@page "/admin/sitestats"
 @rendermode InteractiveServer
 
 @using RVParking.Data
 @using RVParking.Services
 @using Microsoft.EntityFrameworkCore
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Grids
+@using Microsoft.AspNetCore.Components.QuickGrid
+
 
 @* @inject DataTransferService TransferService *@
 @inject ApplicationDbContext dbContext
@@ -50,146 +54,171 @@
 <button type="button" class="btn btn-secondary" @onclick="GetLoginStats"> Refresh and Show Statistics </button>
 <br />
 <br />
-<section class="card-list product-list">
-@*     <a class="card card-1" role="group">
-        <div class="card-content">
-            <h4 class="card-title">Transfer Row Count</h4>
-            @if (lastTransferResult != null)
-            {
-                <div>
-                    <ul>
-                        <li>Total records transferred: @lastTransferResult.TotalRecordsTransferred</li>
-                        <li>AppLogs added: @lastTransferResult.AppLogsAdded</li>
-                        <li>Users added: @lastTransferResult.UsersAdded</li>
-                        <li>LoginLogs added: @lastTransferResult.LoginLogsAdded</li>
-                        <li>VisitLogs added: @lastTransferResult.VisitLogsAdded</li>
-                    </ul>
-                </div>
-            }
-        </div>
-    </a> *@
-    <a class="card card-1" role="group">
-        <div class="card-content">
-            <h4 class="card-title">Login Statistics</h4>
-
-            @if (loginStats != null)
-            {
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Time Period</th>
-                                <th>Successful Logins</th>
-                                <th>Failed Logins</th>
-                                <th>TOTAL Logins</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Last 24 Hours</td>
-                                <td>@loginStats.SuccessLast24Hours</td>
-                                <td>@loginStats.FailedLast24Hours</td>
-                                <td>@loginStats.TotalLoginAttempts24Hours</td>
-                            </tr>
-                            <tr>
-                                <td>Last Week</td>
-                                <td>@loginStats.SuccessLastWeek</td>
-                                <td>@loginStats.FailedLastWeek</td>
-                                <td>@loginStats.TotalLoginAttemptsWeek</td>
-                            </tr>
-                            <tr>
-                                <td>Last Month</td>
-                                <td>@loginStats.SuccessLastMonth</td>
-                                <td>@loginStats.FailedLastMonth</td>
-                                <td>@loginStats.TotalLoginAttemptsMonth</td>
-                            </tr>
-                            <tr>
-                                <td>Last Year</td>
-                                <td>@loginStats.SuccessLastYear</td>
-                                <td>@loginStats.FailedLastYear</td>
-                                <td>@loginStats.TotalLoginAttemptsYear</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-            }
-        </div>
-
-    </a>
-    <a class="card card-2" role="group">
-        <div class="card-content">
-            <h4 class="card-title">Pages visited Statistics</h4>
-
-            @if (visitStats != null)
-            {
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Location</th>
-                                <th>Count24h</th>
-                                <th>CountWeek</th>
-                                <th>CountMonth</th>
-                                <th>CountYear</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var locn in visitStats)
-                            {
-                                <tr>
-                                    <td>@locn.Location</td>
-                                    <td>@locn.Count24h</td>
-                                    <td>@locn.CountWeek</td>
-                                    <td>@locn.CountMonth</td>
-                                    <td>@locn.CountYear</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-
-            }
-        </div>
-    </a>
-            <a class="card card-3" role="group">
-                <div class="card-content">
-                    <h4 class="card-title">User Visit Statistics</h4>
-
-                    @if (userVisitStats != null)
-                    {
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>User Name</th>
-                                        <th>Location</th>
-                                        <th>Count24h</th>
-                                        <th>CountWeek</th>
-                                        <th>CountMonth</th>
-                                        <th>CountYear</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var locn in userVisitStats)
-                                    {
+    <SfAccordion  Width="98%" ExpandMode="ExpandMode.Single">
+        <Syncfusion.Blazor.Navigations.AccordionItems>
+            <Syncfusion.Blazor.Navigations.AccordionItem >
+                <HeaderTemplate>
+                        <h4 class="card-title">Login Statistics</h4>
+                </HeaderTemplate>
+                <ContentTemplate>
+                        @if (loginStats != null)
+                        {
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
                                         <tr>
-                                            <td>@locn.UserNameIpAddr</td>
-                                            <td>@locn.Location</td>
-                                            <td>@locn.Count24h</td>
-                                            <td>@locn.CountWeek</td>
-                                            <td>@locn.CountMonth</td>
-                                            <td>@locn.CountYear</td>
+                                            <th>Time Period</th>
+                                            <th>Successful Logins</th>
+                                            <th>Failed Logins</th>
+                                            <th>TOTAL Logins</th>
                                         </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Last 24 Hours</td>
+                                            <td>@loginStats.SuccessLast24Hours</td>
+                                            <td>@loginStats.FailedLast24Hours</td>
+                                            <td>@loginStats.TotalLoginAttempts24Hours</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Last Week</td>
+                                            <td>@loginStats.SuccessLastWeek</td>
+                                            <td>@loginStats.FailedLastWeek</td>
+                                            <td>@loginStats.TotalLoginAttemptsWeek</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Last Month</td>
+                                            <td>@loginStats.SuccessLastMonth</td>
+                                            <td>@loginStats.FailedLastMonth</td>
+                                            <td>@loginStats.TotalLoginAttemptsMonth</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Last Year</td>
+                                            <td>@loginStats.SuccessLastYear</td>
+                                            <td>@loginStats.FailedLastYear</td>
+                                            <td>@loginStats.TotalLoginAttemptsYear</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
 
-                    }
-                </div>
-            </a>
-</section>
+                        }
+                </ContentTemplate>
+            </Syncfusion.Blazor.Navigations.AccordionItem>
+                <Syncfusion.Blazor.Navigations.AccordionItem>
+                    <HeaderTemplate>
+                        <h4 class="card-title">Pages Visited Statistics</h4>
+                    </HeaderTemplate>
+                    <ContentTemplate>
+                        @if (visitStats != null)
+                        {
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Location</th>
+                                            <th>Count24h</th>
+                                            <th>Unique24h</th>
+                                            <th>CountWeek</th>
+                                            <th>UniqueWeek</th>
+                                            <th>CountMonth</th>
+                                            <th>UniqueMonth</th>
+                                            <th>CountYear</th>
+                                            <th>UniqueYear</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var locn in visitStats)
+                                        {
+                                            <tr>
+                                                <td>@locn.Location</td>
+                                                <td>@locn.Count24h</td>
+                                                <td>@locn.UniqueUsers24h</td>
+                                                <td>@locn.CountWeek</td>
+                                                <td>@locn.UniqueUsersWeek</td>
+                                                <td>@locn.CountMonth</td>
+                                                <td>@locn.UniqueUsersMonth</td>
+                                                <td>@locn.CountYear</td>
+                                                <td>@locn.UniqueUsersYear</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        }
+
+                    </ContentTemplate>
+                </Syncfusion.Blazor.Navigations.AccordionItem>
+                <Syncfusion.Blazor.Navigations.AccordionItem>
+                    <HeaderTemplate>
+                        <h4 class="card-title">User Visit Statistics</h4>
+                    </HeaderTemplate>
+                    <ContentTemplate>
+                        @if (userVisitStats != null)
+                        {
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>User Name</th>
+                                            <th>Location</th>
+                                            <th>Count24h</th>
+                                            <th>CountWeek</th>
+                                            <th>CountMonth</th>
+                                            <th>CountYear</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var locn in userVisitStats)
+                                        {
+                                            <tr>
+                                                <td>@locn.UserNameIpAddr</td>
+                                                <td>@locn.Location</td>
+                                                <td>@locn.Count24h</td>
+                                                <td>@locn.CountWeek</td>
+                                                <td>@locn.CountMonth</td>
+                                                <td>@locn.CountYear</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        }
+
+                    </ContentTemplate>
+                </Syncfusion.Blazor.Navigations.AccordionItem>
+                <Syncfusion.Blazor.Navigations.AccordionItem>
+                    <HeaderTemplate>
+                        <h4>AppLog (Application Logger) Viewer</h4>
+                    </HeaderTemplate>
+                    <ContentTemplate>
+                        @if (filteredAppLogs != null && filteredAppLogs.Any())
+                        {
+                            <QuickGrid Items="@filteredAppLogs.AsQueryable()" Pagination="@pagination" Class="applog-grid">
+        <PropertyColumn Property="@(log => log.AppLogId)" Title="ID" Sortable="true" />
+        <PropertyColumn Property="@(log => log.CreatedAt)" Title="Created At" Format="yyyy-MM-dd HH:mm:ss" Sortable="true" />
+        <PropertyColumn Property="@(log => log.LogLevel)" Title="Level" Sortable="true" />
+        <PropertyColumn Property="@(log => log.Category)" Title="Category" Sortable="true" />
+        <PropertyColumn Property="@(log => log.Message)" Title="Message" Sortable="true" />
+        <PropertyColumn Property="@(log => log.Exception)" Title="Exception" Sortable="true" />
+    </QuickGrid>
+    
+    <Paginator State="@pagination" />
+}
+else
+{
+    <p>No application logs available. Click "Refresh and Show Statistics" to load data.</p>
+}
+
+                    </ContentTemplate>
+                </Syncfusion.Blazor.Navigations.AccordionItem>
+                
+
+        </Syncfusion.Blazor.Navigations.AccordionItems>
+    </SfAccordion>
+
 </Authorized>
 </AuthorizeView>
 
@@ -197,26 +226,20 @@
 
 @code {
     private List<AppLog> appLogs;
-    // private TransferResult? lastTransferResult;
     private LoginStats? loginStats;
     private List<VisitStats> visitStats;
     private List<UserVisitStats> userVisitStats;
+    private List<AppLog> filteredAppLogs = new List<AppLog>();
     private bool isTransferring = false;
+    protected override async Task OnInitializedAsync()
+    {
+        
+        await GetLoginStats();
+    }
 
-    // private async Task TransferData()
-    // {
-    //     isTransferring = true;
-    //     try
-    //     {
-    //         lastTransferResult = await TransferService.TransferAsync();
-    //         appLogs = await LocalDb.AppLogs.ToListAsync<AppLog>();
-    //     }
-    //     finally
-    //     {
-    //         isTransferring = false;
-    //         StateHasChanged();
-    //     }
-    // }
+    // Add pagination state
+    private PaginationState pagination = new PaginationState { ItemsPerPage = 20 };
+    
     private async Task GetLoginStats()
     {
 
@@ -237,6 +260,7 @@
 
         await GetVisitLogStatsAsync();
         await GetUserVisitLogStatsAsync();
+        await LoadAppLogsAsync();
     }
 
     private async Task GetVisitLogStatsAsync()
@@ -256,7 +280,11 @@
                 Count24h = g.Count(v => v.Timestamp >= last24h),
                 CountWeek = g.Count(v => v.Timestamp >= lastWeek),
                 CountMonth = g.Count(v => v.Timestamp >= lastMonth),
-                CountYear = g.Count(v => v.Timestamp >= lastYear)
+                CountYear = g.Count(v => v.Timestamp >= lastYear),
+                UniqueUsers24h = g.Where(v => v.Timestamp >= last24h).Select(v => v.UserId ?? v.IpAddress).Distinct().Count(),
+                UniqueUsersWeek = g.Where(v => v.Timestamp >= lastWeek).Select(v => v.UserId ?? v.IpAddress).Distinct().Count(),
+                UniqueUsersMonth = g.Where(v => v.Timestamp >= lastMonth).Select(v => v.UserId ?? v.IpAddress).Distinct().Count(),
+                UniqueUsersYear = g.Where(v => v.Timestamp >= lastYear).Select(v => v.UserId ?? v.IpAddress).Distinct().Count()
             })
             .OrderByDescending(vs => vs.CountYear)
            .ToListAsync();
@@ -291,6 +319,13 @@
                                 })
                                 .OrderByDescending(vs => vs.CountYear)
                                 .ToListAsync();
+    }
+
+    private async Task LoadAppLogsAsync()
+    {
+        filteredAppLogs = await dbContext.AppLogs
+            .OrderByDescending(log => log.CreatedAt)
+            .ToListAsync();
     }
 
 }

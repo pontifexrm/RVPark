@@ -42,21 +42,23 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="15.1.0" />
+    <PackageReference Include="AutoMapper" Version="16.0.0" />
     <PackageReference Include="Blazor.Bootstrap" Version="3.5.0" />
     <PackageReference Include="MailKit" Version="4.14.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0">
+    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="10.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Syncfusion.Blazor.Buttons" Version="31.2.15" />
-    <PackageReference Include="Syncfusion.Blazor.Calendars" Version="31.2.15" />
-    <PackageReference Include="Syncfusion.Blazor.Navigations" Version="31.2.15" />
-    <PackageReference Include="Syncfusion.Blazor.SplitButtons" Version="31.2.15" />
-    <PackageReference Include="Syncfusion.Blazor.Themes" Version="31.2.15" />
+    <PackageReference Include="Syncfusion.Blazor.Buttons" Version="31.2.18" />
+    <PackageReference Include="Syncfusion.Blazor.Calendars" Version="31.2.18" />
+    <PackageReference Include="Syncfusion.Blazor.Grid" Version="31.2.18" />
+    <PackageReference Include="Syncfusion.Blazor.Navigations" Version="31.2.18" />
+    <PackageReference Include="Syncfusion.Blazor.SplitButtons" Version="31.2.18" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="31.2.18" />
     <PackageReference Include="TNZAPI.NET" Version="2.4.1.3" />
   </ItemGroup>
 
