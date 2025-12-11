@@ -37,6 +37,14 @@
         </div>
         <AuthorizeView>
             <NotAuthorized>
+                @if (showtestItems)
+                {
+                    <div class="nav-item  px-3">
+                        <NavLink class="nav-link" href="availability">
+                            <span class="bi bi-calendar-nav-menu" aria-hidden="true"></span> View Availability
+                        </NavLink>
+                    </div>
+                }
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="things">
                         <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Things to Know
@@ -49,6 +57,14 @@
                 </div>
             </NotAuthorized>
             <Authorized>
+                @if (showtestItems)
+                {
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="availability">
+                            <span class="bi bi-calendar-nav-menu" aria-hidden="true"></span> View Availability
+                        </NavLink>
+                    </div>
+                }
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="thingsdetail">
                         <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Things to Know
@@ -70,6 +86,7 @@
             </NotAuthorized>
 
             <Authorized>
+
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="information">
                         <span class="bi bi-book-nav-menu" aria-hidden="true"></span> Site Info
@@ -81,15 +98,7 @@
                     </NavLink>
                 </div>
 
-                @if (showtestItems)
-                {
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="availability">
-                            <span class="bi bi-calendar-nav-menu" aria-hidden="true"></span> View Availability
-                        </NavLink>
-                    </div>
-                }
-                else
+                @if (!showtestItems)
                 {
                     <div class="nav-item px-3">
                         <NavLink class="nav-link" href="availabilityrv">
@@ -109,14 +118,7 @@
                 </div>
             </Authorized>
             <NotAuthorized>
-                @if (showtestItems)
-                {
-                    <div class="nav-item  px-3" >
-                        <NavLink class="nav-link"  href="availability">
-                            <span class="bi bi-calendar-nav-menu"  aria-hidden="true"></span> View Availability
-                        </NavLink>
-                    </div>
-                }
+
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="information">
                         
@@ -172,7 +174,7 @@
     </nav>
 
     <div style="font-size: 0.6em; color: aliceblue; text-align:center;">
-        <br />Ver: 1.0.58 2025-12-08<br />
+        <br />Ver: 1.0.59 2025-12-11<br />
     </div>
     @if (EnvInfo.ShouldDisplayEnvInfo)
     {

@@ -284,64 +284,78 @@ a.card * {
 /* Print-specific styles */
 @media print {
     /* Hide everything by default */
+    .print-container {
+        page-break-inside: avoid;
+    }
+
+    img, .print-container {
+        max-width: 100%;
+        max-height: 100vh; /* fit within viewport height */
+        object-fit: contain; /* scale without cropping */
+    }
+
     body * {
+        /*transform: scale(0.8);*/ /* 80% of original size */
+        margin: 0;
         visibility: hidden;
     }
 
-    /* Show only the print section and its children */
-    .print-section,
-    .print-section * {
-        visibility: visible;
-    }
 
-    /* Position print section at top-left */
+    @page {
+        /*transform: scale(0.8);*/ /* 80% of original size */
+        margin: 0;
+        size: A4 landscape; /* or 'letter' depending on your region */
+    }
+        /* Show only the print section and its children */
+        .print-section,
+        .print-section * {
+            visibility: visible;
+        }
+        /* Position print section at top-left */
     .print-section {
         position: absolute;
         left: 0;
         top: 0;
         width: 100%;
     }
+        /* Hide navigation buttons when printing */
+        .calendar-navigation button,
+        .no-print {
+            display: none !important;
+        }
+        /* Adjust calendar for print */
+        .calendar-grid {
+            border: 2px solid #000;
+            page-break-inside: avoid;
+        }
 
-    /* Hide navigation buttons when printing */
-    .calendar-navigation button,
-    .no-print {
-        display: none !important;
-    }
+        .calendar-day {
+            border: 1px solid #000;
+            page-break-inside: avoid;
+        }
+        /* Ensure colors print correctly */
+        .status-available,
+        .status-dayallavailable,
+        .status-daypartavailable {
+            background-color: lightgreen !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
 
-    /* Adjust calendar for print */
-    .calendar-grid {
-        border: 2px solid #000;
-        page-break-inside: avoid;
-    }
+        .status-busy,
+        .status-dayallbusy {
+            background-color: lightsteelblue !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
 
-    .calendar-day {
-        border: 1px solid #000;
-        page-break-inside: avoid;
+        .status-unavailable,
+        .status-dayallunavailable {
+            background-color: darkgrey !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
     }
-
-    /* Ensure colors print correctly */
-    .status-available,
-    .status-dayallavailable,
-    .status-daypartavailable {
-        background-color: lightgreen !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-
-    .status-busy,
-    .status-dayallbusy {
-        background-color: lightsteelblue !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-
-    .status-unavailable,
-    .status-dayallunavailable {
-        background-color: darkgrey !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-}
 
 /* Hide print button on screen if desired */
 .no-print {

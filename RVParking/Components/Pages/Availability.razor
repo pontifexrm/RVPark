@@ -16,12 +16,6 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using System.Security.Claims
-@using TNZAPI.NET;
-@using TNZAPI.NET.Core;
-@using TNZAPI.NET.Api.Addressbook.Contact.Dto;
-
-@* @using Syncfusion.Blazor
-@using Syncfusion.Blazor.Calendars *@
 
 
 @* Is Being Used *@
@@ -43,8 +37,7 @@
 @inject IEmailSender<ApplicationUser> EmailSender
 @inject IJSRuntime JSRuntime
 
-@* <AuthorizeView>
-    <Authorized> *@
+
 
 
         <div class="print-section">
@@ -60,6 +53,13 @@
                 <div class="form-group" style="text-align:center; margin-left: 1%;">
                     <button class="btn btn-primary" @onclick="NextMonth">&gt;</button>
                 </div>
+        <AuthorizeView>
+            <Authorized>
+                <div class="form-group" style="text-align:center; margin-left:1%;">
+                    <button class="btn btn-secondary no-print" @onclick="PrintCalendar">Print Calendar</button>
+                </div>
+            </Authorized>
+        </AuthorizeView>
             </div>
 
             <div class="calendar-grid">
@@ -100,7 +100,7 @@
         </div>
 
         <!-- Add print button outside the print section -->
-        <button class="btn btn-secondary no-print" @onclick="PrintCalendar">Print Calendar</button>
+        @* <button class="btn btn-secondary no-print" @onclick="PrintCalendar">Print Calendar</button> *@
 
 @*         @if (showDayDetail)
         {
@@ -117,11 +117,7 @@
             </div>
         } *@
 
-@*     </Authorized>
-    <NotAuthorized>
-        <h4>- You are NOT AUTHORIZED -</h4>
-    </NotAuthorized>
-</AuthorizeView> *@
+
 
 
 @code {
