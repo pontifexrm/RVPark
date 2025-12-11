@@ -68,7 +68,7 @@ namespace RVParking.Services.Email
 
                 // prepare applog message
                 var alogMsg = $"EmailTo: {email.To} fm: {email.From} Subj: {email.Subject} Msg: {email.Body}";
-                var sVia = _env.ShouldDisplayEnvInfo ? $"TEST-MailKit - {_settings.Host}" :$"MailKit - {{_settings.Host}}";
+                var sVia = _env.ShouldDisplayEnvInfo ? $"TEST-MailKit - {_settings.Host}" :$"MailKit - {_settings.Host}";
                 alogMsg = _env.ShouldDisplayEnvInfo ? $"TEST-{alogMsg}" : alogMsg ;
 
                 await _appLogger.LogAsync("Info", $"{sVia}", $"Email sent Details:-{alogMsg}");

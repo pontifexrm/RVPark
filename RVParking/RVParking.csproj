@@ -9,15 +9,37 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Components\Admin\Pages\Manage\**" />
+    <Content Remove="Components\Admin\Pages\Manage\**" />
+    <EmbeddedResource Remove="Components\Admin\Pages\Manage\**" />
+    <None Remove="Components\Admin\Pages\Manage\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Data\EmailSenderMailKit.cs" />
     <Compile Remove="Services\CustomAppLoggerOLD.cs" />
     <Compile Remove="Services\Logging\SiteStatsService.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="Components\Admin\Pages\AllBookings.razor" />
+    <Content Remove="Components\Admin\Pages\AppRole_Admin.razor" />
+    <Content Remove="Components\Admin\Pages\AppUserRole_Admin.razor" />
+    <Content Remove="Components\Admin\Pages\AspNetUser_Admin.razor" />
+    <Content Remove="Components\Admin\Pages\BkgProperty_Admin.razor" />
+    <Content Remove="Components\Admin\Pages\Bkg_User_Admin.razor" />
+    <Content Remove="Components\Admin\Pages\BookingAvailability.razor" />
+    <Content Remove="Components\Admin\Pages\Index.razor" />
+    <Content Remove="Components\Admin\Pages\SiteStatsComponent.razor" />
+    <Content Remove="Components\Admin\Pages\UserBookings.razor" />
+    <Content Remove="Components\Admin\Pages\_Imports.razor" />
+    <Content Remove="Components\Admin\Shared\AdminLayout.razor" />
+    <Content Remove="Components\Admin\Shared\AdminNavMenu.razor" />
     <Content Remove="Components\Admin\Shared\ManageLayout.razor" />
     <Content Remove="Components\Layout\BkgMmtMainLayout.razor" />
     <Content Remove="Components\Layout\BkgMmtNavMenu.razor" />
+    <Content Remove="Components\Pages\Admin.razor" />
+    <Content Remove="Components\Pages\Auth.razor" />
     <Content Remove="Components\Pages\Availability01.razor" />
     <Content Remove="Components\Pages\Availabilityold.razor" />
     <Content Remove="Components\Pages\TabComponents\DBTblNavMenu.razor" />
@@ -34,6 +56,7 @@
 
   <ItemGroup>
     <None Remove="Components\Layout\BkgMmtNavMenu.razor.css" />
+    <None Remove="Components\Pages\Admin.razor.css" />
     <None Remove="Components\Pages\ContactRegister.razor.css" />
   </ItemGroup>
 
@@ -63,6 +86,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Components\Admin\Pages\" />
+    <Folder Include="Components\Admin\Shared\" />
     <Folder Include="Components\Pages\Components\" />
     <Folder Include="Migrations\" />
   </ItemGroup>

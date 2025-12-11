@@ -13,5 +13,19 @@ namespace RVParking.Data
         public string Message { get; set; } = string.Empty;
         public string? Exception { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public string CreatedAtNZST
+        {
+            get
+            {
+                return FormatNZTime(CreatedAt);
+            }
+        }
+        private static string FormatNZTime(DateTime utcDateTime)
+        {
+            TimeZoneInfo nzTimeZone = TimeZoneInfo.FindSystemTimeZoneById("New Zealand Standard Time");
+            DateTime nzDateTime = TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, nzTimeZone);
+            return nzDateTime.ToString("yyyy-MM-dd HH:mm:ss");
+        }
     }
+
 }

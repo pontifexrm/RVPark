@@ -2,7 +2,7 @@
 @using Syncfusion.Blazor.SplitButtons
 @using Syncfusion.Blazor.Buttons    
 @using Microsoft.AspNetCore.Components.Routing
-
+@rendermode InteractiveServer
 @implements IDisposable
 
 @inject NavigationManager NavigationManager 
@@ -35,46 +35,54 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        <AuthorizeView>
+        @if (!showAdminItems)
+        {
+             <AuthorizeView>
             <NotAuthorized>
-                @if (showtestItems)
+                @if (!showAdminItems)
                 {
-                    <div class="nav-item  px-3">
-                        <NavLink class="nav-link" href="availability">
-                            <span class="bi bi-calendar-nav-menu" aria-hidden="true"></span> View Availability
+                    @if (showtestItems)
+                    {
+                        <div class="nav-item  px-3">
+                            <NavLink class="nav-link" href="availability">
+                                <span class="bi bi-calendar-nav-menu" aria-hidden="true"></span> View Availability
+                            </NavLink>
+                        </div>
+                    }
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="things">
+                            <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Things to Know
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="contactregister">
+                            <span class="bi bi-envelope-nav-menu" aria-hidden="true"></span> Contact Us - Book
                         </NavLink>
                     </div>
                 }
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="things">
-                        <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Things to Know
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="contactregister">
-                        <span class="bi bi-envelope-nav-menu" aria-hidden="true"></span> Contact Us - Book
-                    </NavLink>
-                </div>
             </NotAuthorized>
             <Authorized>
-                @if (showtestItems)
+                @if (!showAdminItems)
                 {
+                    @if (showtestItems)
+                    {
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="availability">
+                                <span class="bi bi-calendar-nav-menu" aria-hidden="true"></span> View Availability
+                            </NavLink>
+                        </div>
+                    }
                     <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="availability">
-                            <span class="bi bi-calendar-nav-menu" aria-hidden="true"></span> View Availability
+                        <NavLink class="nav-link" href="thingsdetail">
+                            <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Things to Know
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="askusfmuser">
+                            <span class="bi bi-envelope-nav-menu" aria-hidden="true"></span> Ask Us or Request
                         </NavLink>
                     </div>
                 }
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="thingsdetail">
-                        <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Things to Know
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="askusfmuser">
-                        <span class="bi bi-envelope-nav-menu" aria-hidden="true"></span> Ask Us or Request
-                    </NavLink>
-                </div>   
             </Authorized>
         </AuthorizeView>
 
@@ -163,18 +171,83 @@
                         <span class="bi bi-book-nav-menu" aria-hidden="true"></span> All Bookings
                     </NavLink>
                 </div>
-                <div class="nav-item px-3">
+@*                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Admin/Manage">
                         <span class="bi bi-database-nav-menu" aria-hidden="true"></span> Admin Tools
                     </NavLink>
                 </div>
+ *@                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link" \>
+                            <button type="button" class="btn btn-secondary" @onclick="AdminAccess">@(showAdminItems ? "Return Main Menu" : "Administration Menu")  </button>
+                        </NavLink>
+                    </div>
+
             </Authorized>
         </AuthorizeView>
+        }
+        else
+        {
+        <AuthorizeView Roles="Admin" Context="authContext">
+            <Authorized>
+                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link"  href="allbookings">
+                                <span class="bi bi-book-nav-menu" aria-hidden="true"></span> All Bookings
+                            </NavLink>
+                        </div>
 
+                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link"  href="bkg_user_admin">
+                            <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Bkg User Admin
+                            </NavLink>
+                        </div>
+                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link"  href="aspnetuser_admin">
+                                <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span>AppUser Admin
+                            </NavLink>
+                        </div>
+                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link"  href="bookingavailability">
+                                <span class="bi bi-book-nav-menu" aria-hidden="true"></span> Booking Avail_Mnt
+                            </NavLink>
+                        </div>
+                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link"  href="user-bookings">
+                                <span class="bi bi-book-nav-menu" aria-hidden="true"></span> User Bookings
+                            </NavLink>
+                        </div>
+                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link"  href="bkgproperty_admin">
+                                <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>Property Admin
+                            </NavLink>
+                        </div>
+                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link"  href="asprole_admin">
+                                <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>Role Admin
+                            </NavLink>
+                        </div>
+                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link"  href="aspuserrole_admin">
+                                <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>User to Role Admin
+                            </NavLink>
+                        </div>
+                <div class="nav-item nav-link px-3">
+                            <NavLink class="nav-link"  href="sitestats">
+                                <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>Site Statistics
+                            </NavLink>
+                        </div>
+
+                <div class="nav-item nav-link px-3">
+                    <NavLink class="nav-link" \>
+                        <button type="button" class="btn btn-secondary" @onclick="AdminAccess">@(showAdminItems ? "Return Main Menu" : "Administration Menu")  </button>
+                    </NavLink>
+                </div>
+                </Authorized>
+        </AuthorizeView>
+        }
     </nav>
 
     <div style="font-size: 0.6em; color: aliceblue; text-align:center;">
-        <br />Ver: 1.0.60 2025-12-12<br />
+        <br />Ver: 1.0.61 2025-12-12<br />
     </div>
     @if (EnvInfo.ShouldDisplayEnvInfo)
     {
@@ -350,7 +423,10 @@
         StateHasChanged();
 
     }
-
+    public void AdminAccess()
+    {
+        showAdminItems = !showAdminItems;
+    }
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
