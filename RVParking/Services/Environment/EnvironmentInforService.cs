@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using RVParking.Data;
@@ -98,6 +99,25 @@ namespace RVParking.Services.Environment
             }
 
             return (server, database);
+        }
+
+        public string ApplicationVersion
+        {
+            get
+            {
+                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                var version = assembly.GetName().Version;
+                //var fileVersionAttr = assembly.GetCustomAttribute<System.Reflection.AssemblyFileVersionAttribute>();
+                //var infoVersionAttr = assembly.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>();
+                var productAttr = assembly.GetCustomAttribute<System.Reflection.AssemblyProductAttribute>();
+                var productName = productAttr?.Product ?? "n/a";
+
+                return $"Name: {productName.ToString() ?? "n/a"}"
+                + $" Ver: {version?.ToString() ?? "0.0.0.0"} ";
+                    //+
+                    //   $"(File: {fileVersionAttr?.Version ?? "n/a"}, " +
+                    //   $"Product: {infoVersionAttr?.InformationalVersion ?? "n/a"})";
+            }
         }
     }
 }

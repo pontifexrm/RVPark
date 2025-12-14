@@ -136,12 +136,14 @@
                             <li><a class="dropdown-item" href="aspuserrole_admin">User to Role Admin</a></li>
                             @* <li><a class="dropdown-item" href=""></a></li> *@
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" disabled>Ver: 1.0.62 2025-12-12</a></li>
+                            @* <li><a class="dropdown-item" disabled>Ver: 1.0.62 2025-12-12</a></li> *@
+                            <li><a class="dropdown-item env-line env-db" disabled>@EnvInfo.ApplicationVersion</a></li>
                             @if (EnvInfo.ShouldDisplayEnvInfo)
                             {
                                 <li><a class="dropdown-item env-line env-name" disabled>Env: @EnvInfo.EnvironmentName </a></li>
                                 <li><a class="dropdown-item env-line env-server" disabled>Svr: @EnvInfo.ServerName</a></li>
                                 <li><a class="dropdown-item env-line env-db" disabled>DB : @EnvInfo.DatabaseName</a></li>
+                                
                             }
                         </ul>
                     </li>

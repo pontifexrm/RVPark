@@ -28,6 +28,10 @@
     This page allows you to manually trigger the transfer of log data from the RVPark.nz website to the local database,
     and view statistics on login attempts and visit logs.
 </p>
+<div class="mb-3">
+    <label for="filterInput">Exclude UserNames/IPs (separate with |):</label>
+    <input type="text" id="filterInput" class="form-control" @bind="filterString" placeholder="user1|192.168.1.1|user2" />
+</div>
 <button type="button" class="btn btn-secondary" @onclick="GetLoginStats"> Refresh and Show Statistics </button>
 <br />
 <br />
@@ -213,9 +217,14 @@
     private List<UserVisitStats> userVisitStats;
     private List<AppLog> filteredAppLogs = new List<AppLog>();
     private bool isTransferring = false;
+    private string filterString = "";
+    
     protected override async Task OnInitializedAsync()
     {
-        
+        filterString = await dbContext.AppParameters
+    .Where(p => p.ParamKey == "UserSiteVisitorsToExclude")
+    .Select(p => p.ParamValue)
+    .FirstOrDefaultAsync() ?? "";
         await GetLoginStats();
     }
 
@@ -280,9 +289,15 @@
         var lastWeek = now.AddDays(-7);
         var lastMonth = now.AddMonths(-1);
         var lastYear = now.AddYears(-1);
+        
+        // Get filter list
+        var excludeList = string.IsNullOrWhiteSpace(filterString) 
+            ? new HashSet<string>() 
+            : filterString.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToHashSet();
+        
         //
         // Left join VisitLogs to bkg_Users on AppUserId so anonymous visits still appear.
-        userVisitStats = await (from v in dbContext.VisitLogs
+        var allUserVisitStats = await (from v in dbContext.VisitLogs
                                 join b in dbContext.bkg_Users on v.UserId equals b.AppUserId into ub
                                 from b in ub.DefaultIfEmpty()
                                 group v by new
@@ -303,6 +318,11 @@
                                 })
                                 .OrderByDescending(vs => vs.CountYear)
                                 .ToListAsync();
+        
+        // Filter out excluded users/IPs
+        userVisitStats = allUserVisitStats
+            .Where(uvs => !excludeList.Any(exclude => uvs.UserNameIpAddr.Contains(exclude, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
     }
 
     private async Task LoadAppLogsAsync()
