@@ -68,6 +68,9 @@ namespace RVParking.Services.Logging
                 path.StartsWith("/images", StringComparison.OrdinalIgnoreCase) ||
                 path.StartsWith("/css", StringComparison.OrdinalIgnoreCase) ||
                 path.StartsWith("/js", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("//wp", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("//xmlrpc.php", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("/wp-admin", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(path, "/favicon.ico", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(path, "/robots.txt", StringComparison.OrdinalIgnoreCase))
             {

@@ -3,37 +3,6 @@
     display: flex;
     flex-direction: column;
 }
-/* Light text color */
-nav .item {
-    color: #f0f0f0; /* very light gray */
-}
-
-/* Light background color */
-nav .item {
-    background-color: #e6f7ff; /* soft light blue */
-    color: #333; /* dark text for contrast */
-}
-
-    /* Hover effect for better UX */
-    nav .item:hover {
-        background-color: #d9d9d9; /* slightly darker gray on hover */
-    }
-/* Light text color */
-nav .link {
-    color: #f0f0f0; /* very light gray */
-}
-
-/* Light background color */
-nav .link {
-    background-color: #e6f7ff; /* soft light blue */
-    color: #333; /* dark text for contrast */
-}
-
-    /* Hover effect for better UX */
-    nav .link:hover {
-        background-color: #d9d9d9; /* slightly darker gray on hover */
-    }
-
 
 main {
     flex: 1;
@@ -42,9 +11,7 @@ main {
 .sidebar {
     background-image: linear-gradient(180deg, rgb(19, 75, 13) 0%, #a6e8a3 70%);
 }
-.navbar {
-    padding: 0;
-}
+
 .top-row {
     /*background-image: linear-gradient(90deg, darkgreen, white );*/
     /*color: white;*/
@@ -131,47 +98,3 @@ main {
         right: 0.75rem;
         top: 0.5rem;
     }
-.nav-item {
-    font-size: 0.9rem;
-
-}
-.top-row {
-    min-height: 3.5rem;
-    background-color: darkgreen;
-    /*background-color: rgba(0,0,0,0.4);*/
-}
-.navbar-brand {
-    font-size: 1.1rem;
-    background-color: darkgreen;
-}
-
-
-    .nav-item ::deep .nav-link {
-        color: #d7d7d7;
-        background: none;
-        border: none;
-        border-radius: 4px;
-        height: 3rem;
-        display: flex;
-        align-items: center;
-        line-height: 3rem;
-        width: 100%;
-    }
-
-    .nav-item ::deep a.active {
-        background-color: rgba(255,255,255,0.37);
-        color: white;
-    }
-
-    .nav-item ::deep .nav-link:hover {
-        background-color: rgba(255,255,255,0.1);
-        color: white;
-    }
-
-.nav-scrollable {
-    display: none;
-    background-image: linear-gradient( darkgreen, darkolivegreen );
-}
-.navbar {
-    background-color: darkgreen !important;
-}

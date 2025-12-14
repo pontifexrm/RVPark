@@ -123,8 +123,14 @@ switch (smsProvider.ToLowerInvariant())
 }
 
 
-builder.Services.AddSingleton<IEnvironmentInfoService, EnvironmentInfoService>();
-
+//builder.Services.AddSingleton<IEnvironmentInfoService, EnvironmentInfoService>();
+builder.Services.AddScoped<IEnvironmentInfoService>(sp =>
+{
+    var env = sp.GetRequiredService<IWebHostEnvironment>();
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    var dbContext = sp.GetRequiredService<ApplicationDbContext>();
+    return new EnvironmentInfoService(env, configuration, dbContext);
+});
 //builder.Services.AddScoped<IAppLogger, AppLogger>();
 
 

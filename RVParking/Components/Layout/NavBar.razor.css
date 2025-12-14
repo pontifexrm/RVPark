@@ -1,4 +1,4 @@
-.page {
+﻿.page {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -42,9 +42,11 @@ main {
 .sidebar {
     background-image: linear-gradient(180deg, rgb(19, 75, 13) 0%, #a6e8a3 70%);
 }
+
 .navbar {
     padding: 0;
 }
+
 .top-row {
     /*background-image: linear-gradient(90deg, darkgreen, white );*/
     /*color: white;*/
@@ -62,23 +64,23 @@ main {
         text-decoration: none;
     }
 
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: underline;
-    }
+        .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
+            text-decoration: underline;
+        }
 
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+        .top-row ::deep a:first-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
 @media (max-width: 640.98px) {
     .top-row {
         justify-content: space-between;
     }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        margin-left: 0;
-    }
+        .top-row ::deep a, .top-row ::deep .btn-link {
+            margin-left: 0;
+        }
 }
 
 @media (min-width: 641px) {
@@ -99,11 +101,11 @@ main {
         z-index: 1;
     }
 
-    .top-row.auth ::deep a:first-child {
-        flex: 1;
-        text-align: right;
-        width: 0;
-    }
+        .top-row.auth ::deep a:first-child {
+            flex: 1;
+            text-align: right;
+            width: 0;
+        }
 
     .top-row, article {
         padding-left: 2rem !important;
@@ -131,47 +133,50 @@ main {
         right: 0.75rem;
         top: 0.5rem;
     }
+
 .nav-item {
     font-size: 0.9rem;
-
 }
+
 .top-row {
     min-height: 3.5rem;
     background-color: darkgreen;
     /*background-color: rgba(0,0,0,0.4);*/
 }
+
 .navbar-brand {
     font-size: 1.1rem;
     background-color: darkgreen;
 }
 
 
-    .nav-item ::deep .nav-link {
-        color: #d7d7d7;
-        background: none;
-        border: none;
-        border-radius: 4px;
-        height: 3rem;
-        display: flex;
-        align-items: center;
-        line-height: 3rem;
-        width: 100%;
-    }
+.nav-item ::deep .nav-link {
+    color: #d7d7d7;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    line-height: 3rem;
+    width: 100%;
+}
 
-    .nav-item ::deep a.active {
-        background-color: rgba(255,255,255,0.37);
-        color: white;
-    }
+.nav-item ::deep a.active {
+    background-color: rgba(255,255,255,0.37);
+    color: white;
+}
 
-    .nav-item ::deep .nav-link:hover {
-        background-color: rgba(255,255,255,0.1);
-        color: white;
-    }
+.nav-item ::deep .nav-link:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: white;
+}
 
 .nav-scrollable {
     display: none;
     background-image: linear-gradient( darkgreen, darkolivegreen );
 }
+
 .navbar {
     background-color: darkgreen !important;
 }

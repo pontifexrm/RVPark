@@ -22,29 +22,6 @@
         </div>
     </NotAuthorized>
     <Authorized>
-@* PSEUDOCODE PLAN:
-   1. Replace inline max-width styles on the three card anchors with specific classes:
-      - add `card-1`, `card-2`, `card-3` to give unequal flex sizing.
-      - keep the existing Razor logic and content unchanged inside each card.
-   2. Use a flex container for `.card-list.product-list`:
-      - set `display: flex`, `gap: 0` to eliminate gaps between cards.
-      - ensure full-width layout with no default margins/padding on the container.
-   3. For unequal portions:
-      - assign `.card-1 { flex: 1 1 25%; }`
-      - assign `.card-2 { flex: 1 1 35%; }`
-      - assign `.card-3 { flex: 1 1 40%; }`
-      - these flex rules let cards grow/shrink while targeting those base percentages.
-   4. Make each `.card` a block-level flex column so content fills height:
-      - `display: flex; flex-direction: column;`
-      - `min-width: 0` to prevent overflow.
-   5. Remove gaps and default anchor decorations:
-      - `gap: 0`, `text-decoration: none`, `color: inherit`.
-   6. Add responsive rule:
-      - at `max-width: 900px` switch `.card-list.product-list` to `flex-direction: column` so cards stack.
-      - ensure stacked cards stretch 100% width and have no horizontal gaps.
-   7. Add small visual separators when stacked (optional): use top border for stacked items.
-   8. Preserve all Razor C# code and behavior; only modify markup classes and add CSS.
-*@
 
 <h3>Retreive Log data from RVPark and Display Stats</h3>
 <p>
@@ -63,7 +40,8 @@
                 <ContentTemplate>
                         @if (loginStats != null)
                         {
-                            <div class="table-responsive">
+                            <div style="overflow-x:auto;">
+
                                 <table class="table">
                                     <thead>
                                         <tr>
@@ -112,7 +90,8 @@
                     <ContentTemplate>
                         @if (visitStats != null)
                         {
-                            <div class="table-responsive">
+                            <div style="overflow-x:auto;">
+
                                 <table class="table">
                                     <thead>
                                         <tr>
@@ -157,7 +136,8 @@
                     <ContentTemplate>
                         @if (userVisitStats != null)
                         {
-                            <div class="table-responsive">
+                            <div style="overflow-x:auto;">
+
                                 <table class="table">
                                     <thead>
                                         <tr>
@@ -189,14 +169,15 @@
 
                     </ContentTemplate>
                 </Syncfusion.Blazor.Navigations.AccordionItem>
-                <Syncfusion.Blazor.Navigations.AccordionItem>
+                <Syncfusion.Blazor.Navigations.AccordionItem >
                     <HeaderTemplate>
                         <h4>AppLog (Application Logger) Viewer</h4>
                     </HeaderTemplate>
                     <ContentTemplate>
                         @if (filteredAppLogs != null && filteredAppLogs.Any())
                         {
-                            <QuickGrid Items="@filteredAppLogs.AsQueryable()" Pagination="@pagination" Class="applog-grid">
+                                        <div style="overflow-x:auto;">
+                            <QuickGrid Items="@filteredAppLogs.AsQueryable()" Pagination="@pagination" Class="applog-grid" style="overflow-x: auto;">
                                 <PropertyColumn Property="@(log => log.AppLogId)" Title="ID" Sortable="true" />
                                 <PropertyColumn Property="@(log => log.CreatedAtNZST)" Title="Created At (NZST)" Sortable="true" />
                                 <PropertyColumn Property="@(log => log.LogLevel)" Title="Level" Sortable="true" />
@@ -206,6 +187,7 @@
                             </QuickGrid>
     
                             <Paginator State="@pagination" />
+                            </div>
                         }
                         else
                         {
@@ -219,7 +201,7 @@
         </Syncfusion.Blazor.Navigations.AccordionItems>
     </SfAccordion>
 
-</Authorized>
+    </Authorized>
 </AuthorizeView>
 
 
@@ -305,7 +287,9 @@
                                 from b in ub.DefaultIfEmpty()
                                 group v by new
                                 {
-                                    UserNameIpAddr = (b != null && b.UserName != null && b.UserName != "") ? b.UserName : (v.IpAddress ?? "Unknown"),
+                                    UserNameIpAddr = (b != null && b.UserName != null && b.UserName != "") ?
+                                    (b.UserFirstName + " " + b.UserLastName + " " + b.UserName + " " + v.IpAddress ?? "Unknown").Trim() 
+                                    : (v.IpAddress ?? "Unknown"),
                                     Path = v.Path
                                 } into g
                                 select new UserVisitStats
@@ -337,4 +321,5 @@
         return nzTime.ToString("yyyy-MM-dd HH:mm:ss");
     }
 }
+
 

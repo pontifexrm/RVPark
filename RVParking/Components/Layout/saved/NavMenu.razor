@@ -1,11 +1,11 @@
 ﻿@using Syncfusion.Blazor.Navigations
 @using Syncfusion.Blazor.SplitButtons
-@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Buttons    
 @using Microsoft.AspNetCore.Components.Routing
 @rendermode InteractiveServer
 @implements IDisposable
 
-@inject NavigationManager NavigationManager
+@inject NavigationManager NavigationManager 
 @inject IJSRuntime JS
 @inject IWebHostEnvironment Env
 @inject IConfiguration configuration
@@ -19,7 +19,7 @@
         @* <div style="font-size: 0.6em; color: aliceblue; text-align:left;"><br /><br />ver: 0.0.12</div> *@
         <a class="navbar-brand" href="/">
             <img src="images/RVParkB.png" width="100" height="40" class="d-inline-block align-top mb-1 mt-1 ms-lg-2"
-                 alt="RVPark Booking Logo">
+            alt="RVPark Booking Logo"> 
 
         </a>
         @* <div style="font-size: 0.6em; color: aliceblue; text-align:left;"><br /><br />ver: 0.0.12</div> *@
@@ -35,7 +35,7 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-
+      
         <AuthorizeView>
             <NotAuthorized>
                 @if (!showAdminItems)
@@ -103,7 +103,7 @@
                     </div>
                     <div class="nav-item px-3">
                         <NavLink class="nav-link" href="mybookings">
-                            <span class="bi bi-book-nav-menu" aria-hidden="true"></span> New / My Bkgs
+                            <span class="bi bi-book-nav-menu" aria-hidden="true"></span> New / My Bkgs 
                         </NavLink>
                     </div>
 
@@ -131,7 +131,7 @@
 
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="information">
-
+                        
                         <span class="bi bi-book-nav-menu" aria-hidden="true"></span> Have a Look
                     </NavLink>
                 </div>
@@ -187,11 +187,6 @@
                     </NavLink>
                 </div>
                 <div class="nav-item nav-link px-3">
-                <NavLink class="nav-link" href="appparameters">
-                    <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> App Parameter Admin
-                    </NavLink>
-                </div>
-                <div class="nav-item nav-link px-3">
                     <NavLink class="nav-link" href="bkg_user_admin">
                         <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Bkg User Admin
                     </NavLink>
@@ -228,7 +223,7 @@
                 </div>
 
 
-                @*                 <div class="nav-item px-3">
+@*                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Admin/Manage">
                         <span class="bi bi-database-nav-menu" aria-hidden="true"></span> Admin Tools
                     </NavLink>
@@ -242,7 +237,7 @@
 
             </Authorized>
         </AuthorizeView>
-        @* } *@
+         @* } *@
         @*        else
         {
         <AuthorizeView Roles="Admin" Context="authContext">
@@ -299,24 +294,24 @@
                         <button type="button" class="btn btn-secondary" @onclick="AdminAccess">@(showAdminItems ? "Return Main Menu" : "Administration Menu")  </button>
                     </NavLink>
                 </div> *@
-        @* </Authorized> *@
+                @* </Authorized> *@
         @* </AuthorizeView> *@
         @* } *@
 
-    </nav>
+</nav>
 
     <div style="font-size: 0.6em; color: aliceblue; text-align:center;">
         <br />Ver: 1.0.62 2025-12-12<br />
     </div>
     @if (EnvInfo.ShouldDisplayEnvInfo)
     {
-        <div class="env-info" aria-hidden="false" style="color:hotpink">
+        <div class="env-info" aria-hidden="false" style="color:hotpink" >
             <div class="env-line env-name">Env: @EnvInfo.EnvironmentName</div>
             <div class="env-line env-server">Svr: @EnvInfo.ServerName</div>
             <div class="env-line env-db">DB : @EnvInfo.DatabaseName</div>
         </div>
     }
-
+    
     @* <br/>
     <br />
     <br />
@@ -364,24 +359,24 @@
 
 <style>
     html, body, #app {
-        height: 100%;
+      height: 100%;
     }
 
     .nav-scrollable {
-        display: flex;
-        flex-direction: column;
-        height: calc(100vh - 56px);
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 56px);
     }
-        /* The nav becomes the scrollable area and sits above the pinned footer */
-        .nav-scrollable nav {
-            position: relative;
-            z-index: 2; /* ensure nav content renders above the nav-bottom */
-            flex: 1 1 auto;
-            overflow: auto;
-        }
+    /* The nav becomes the scrollable area and sits above the pinned footer */
+    .nav-scrollable nav {
+        position: relative;
+        z-index: 2; /* ensure nav content renders above the nav-bottom */
+        flex: 1 1 auto;
+        overflow: auto;
+    }
 
-        /* Pinned bottom item */
-        .nav-scrollable .nav-bottom {
+    /* Pinned bottom item */
+    .nav-scrollable .nav-bottom {
             position: absolute; /* pin to bottom of the .nav-scrollable container */
             left: 0;
             right: 0;
@@ -393,7 +388,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-        }
+    }
             /* Force left alignment and override other CSS that might push the item right */
             .nav-scrollable .nav-bottom.left {
                 justify-content: flex-start !important;
@@ -416,7 +411,6 @@
             .nav-scrollable .nav-bottom.center {
                 justify-content: center;
             }
-
     .env-badge {
         display: inline-block;
         font-size: 0.75rem;
@@ -453,46 +447,30 @@
         background: #343a40;
     }
     /* dark */
-    /* Environment indicator styling - closely formed rows, left-justified */
+        /* Environment indicator styling - closely formed rows, left-justified */
     .env-info {
         display: inline-block;
         text-align: left;
         color: aliceblue;
         font-size: 0.62rem;
         line-height: 1.05; /* closely formed rows */
-        margin: 1rem;
+        margin: 1rem ;
         padding: 0;
         white-space: nowrap;
     }
 
-        .env-info .env-line {
-            margin: 0;
-            padding: 0;
-        }
+    .env-info .env-line {
+        margin: 0;
+        padding: 0;
+    }
 
     /* optional color classes for other uses */
-    .env-dev {
-        background: #198754;
-    }
-
-    .env-testing {
-        background: #fd7e14;
-    }
-
-    .env-staging {
-        background: #0d6efd;
-    }
-
-    .env-local {
-        background: #6f42c1;
-    }
-
-    .env-prod {
-        background: #6c757d;
-    }
-
-    .env-other {
-        background: #343a40;
-    }
+    .env-dev { background: #198754; }
+    .env-testing { background: #fd7e14; }
+    .env-staging { background: #0d6efd; }
+    .env-local { background: #6f42c1; }
+    .env-prod { background: #6c757d; }
+    .env-other { background: #343a40; }
+    
 </style>
 

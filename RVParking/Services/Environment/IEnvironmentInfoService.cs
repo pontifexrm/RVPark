@@ -7,5 +7,6 @@
         string DatabaseName { get; }
         bool IsLiveDatabaseEnvironment { get; }
         bool ShouldDisplayEnvInfo { get; }
+        string FeatureMenuType { get; }
     }
 }

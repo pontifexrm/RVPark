@@ -454,3 +454,12 @@ a.card * {
 .no-print {
     margin: 20px 0;
 }
+.e-accordion .e-content {
+    overflow-x: auto !important;
+}
+
+.e-accordion .table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+}

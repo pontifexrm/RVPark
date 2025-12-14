@@ -62,7 +62,7 @@
         </AuthorizeView>
             </div>
 
-            <div class="calendar-grid">
+            <div class="calendar-grid table-responsive">
                 <div class="calendar-header">
                     @* set for monday start of week, else for Sunday us (var day in culture.DateTimeFormat.AbbreviatedDayNames) below *@
                     @foreach (var day in culture.DateTimeFormat.AbbreviatedDayNames.Skip(1).Concat(culture.DateTimeFormat.AbbreviatedDayNames.Take(1)))

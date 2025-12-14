@@ -77,6 +77,7 @@ namespace RVParking.Services.Email
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to send email to {Recipient}", message.To);
+                await _appLogger.LogAsync("ERROR", ex.Message.ToString(), "Failed to send email to " + message.To);
                 return false;
             }
         }

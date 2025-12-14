@@ -19,7 +19,16 @@ namespace RVParking.Data
         public DbSet<VisitLog>? VisitLogs { get; set; }
 
         public DbSet<LoginLog>? LoginLogs { get; set; }
+        public DbSet<AppParameter>? AppParameters { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
 
+            // Create unique index on ParamKey
+            modelBuilder.Entity<AppParameter>()
+                .HasIndex(p => p.ParamKey)
+                .IsUnique();
+        }
 
 
 

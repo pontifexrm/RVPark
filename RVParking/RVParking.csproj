@@ -38,6 +38,8 @@
     <Content Remove="Components\Admin\Shared\ManageLayout.razor" />
     <Content Remove="Components\Layout\BkgMmtMainLayout.razor" />
     <Content Remove="Components\Layout\BkgMmtNavMenu.razor" />
+    <Content Remove="Components\Layout\saved\MainLayout.razor" />
+    <Content Remove="Components\Layout\saved\NavMenu.razor" />
     <Content Remove="Components\Pages\Admin.razor" />
     <Content Remove="Components\Pages\Auth.razor" />
     <Content Remove="Components\Pages\Availability01.razor" />
@@ -56,6 +58,8 @@
 
   <ItemGroup>
     <None Remove="Components\Layout\BkgMmtNavMenu.razor.css" />
+    <None Remove="Components\Layout\saved\MainLayout.razor.css" />
+    <None Remove="Components\Layout\saved\NavMenu.razor.css" />
     <None Remove="Components\Pages\Admin.razor.css" />
     <None Remove="Components\Pages\ContactRegister.razor.css" />
   </ItemGroup>
@@ -88,6 +92,7 @@
   <ItemGroup>
     <Folder Include="Components\Admin\Pages\" />
     <Folder Include="Components\Admin\Shared\" />
+    <Folder Include="Components\Layout\saved\" />
     <Folder Include="Components\Pages\Components\" />
     <Folder Include="Migrations\" />
   </ItemGroup>

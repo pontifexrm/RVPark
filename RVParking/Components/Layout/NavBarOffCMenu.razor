@@ -1,0 +1,183 @@
+﻿@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.SplitButtons
+@using Syncfusion.Blazor.Buttons
+@using Microsoft.AspNetCore.Components.Routing
+@rendermode InteractiveServer
+@* @implements IDisposable *@
+
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+@inject IWebHostEnvironment Env
+@inject IConfiguration configuration
+@inject RVParking.Services.Environment.IEnvironmentInfoService EnvInfo
+
+    <!-- Navbar with toggle button -->
+    <nav class="navbar bg-dark navbar-dark">
+      <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu"
+                aria-controls="offcanvasMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>       
+        <a class="navbar-brand" href="/" style="color:aliceblue; align-items:flex-end;">
+            <img src="images/RVParkB.png" width="100" height="40" class="d-inline-block align-top mb-1 mt-1 ms-lg-2"
+                 alt="RVPark Booking Logo">
+        </a>
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Manage">
+                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span>@context.User.Identity?.Name
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="" />
+                        <button type="submit" class="nav-link">
+                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                        </button>
+                    </form>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/RegisterFull">
+                        Register
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Login">
+                        Login
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
+
+
+
+      </div>
+    </nav>
+
+    <!-- Offcanvas menu -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenuLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasMenuLabel">RV & Apmt on Fitz</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body nav-link">
+        <ul class="navbar-nav me-auto mb-1 mb-lg-0">
+            @*                      <li class="nav-item"> <a class="nav-link " aria-current="page" href="#">Home</a> </li> *@
+            <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="availability">View Availability</a>
+            </li>
+            <AuthorizeView>
+                <NotAuthorized>
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="things">Things to Know</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="contactregister">Contact Us - Book</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="information">Have a Look</a>
+                    </li>
+                </NotAuthorized>
+                <Authorized>
+                    @if (!context.User.IsInRole("Admin"))
+                    {
+
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="thingsdetail">Things to Know</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="askusfmuser">Ask Us or Request</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="information">Site Info</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="mybookings">New / My Bkgs</a>
+                        </li>
+                    }
+                </Authorized>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Admin" Context="authContext">
+                <Authorized>
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="allbookings">All Bookings</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" aria-current="page" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Site Information
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="thingsdetail">Things To Know</a></li>
+                            <li><a class="dropdown-item" href="askusfmuser">Ask Us or Request</a></li>
+                            <li><a class="dropdown-item" href="information">Property Info</a></li>
+                            <li><a class="dropdown-item" href="mybookings">New / My Bkgs</a></li>
+                            @* <li><hr class="dropdown-divider"></li> *@
+                            @* <li><a class="dropdown-item" href="#">Something else here</a></li> *@
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" aria-current="page" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Admin Tasks
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="sitestats">Site Statistics</a></li>
+                            <li><a class="dropdown-item" href="appparameters">App Parameter Admin</a></li>
+                            <li><a class="dropdown-item" href="bkg_user_admin">Bkg User Admin</a></li>
+                            <li><a class="dropdown-item" href="aspnetuser_admin">AppUser Admin</a></li>
+                            <li><a class="dropdown-item" href="bookingavailability">Booking Avail_Mnt</a></li>
+                            <li><a class="dropdown-item" href="user-bookings">User Bookings</a></li>
+                            <li><a class="dropdown-item" href="bkgproperty_admin">Property Admin</a></li>
+                            <li><a class="dropdown-item" href="asprole_admin">Role Admin</a></li>
+                            <li><a class="dropdown-item" href="aspuserrole_admin">User to Role Admin</a></li>
+                            @* <li><a class="dropdown-item" href=""></a></li> *@
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" disabled>Ver: 1.0.62 2025-12-12</a></li>
+                            @if (EnvInfo.ShouldDisplayEnvInfo)
+                            {
+                                <li><a class="dropdown-item env-line env-name" disabled>Env: @EnvInfo.EnvironmentName </a></li>
+                                <li><a class="dropdown-item env-line env-server" disabled>Svr: @EnvInfo.ServerName</a></li>
+                                <li><a class="dropdown-item env-line env-db" disabled>DB : @EnvInfo.DatabaseName</a></li>
+                            }
+                        </ul>
+                    </li>
+                </Authorized>
+            </AuthorizeView>
+        </ul>
+@*         <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Manage">
+                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span>@context.User.Identity?.Name
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="" />
+                        <button type="submit" class="nav-link">
+                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                        </button>
+                    </form>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/RegisterFull">
+                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Login">
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView> *@
+    </div>
+    </div>
+
