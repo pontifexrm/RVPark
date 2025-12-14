@@ -148,8 +148,8 @@ a, a:visited {
 .card-list {
     display: flex;
     flex-wrap: wrap;
-    flex: 0 0 calc(95% - 0.8em);
-    max-width: calc(95% - 0.8em);
+    flex: 0 0 calc(98% - 0.8em);
+    max-width: calc(98% - 0.8em);
     /*gap: 0.5em;*/
     margin-left: 0.5em;
     /*margin-right: 0.5em;*/
@@ -300,8 +300,8 @@ a.card * {
 
     /* Card-1: 30% width */
     .card-list.product-list .card-1 {
-        flex: 0 0 30%;
-        max-width: 30%;
+        flex: 0 0 33%;
+        max-width: 33%;
     }
 
     /* Card-2: 70% width (remaining space in first row) */
