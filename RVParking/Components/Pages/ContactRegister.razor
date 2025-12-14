@@ -567,8 +567,8 @@
         // if a new booking then we need to Create it else Change it.
         if (currentBooking.BookingId == 0) // A new booking
         {
-            currentBooking.CreatedDte = DateTime.Now;
-            currentBooking.UpdatedDte = DateTime.Now;
+            currentBooking.CreatedDte = DateTime.UtcNow;
+            currentBooking.UpdatedDte = DateTime.UtcNow;
             var savedOK = await bkg_Engine.CreateBookingAsync(currentBooking);
             if (!savedOK)
             {
@@ -585,7 +585,7 @@
         }
         else // editing existing bkg
         {
-            currentBooking.UpdatedDte = DateTime.Now;
+            currentBooking.UpdatedDte = DateTime.UtcNow;
 
             var savedOK = await bkg_Engine.EditBookingAsync(orgnBkg, currentBooking);
             if (!savedOK)
@@ -1129,27 +1129,26 @@
     }
     private void DteAriveChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ();;
+        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ();
         if (Todate <= Fmdate)
         {
             Todate = AddOneDay(Fmdate);
-            RegistrationInput.Fmdate = Fmdate;
-            RegistrationInput.Todate = Todate;
-            StateHasChanged();
         }
+        RegistrationInput.Fmdate = Fmdate.Date;
+        RegistrationInput.Todate = Todate.Date;
+        StateHasChanged();
     }
     private void DteDepartChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Todate = args.Value ?? DateHelper.GetCurrentDateInNZ();;
+        Todate = args.Value ?? DateHelper.GetCurrentDateInNZ();
         if (Todate <= Fmdate)
         {
 
             Fmdate = SubOneDay(Todate);
-            RegistrationInput.Fmdate = Fmdate;
-            RegistrationInput.Todate = Todate;
-
-            StateHasChanged();
         }
+        RegistrationInput.Fmdate = Fmdate.Date;
+        RegistrationInput.Todate = Todate.Date;
+        StateHasChanged();
     }
 
 }

@@ -619,14 +619,14 @@
     }
     private void DteAriveChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ();;
+        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ(); 
         if (Todate <= Fmdate)
         {
             Todate = AddOneDay(Fmdate);
-            ContactInput.Fmdate = Fmdate;
-            ContactInput.Todate = Todate;
-            StateHasChanged();
         }
+        ContactInput.Fmdate = Fmdate.Date;
+        ContactInput.Todate = Todate.Date;
+        StateHasChanged();
     }
     private void DteDepartChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
@@ -635,11 +635,10 @@
         {
 
             Fmdate = SubOneDay(Todate);
-            ContactInput.Fmdate = Fmdate;
-            ContactInput.Todate = Todate;
-
-            StateHasChanged();
         }
+        ContactInput.Fmdate = Fmdate.Date;
+        ContactInput.Todate = Todate.Date;
+        StateHasChanged();
     }
 
 

@@ -462,14 +462,14 @@
 
     private void DteAriveChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ(); Fmdate = Fmdate.Date;
+        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ(); 
         if (Todate <= Fmdate)
         {
             Todate = AddOneDay(Fmdate);
-            currentBooking.DateArrive = Fmdate.Date;
-            currentBooking.DateDepart = Todate.Date;
-            StateHasChanged();
         }
+        currentBooking.DateArrive = Fmdate.Date;
+        currentBooking.DateDepart = Todate.Date;
+        StateHasChanged();
     }
     private void DteDepartChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
@@ -478,11 +478,10 @@
         {
 
             Fmdate = SubOneDay(Todate);
-            currentBooking.DateArrive = Fmdate;
-            currentBooking.DateDepart = Todate;
-
-            StateHasChanged();
         }
+        currentBooking.DateArrive = Fmdate.Date;
+        currentBooking.DateDepart = Todate.Date;
+        StateHasChanged();
     }
 
     private void CheckBkgRequest()
