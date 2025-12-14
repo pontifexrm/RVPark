@@ -253,15 +253,16 @@
     {
         currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
         currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
-        string s = configuration["TNZ:SMSrept"];
+        string s = configuration["SMSSettings:SMSrept"];
         string txtrept = Chk_E_164_Phone(s);
         //        currentBooking.DateArrive = Fmdate; currentBooking.DateDepart = Todate;
 
         // if a new booking then we need to Create it else Change it.
         if (currentBooking.BookingId == 0) // A new booking
         {
-            currentBooking.CreatedDte = DateTime.Now;
-            currentBooking.UpdatedDte = DateTime.Now;
+            currentBooking.DateArrive = Fmdate; currentBooking.DateDepart = Todate;
+            currentBooking.CreatedDte = DateTime.UtcNow;
+            currentBooking.UpdatedDte = DateTime.UtcNow;
             var savedOK = await bkg_Engine.CreateBookingAsync(currentBooking);
             if (!savedOK)
             {
@@ -278,7 +279,7 @@
         }
         else // editing existing bkg
         {
-            currentBooking.UpdatedDte = DateTime.Now;
+            currentBooking.UpdatedDte = DateTime.UtcNow;
 
             var savedOK = await bkg_Engine.EditBookingAsync(orgnBkg, currentBooking);
             if (!savedOK)

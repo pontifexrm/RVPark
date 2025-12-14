@@ -304,9 +304,10 @@
         @* } *@
 
     </nav>
+                                @* <li><a class="dropdown-item env-line env-db" disabled>@EnvInfo.ApplicationVersion</a></li> *@
 
     <div style="font-size: 0.6em; color: aliceblue; text-align:center;">
-        <br />Ver: 1.0.62 2025-12-12<br />
+        <br />@EnvInfo.ApplicationVersion<br />
     </div>
     @if (EnvInfo.ShouldDisplayEnvInfo)
     {

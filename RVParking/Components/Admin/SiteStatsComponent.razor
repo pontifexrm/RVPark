@@ -45,45 +45,14 @@
                         @if (loginStats != null)
                         {
                             <div style="overflow-x:auto;">
-
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Time Period</th>
-                                            <th>Successful Logins</th>
-                                            <th>Failed Logins</th>
-                                            <th>TOTAL Logins</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Last 24 Hours</td>
-                                            <td>@loginStats.SuccessLast24Hours</td>
-                                            <td>@loginStats.FailedLast24Hours</td>
-                                            <td>@loginStats.TotalLoginAttempts24Hours</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Last Week</td>
-                                            <td>@loginStats.SuccessLastWeek</td>
-                                            <td>@loginStats.FailedLastWeek</td>
-                                            <td>@loginStats.TotalLoginAttemptsWeek</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Last Month</td>
-                                            <td>@loginStats.SuccessLastMonth</td>
-                                            <td>@loginStats.FailedLastMonth</td>
-                                            <td>@loginStats.TotalLoginAttemptsMonth</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Last Year</td>
-                                            <td>@loginStats.SuccessLastYear</td>
-                                            <td>@loginStats.FailedLastYear</td>
-                                            <td>@loginStats.TotalLoginAttemptsYear</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <QuickGrid Items="@GetLoginStatsAsQueryable()" Class="table">
+                                    <PropertyColumn Property="@(s => s.TimePeriod)" Title="Time Period" />
+                                    <PropertyColumn Property="@(s => s.SuccessfulLogins)" Title="Successful Logins" />
+                                    <PropertyColumn Property="@(s => s.FailedLogins)" Title="Failed Logins" />
+                                    <PropertyColumn Property="@(s => s.TotalLogins)" Title="TOTAL Logins" />
+                                </QuickGrid>
+                                <Paginator State="@loginStatsPagination" />
                             </div>
-
                         }
                 </ContentTemplate>
             </Syncfusion.Blazor.Navigations.AccordionItem>
@@ -95,42 +64,20 @@
                         @if (visitStats != null)
                         {
                             <div style="overflow-x:auto;">
-
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Location</th>
-                                            <th>Count24h</th>
-                                            <th>Unique24h</th>
-                                            <th>CountWeek</th>
-                                            <th>UniqueWeek</th>
-                                            <th>CountMonth</th>
-                                            <th>UniqueMonth</th>
-                                            <th>CountYear</th>
-                                            <th>UniqueYear</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var locn in visitStats)
-                                        {
-                                            <tr>
-                                                <td>@locn.Location</td>
-                                                <td>@locn.Count24h</td>
-                                                <td>@locn.UniqueUsers24h</td>
-                                                <td>@locn.CountWeek</td>
-                                                <td>@locn.UniqueUsersWeek</td>
-                                                <td>@locn.CountMonth</td>
-                                                <td>@locn.UniqueUsersMonth</td>
-                                                <td>@locn.CountYear</td>
-                                                <td>@locn.UniqueUsersYear</td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
+                                <QuickGrid Items="@visitStats.AsQueryable()" Pagination="@visitStatsPagination" Class="table">
+                                    <PropertyColumn Property="@(v => v.Location)" Title="Location" Sortable="true" />
+                                    <PropertyColumn Property="@(v => v.Count24h)" Title="Count24h" Sortable="true" />
+                                    <PropertyColumn Property="@(v => v.UniqueUsers24h)" Title="Unique24h" Sortable="true" />
+                                    <PropertyColumn Property="@(v => v.CountWeek)" Title="CountWeek" Sortable="true" />
+                                    <PropertyColumn Property="@(v => v.UniqueUsersWeek)" Title="UniqueWeek" Sortable="true" />
+                                    <PropertyColumn Property="@(v => v.CountMonth)" Title="CountMonth" Sortable="true" />
+                                    <PropertyColumn Property="@(v => v.UniqueUsersMonth)" Title="UniqueMonth" Sortable="true" />
+                                    <PropertyColumn Property="@(v => v.CountYear)" Title="CountYear" Sortable="true" />
+                                    <PropertyColumn Property="@(v => v.UniqueUsersYear)" Title="UniqueYear" Sortable="true" />
+                                </QuickGrid>
+                                <Paginator State="@visitStatsPagination" />
                             </div>
-
                         }
-
                     </ContentTemplate>
                 </Syncfusion.Blazor.Navigations.AccordionItem>
                 <Syncfusion.Blazor.Navigations.AccordionItem>
@@ -141,36 +88,17 @@
                         @if (userVisitStats != null)
                         {
                             <div style="overflow-x:auto;">
-
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>User Name</th>
-                                            <th>Location</th>
-                                            <th>Count24h</th>
-                                            <th>CountWeek</th>
-                                            <th>CountMonth</th>
-                                            <th>CountYear</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var locn in userVisitStats)
-                                        {
-                                            <tr>
-                                                <td>@locn.UserNameIpAddr</td>
-                                                <td>@locn.Location</td>
-                                                <td>@locn.Count24h</td>
-                                                <td>@locn.CountWeek</td>
-                                                <td>@locn.CountMonth</td>
-                                                <td>@locn.CountYear</td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
+                                <QuickGrid Items="@userVisitStats.AsQueryable()" Pagination="@userVisitPagination" Class="table">
+                                    <PropertyColumn Property="@(u => u.UserNameIpAddr)" Title="User Name" Sortable="true" />
+                                    <PropertyColumn Property="@(u => u.Location)" Title="Location" Sortable="true" />
+                                    <PropertyColumn Property="@(u => u.Count24h)" Title="Count24h" Sortable="true" />
+                                    <PropertyColumn Property="@(u => u.CountWeek)" Title="CountWeek" Sortable="true" />
+                                    <PropertyColumn Property="@(u => u.CountMonth)" Title="CountMonth" Sortable="true" />
+                                    <PropertyColumn Property="@(u => u.CountYear)" Title="CountYear" Sortable="true" />
+                                </QuickGrid>
+                                <Paginator State="@userVisitPagination" />
                             </div>
-
                         }
-
                     </ContentTemplate>
                 </Syncfusion.Blazor.Navigations.AccordionItem>
                 <Syncfusion.Blazor.Navigations.AccordionItem >
@@ -180,28 +108,24 @@
                     <ContentTemplate>
                         @if (filteredAppLogs != null && filteredAppLogs.Any())
                         {
-                                        <div style="overflow-x:auto;">
-                            <QuickGrid Items="@filteredAppLogs.AsQueryable()" Pagination="@pagination" Class="applog-grid" style="overflow-x: auto;">
-                                <PropertyColumn Property="@(log => log.AppLogId)" Title="ID" Sortable="true" />
-                                <PropertyColumn Property="@(log => log.CreatedAtNZST)" Title="Created At (NZST)" Sortable="true" />
-                                <PropertyColumn Property="@(log => log.LogLevel)" Title="Level" Sortable="true" />
-                                <PropertyColumn Property="@(log => log.Category)" Title="Category" Sortable="true" />
-                                <PropertyColumn Property="@(log => log.Message)" Title="Message" Sortable="true" />
-                                <PropertyColumn Property="@(log => log.Exception)" Title="Exception" Sortable="true" />
-                            </QuickGrid>
-    
-                            <Paginator State="@pagination" />
+                            <div style="overflow-x:auto;">
+                                <QuickGrid Items="@filteredAppLogs.AsQueryable()" Pagination="@pagination" Class="applog-grid" style="overflow-x: auto;">
+                                    <PropertyColumn Property="@(log => log.AppLogId)" Title="ID" Sortable="true" />
+                                    <PropertyColumn Property="@(log => log.CreatedAtNZST)" Title="Created At (NZST)" Sortable="true" />
+                                    <PropertyColumn Property="@(log => log.LogLevel)" Title="Level" Sortable="true" />
+                                    <PropertyColumn Property="@(log => log.Category)" Title="Category" Sortable="true" />
+                                    <PropertyColumn Property="@(log => log.Message)" Title="Message" Sortable="true" />
+                                    <PropertyColumn Property="@(log => log.Exception)" Title="Exception" Sortable="true" />
+                                </QuickGrid>
+                                <Paginator State="@pagination" />
                             </div>
                         }
                         else
                         {
                             <p>No application logs available. Click "Refresh and Show Statistics" to load data.</p>
                         }
-
                     </ContentTemplate>
                 </Syncfusion.Blazor.Navigations.AccordionItem>
-                
-
         </Syncfusion.Blazor.Navigations.AccordionItems>
     </SfAccordion>
 
@@ -229,11 +153,13 @@
     }
 
     // Add pagination state
-    private PaginationState pagination = new PaginationState { ItemsPerPage = 20 };
+    private PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+    private PaginationState userVisitPagination = new PaginationState { ItemsPerPage = 10 };
+    private PaginationState visitStatsPagination = new PaginationState { ItemsPerPage = 10 };
+    private PaginationState loginStatsPagination = new PaginationState { ItemsPerPage = 10 };
     
     private async Task GetLoginStats()
     {
-
         loginStats = await dbContext.LoginLogs
            .GroupBy(l => 1) // group everything into one bucket
            .Select(g => new LoginStats
@@ -252,6 +178,29 @@
         await GetVisitLogStatsAsync();
         await GetUserVisitLogStatsAsync();
         await LoadAppLogsAsync();
+    }
+
+    private IQueryable<LoginStatsRow> GetLoginStatsAsQueryable()
+    {
+        if (loginStats == null)
+            return new List<LoginStatsRow>().AsQueryable();
+
+        var rows = new List<LoginStatsRow>
+        {
+            new LoginStatsRow { TimePeriod = "Last 24 Hours", SuccessfulLogins = loginStats.SuccessLast24Hours, FailedLogins = loginStats.FailedLast24Hours, TotalLogins = loginStats.TotalLoginAttempts24Hours },
+            new LoginStatsRow { TimePeriod = "Last Week", SuccessfulLogins = loginStats.SuccessLastWeek, FailedLogins = loginStats.FailedLastWeek, TotalLogins = loginStats.TotalLoginAttemptsWeek },
+            new LoginStatsRow { TimePeriod = "Last Month", SuccessfulLogins = loginStats.SuccessLastMonth, FailedLogins = loginStats.FailedLastMonth, TotalLogins = loginStats.TotalLoginAttemptsMonth },
+            new LoginStatsRow { TimePeriod = "Last Year", SuccessfulLogins = loginStats.SuccessLastYear, FailedLogins = loginStats.FailedLastYear, TotalLogins = loginStats.TotalLoginAttemptsYear }
+        };
+        return rows.AsQueryable();
+    }
+
+    private class LoginStatsRow
+    {
+        public string TimePeriod { get; set; }
+        public int SuccessfulLogins { get; set; }
+        public int FailedLogins { get; set; }
+        public int TotalLogins { get; set; }
     }
 
     private async Task GetVisitLogStatsAsync()
