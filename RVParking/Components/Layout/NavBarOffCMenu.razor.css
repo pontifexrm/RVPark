@@ -139,6 +139,11 @@ body {
     color: aliceblue !important;
     background-color: darkgreen !important;
 }
+/* More specific selector */
+div.offcanvas.offcanvas-start#offcanvasMenu {
+    width: 260px !important;
+    max-width: 260px !important;
+}
 .nav-item {
     font-size: 0.9rem;
 }

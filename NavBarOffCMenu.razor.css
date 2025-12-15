@@ -1,0 +1,24 @@
+/* Override offcanvas width */
+.offcanvas {
+    width: 200px !important;
+}
+
+/* Change background color */
+.offcanvas-body {
+    background-color: #f8f9fa;
+    width: 200px !important;
+   
+}
+
+/* Style the header */
+.offcanvas-header {
+    background-color: #343a40;
+    color: white;
+    width: 200px !important;
+}
+.offcanvas.offcanvas-start {
+    top: 0;
+    left: 0;
+    width: 260px;
+    transform: translateX(-100%);
+}

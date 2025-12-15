@@ -18,10 +18,7 @@
                 aria-controls="offcanvasMenu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>       
-        <a class="navbar-brand" href="/" style="color:aliceblue; align-items:flex-end;">
-            <img src="images/RVParkB.png" width="100" height="40" class="d-inline-block align-top mb-1 mt-1 ms-lg-2"
-                 alt="RVPark Booking Logo">
-        </a>
+
         <AuthorizeView>
             <Authorized>
                 <div class="nav-item px-3">
@@ -52,7 +49,10 @@
                 </div>
             </NotAuthorized>
         </AuthorizeView>
-
+        <a class="navbar-brand" href="/" style="color:aliceblue; align-items:flex-end;">
+            <img src="images/RVParkWhtRev.png" width="100" height="40" class="d-inline-block align-top mb-1 mt-1 ms-lg-2"
+                 alt="RVPark Booking Logo">
+        </a>
 
 
       </div>
@@ -140,9 +140,9 @@
                             <li><a class="dropdown-item env-line env-db" disabled>@EnvInfo.ApplicationVersion</a></li>
                             @if (EnvInfo.ShouldDisplayEnvInfo)
                             {
-                                <li><a class="dropdown-item env-line env-name" disabled>Env: @EnvInfo.EnvironmentName </a></li>
-                                <li><a class="dropdown-item env-line env-server" disabled>Svr: @EnvInfo.ServerName</a></li>
-                                <li><a class="dropdown-item env-line env-db" disabled>DB : @EnvInfo.DatabaseName</a></li>
+                                <li><a class="dropdown-item env-line env-name" disabled>@EnvInfo.EnvironmentName </a></li>
+                                <li><a class="dropdown-item env-line env-server" disabled>@EnvInfo.ServerName</a></li>
+                                <li><a class="dropdown-item env-line env-db" disabled>@EnvInfo.DatabaseName</a></li>
                                 
                             }
                         </ul>
