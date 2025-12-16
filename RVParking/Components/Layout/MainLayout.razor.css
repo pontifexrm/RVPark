@@ -175,3 +175,36 @@ main {
 .navbar {
     background-color: darkgreen !important;
 }
+/* Mobile: 1 card */
+.card {
+    flex: 1 1 100%;
+    max-width: 100%;
+    background: #fff;
+    margin-bottom: 2em;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+}
+
+/* Tablet: 2 cards */
+@media screen and (min-width: 768px) {
+    .card {
+        flex: 0 0 calc(50% - 1em);
+        max-width: calc(50% - 1em);
+    }
+}
+
+/* Desktop: 3 cards */
+@media screen and (min-width: 992px) {
+    .card {
+        flex: 0 0 calc(33.333% - 1em);
+        max-width: calc(33.333% - 1em);
+    }
+}
+
+/* Large Desktop: 4 cards */
+@media screen and (min-width: 1200px) {
+    .card {
+        flex: 0 0 calc(25% - 1em);
+        max-width: calc(25% - 1em);
+    }
+}

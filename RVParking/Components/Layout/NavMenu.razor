@@ -336,7 +336,17 @@
     private bool _expandSubNav = false;
     public bool expandSubNav { set; get; } = false;
 
+    private bool isInteractive = false;
 
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isInteractive = true;
+            StateHasChanged();
+        }
+    }
+    
 
     protected override void OnInitialized()
     {

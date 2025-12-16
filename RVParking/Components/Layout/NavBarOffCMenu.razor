@@ -183,3 +183,15 @@
     </div>
     </div>
 
+@code {
+    private bool isInteractive = false;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isInteractive = true;
+            StateHasChanged();
+        }
+    }
+}
