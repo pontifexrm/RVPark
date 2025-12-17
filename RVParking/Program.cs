@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RVParking.Components;
 using RVParking.Components.Account;
+using RVParking.Components.Admin;
 using RVParking.Data;
 using RVParking.Services;
 using RVParking.Services.Email;
@@ -29,7 +30,7 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-//builder.Services.AddScoped<Bkg_UserService>();
+builder.Services.AddScoped<Bkg_UserService>();
 
 // Request localization options (en-NZ only)
 var supportedCultures = new[] { new CultureInfo("en-NZ") };
