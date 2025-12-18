@@ -1,7 +1,9 @@
 ﻿@page "/availability"
-@* // this verison uses a calendar grid to show availability for public viewing detailing each day and all properties *@
 @rendermode InteractiveServer
+
+@* // this verison uses a calendar grid to show availability for public viewing detailing each day and all properties Also Mngr and Admin can see Day Details*@
 <PageTitle>RV+Apmt Availability</PageTitle>
+<h3>View Current Availability</h3>
 
 
 @using RVParking.Data
@@ -101,21 +103,42 @@
 
         <!-- Add print button outside the print section -->
         @* <button class="btn btn-secondary no-print" @onclick="PrintCalendar">Print Calendar</button> *@
+<AuthorizeView Roles="Admin, Mngr" Context="authContext">
+    <Authorized>
 
-@*         @if (showDayDetail)
+        @if (showDayDetail)
         {
             <div class="day-detail-modal">
                 <div class="modal-content">
                     <h4>@selectedDay.Date.ToString("D")</h4>
-                    <select class="form-control" @bind="selectedDay.Status">
-                        <option value="Available">Available</option>
-                        <option value="Busy">Busy</option>
-                        <option value="Unavailable">Unavailable</option>
-                    </select>
+                    
+                    @foreach (var prop in selectedDay.Properties.Where(p => !string.IsNullOrEmpty(p.Status)))
+                    {
+                        <div class="property-detail @prop.StatusCss">
+                            <strong>@prop.PropName</strong>: @prop.Status
+                            
+                            @if (prop.BookingId.HasValue)
+                            {
+                                <div class="booking-info">
+                                    <small>
+                                        Guest: @prop.GuestName<br/>
+                                        Contact: @prop.Phone<br/>
+                                        Check-in: @prop.CheckIn?.ToString("dd MMM yyyy")<br/>
+                                        Check-out: @prop.CheckOut?.ToString("dd MMM yyyy")<br/>
+                                        Booking #@prop.BookingId
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                        <hr />
+                    }
+                    
                     <button class="btn btn-primary mt-2" @onclick="CloseDetails">Close</button>
                 </div>
             </div>
-        } *@
+        }
+    </Authorized>
+</AuthorizeView>
 
 
 
@@ -221,7 +244,7 @@
                 else if (dayBlocked == 2) dayStatus = "N/A";
                 // if daybooked == 2 don't care dayavailable then neither available
                 // if daybooled == 1 don't care dayavailable then partial available
-         
+
 
                 calendarDays.Add(new DayEntry
                 {
@@ -330,14 +353,50 @@
 
     private async Task ShowDayDetails(DayEntry day)
     {
-        // selectedDay = day;
-        // showDayDetail = true;
+        selectedDay = day;
+
+        // Get all bookings for this date across all properties
+        var bookingsForDay = await ApplicationDbContext.bkg_Bookings
+            .Include(b => b.Bkg_Property)
+            .Include(b => b.Bkg_User)
+            .Where(b => b.DateArrive <= day.Date && b.DateDepart > day.Date)
+            .ToListAsync();
+
+        // Enrich each property status with booking details
+        foreach (var propStatus in selectedDay.Properties)
+        {
+            // Find the property ID from BkgProperties list
+            var property = BkgProperties.FirstOrDefault(p => 
+                StringExtensions.FirstWord(p.Name) == propStatus.PropName);
+
+            if (property != null)
+            {
+                // Find booking for this property on this date
+                var booking = bookingsForDay.FirstOrDefault(b => 
+                    b.Bkg_Property.PropertyId == property.PropertyId);
+
+                if (booking != null)
+                {
+                    // Store booking info (you'll need to add these properties to PropertyDayStatus)
+                    var usrNme = booking.Bkg_User?.UserFirstName + " " 
+                                      + booking.Bkg_User?.UserLastName 
+                                      + " (" + booking.Bkg_User?.UserName + ")"; 
+                    propStatus.BookingId = booking.BookingId;
+                    propStatus.GuestName = usrNme ?? "Unknown";
+                    propStatus.Phone = booking.Bkg_User.UserPhone;
+                    propStatus.CheckIn = booking.DateArrive;
+                    propStatus.CheckOut = booking.DateDepart;
+                }
+            }
+        }
+
+        showDayDetail = true;
     }
 
     private async Task CloseDetails()
     {
-        // showDayDetail = false;
-        // GenerateCalendar(); // Refresh calendar after changes
+        showDayDetail = false;
+        GenerateCalendar(); // Refresh calendar after changes
     }
 
     public class DayEntryOld
@@ -380,6 +439,14 @@
         public string PropName { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
         public string StatusCss { get; set; } = string.Empty;
+        
+        // Booking details
+        public int? BookingId { get; set; }
+        public string GuestName { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+
+        public DateTime? CheckIn { get; set; }
+        public DateTime? CheckOut { get; set; }
     }
     private void PrintCalendar()
     {
