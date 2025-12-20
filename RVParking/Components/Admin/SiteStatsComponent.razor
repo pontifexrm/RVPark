@@ -5,7 +5,6 @@
 @using RVParking.Services
 @using Microsoft.EntityFrameworkCore
 @using Syncfusion.Blazor
-@using Syncfusion.Blazor.Internal
 @using Syncfusion.Blazor.Navigations
 @using Syncfusion.Blazor.Grids
 @using Microsoft.AspNetCore.Components.QuickGrid
@@ -31,7 +30,7 @@
 </p>
 <div class="mb-3">
     <label for="filterInput">Exclude UserNames/IPs (separate with |):</label>
-    <textarea id="filterInput" class="form-control" @bind="filterString" @bind:event="oninput" placeholder="user1|192.168.1.1|user2" rows="2" style="resize: vertical;"></textarea>
+    <input type="text" id="filterInput" class="form-control" @bind="filterString" placeholder="user1|192.168.1.1|user2" />
 </div>
 <button type="button" class="btn btn-secondary" @onclick="GetLoginStats"> Refresh and Show Statistics </button>
 <br />
@@ -227,7 +226,7 @@
                 UniqueUsersMonth = g.Where(v => v.Timestamp >= lastMonth).Select(v => v.UserId ?? v.IpAddress).Distinct().Count(),
                 UniqueUsersYear = g.Where(v => v.Timestamp >= lastYear).Select(v => v.UserId ?? v.IpAddress).Distinct().Count()
             })
-            .OrderByDescending(vs => vs.UniqueUsersWeek)
+            .OrderByDescending(vs => vs.CountYear)
            .ToListAsync();
     }
 
@@ -266,7 +265,7 @@
                                     CountMonth = g.Count(v => v.Timestamp >= lastMonth),
                                     CountYear = g.Count(v => v.Timestamp >= lastYear)
                                 })
-                                .OrderByDescending(vs => vs.Count24h)
+                                .OrderByDescending(vs => vs.CountYear)
                                 .ToListAsync();
         
         // Filter out excluded users/IPs
