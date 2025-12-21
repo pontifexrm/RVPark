@@ -34,7 +34,7 @@ namespace RVParking.Components.Account
             string resetCode) => SendEmailAsync(email, "Reset your password",
             "<html lang=\"en\"><head></head><body>Please reset your password " +
             $"using the following code:<br>{resetCode}</body></html>");
-
+        // TODO: these need to be changed to use rvpark's email service
         public async Task SendEmailAsync(string toEmail, string subject, string message)
         {
             string authToken = string.Empty; string fromEmail = string.Empty;
