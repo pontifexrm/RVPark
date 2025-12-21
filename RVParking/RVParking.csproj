@@ -60,6 +60,8 @@
 
   <ItemGroup>
     <None Remove="Components\Layout\BkgMmtNavMenu.razor.css" />
+    <None Remove="Components\Layout\NavBarOffCMenu.razor.cssaa" />
+    <None Remove="Components\Layout\NavBarOffCMenu.razoraa" />
     <None Remove="Components\Layout\saved\MainLayout.razor.css" />
     <None Remove="Components\Layout\saved\NavMenu.razor.css" />
     <None Remove="Components\Pages\Admin.razor.css" />

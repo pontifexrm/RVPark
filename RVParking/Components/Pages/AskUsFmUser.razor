@@ -213,8 +213,8 @@
         if (searchPropertyId != 0 && ContactInput.Fmdate < ContactInput.Todate)
         {
             newBooking = new Bkg_Booking();
-            newBooking.DateArrive = ContactInput.Fmdate;
-            newBooking.DateDepart = ContactInput.Todate;
+            newBooking.DateArrive = ContactInput.Fmdate.Date;
+            newBooking.DateDepart = ContactInput.Todate.Date;
             newBooking.UserId = currentUser.UserId;
             newBooking.PropertyId = searchPropertyId;
             newBooking.BookingStatus = "Requested";
@@ -260,7 +260,7 @@
         // if a new booking then we need to Create it else Change it.
         if (currentBooking.BookingId == 0) // A new booking
         {
-            currentBooking.DateArrive = Fmdate; currentBooking.DateDepart = Todate;
+            currentBooking.DateArrive = Fmdate.Date; currentBooking.DateDepart = Todate.Date;
             currentBooking.CreatedDte = DateTime.UtcNow;
             currentBooking.UpdatedDte = DateTime.UtcNow;
             var savedOK = await bkg_Engine.CreateBookingAsync(currentBooking);
@@ -313,8 +313,8 @@
         emailMessage.Subject = ContactInput.Subject;
         emailMessage.Message = ContactInput.Message;
         emailMessage.Nzmca = currentUser.UserNZMCA;
-        emailMessage.Fmdate = ContactInput.Fmdate;
-        emailMessage.Todate = ContactInput.Todate;
+        emailMessage.Fmdate = ContactInput.Fmdate.Date;
+        emailMessage.Todate = ContactInput.Todate.Date;
         emailMessage.PropertyId = searchPropertyId;
         emailMessage.Properties = properties;
 
@@ -619,7 +619,7 @@
     }
     private void DteAriveChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ(); 
+        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ(); Fmdate = Fmdate.Date;
         if (Todate <= Fmdate)
         {
             Todate = AddOneDay(Fmdate);
@@ -630,7 +630,7 @@
     }
     private void DteDepartChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Todate = args.Value ?? DateHelper.GetCurrentDateInNZ();;
+        Todate = args.Value ?? DateHelper.GetCurrentDateInNZ(); Todate = Todate.Date;
         if (Todate <= Fmdate)
         {
 

@@ -441,7 +441,7 @@
 
     private void DteAriveChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ(); 
+        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ(); Fmdate = Fmdate.Date;
         if (Todate <= Fmdate)
         {
             Todate = AddOneDay(Fmdate);
@@ -452,13 +452,13 @@
     }
     private void DteDepartChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Todate = args.Value ?? DateHelper.GetCurrentDateInNZ();;
+        Todate = args.Value ?? DateHelper.GetCurrentDateInNZ(); Todate = Todate.Date;
         if (Todate <= Fmdate)
         {
 
             Fmdate = SubOneDay(Todate);
-            currentBooking.DateArrive = Fmdate;
-            currentBooking.DateDepart = Todate;
+            currentBooking.DateArrive = Fmdate.Date;
+            currentBooking.DateDepart = Todate.Date;
 
             StateHasChanged();
         }
@@ -470,8 +470,8 @@
         orgnBkg = new();
 
         currentBooking = booking;
-        orgnBkg.DateArrive = currentBooking.DateArrive; Fmdate = booking.DateArrive;
-        orgnBkg.DateDepart = currentBooking.DateDepart; Todate = booking.DateDepart;
+        orgnBkg.DateArrive = currentBooking.DateArrive.Date; Fmdate = booking.DateArrive.Date;
+        orgnBkg.DateDepart = currentBooking.DateDepart.Date; Todate = booking.DateDepart.Date;
         orgnBkg.PropertyId = currentBooking.PropertyId;
         orgnBkg.BookingStatus = currentBooking.BookingStatus;
         orgnBkg.UserId = currentBooking.UserId;
@@ -544,8 +544,8 @@
             {
                 modalMessage = "Could not save changes to this Booking";
                 // need to return the currentBooking to the orgnBkg.
-                currentBooking.DateArrive = orgnBkg.DateArrive;
-                currentBooking.DateDepart = orgnBkg.DateDepart;
+                currentBooking.DateArrive = orgnBkg.DateArrive.Date;
+                currentBooking.DateDepart = orgnBkg.DateDepart.Date;
                 currentBooking.PropertyId = orgnBkg.PropertyId;
                 currentBooking.BookingStatus = orgnBkg.BookingStatus;
                 currentBooking.BookingComments = orgnBkg.BookingComments;

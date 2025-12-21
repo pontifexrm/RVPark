@@ -195,13 +195,13 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 
 // Migrate database if needed Only do it in debug mode as in Production we will manually manage this process.
-#if DEBUG
-using (var scope = app.Services.CreateScope())
-{
-        //var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        //dbContext.Database.Migrate();
-    }
-#endif
+//#if DEBUG
+//using (var scope = app.Services.CreateScope())
+//{
+//        //var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+//        //dbContext.Database.Migrate();
+//    }
+//#endif
 
 // Use request logging middleware
 app.UseMiddleware<RequestLoggingMiddleware>();

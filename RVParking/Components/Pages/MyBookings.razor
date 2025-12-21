@@ -462,7 +462,7 @@
 
     private void DteAriveChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
     {
-        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ(); 
+        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ(); Fmdate = Fmdate.Date;
         if (Todate <= Fmdate)
         {
             Todate = AddOneDay(Fmdate);
@@ -521,8 +521,8 @@
         orgnBkg = new();
 
         currentBooking = booking;
-        orgnBkg.DateArrive = currentBooking.DateArrive; Fmdate = booking.DateArrive;
-        orgnBkg.DateDepart = currentBooking.DateDepart; Todate = booking.DateDepart;
+        orgnBkg.DateArrive = currentBooking.DateArrive.Date; Fmdate = booking.DateArrive;
+        orgnBkg.DateDepart = currentBooking.DateDepart.Date; Todate = booking.DateDepart.Date;
         orgnBkg.PropertyId = currentBooking.PropertyId;
         orgnBkg.BookingStatus = currentBooking.BookingStatus;
         orgnBkg.UserId = currentBooking.UserId;
