@@ -7,16 +7,22 @@
 @using Microsoft.AspNetCore.WebUtilities
 @using RVParking.Data
 @using RVParking.Components.Account
+@using RVParking.Services.Email
+@using RVParking.Services.SMS
 
 @using Microsoft.AspNetCore.Identity.EntityFrameworkCore
 @using Microsoft.EntityFrameworkCore
-@using TNZAPI.NET;
+@using System.Threading.Tasks
+@* @using TNZAPI.NET;
 @using TNZAPI.NET.Core;
-@using TNZAPI.NET.Api.Addressbook.Contact.Dto;
+@using TNZAPI.NET.Api.Addressbook.Contact.Dto; *@
 
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IEmailSender<ApplicationUser> EmailSender
+@inject IEmailService EmailService
+@inject ISmsService SmsService
+
 @inject ILogger<RegisterFull> Logger
 @inject NavigationManager NavigationManager
 @inject ApplicationDbContext ApplicationDbContext
@@ -165,7 +171,7 @@
 
         // Send email code
         // await EmailSender.SendEmailAsync(RegistrationInput.Email, "Your Email Confirmation Code", $"Your code: {generatedEmailCode}");
-        SendEmailConfirmationCode(RegistrationInput.Email);
+        await SendEmailConfirmationCode(RegistrationInput.Email);
 
         // Send SMS code
         // await SmsSender.SendSmsAsync(RegistrationInput.Mobile, $"Your SMS confirmation code: {generatedSmsCode}");
@@ -387,45 +393,53 @@
 
     }
 
-    private void SendEmailConfirmationCode(string emailTo)
+    private async Task SendEmailConfirmationCode(string emailTo)
     {
         string subjectMsg = "Email Confirmation Code";
         string bodyMsg = $"Your Email Confirmation code is: {generatedEmailCode}";
+        await EmailService.SendEmailAsync(emailTo, subjectMsg, bodyMsg);
 
-      
-// #if !DEBUG
 
-        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
-        var client = new TNZApiClient(apiUser);
+        // // #if !DEBUG
 
-        var reponseEmail = client.Messaging.Email.SendMessage(
-            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-            emailSubject: subjectMsg,
-            messagePlain: bodyMsg,
-            destination: emailTo
-        );
-// #endif
+        //         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+        //             {
+        //                 AuthToken = configuration["TNZ:AuthToken"]
+        //             };
+        //         var client = new TNZApiClient(apiUser);
+
+        //         var reponseEmail = client.Messaging.Email.SendMessage(
+        //             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+        //             emailSubject: subjectMsg,
+        //             messagePlain: bodyMsg,
+        //             destination: emailTo
+        //         );
+        // // #endif
 
     }
-    private void SendTxtConfirmationCode(string txtrept) // txtrept is a phone number in E.164 format and this message is FULL LENGTH expensive.
+    private async Task SendTxtConfirmationCode(string txtrept) // txtrept is a phone number in E.164 format and this message is FULL LENGTH expensive.
     {
         string msg = $"Your SMS confirmation code: {generatedSmsCode}";
-// #if !DEBUG
-        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+        var smsRequest = new SmsRequest
         {
-            AuthToken = configuration["TNZ:AuthToken"]
+            To = txtrept,
+            Message = msg
         };
-        var client = new TNZApiClient(apiUser);
+        await SmsService.SendSmsAsync(smsRequest);
 
-        var response = client.Messaging.SMS.SendMessage
-            (
-                destination: txtrept,
-                messageText: msg
-            );
-// #endif   
+// // #if !DEBUG
+//         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
+//         {
+//             AuthToken = configuration["TNZ:AuthToken"]
+//         };
+//         var client = new TNZApiClient(apiUser);
+
+//         var response = client.Messaging.SMS.SendMessage
+//             (
+//                 destination: txtrept,
+//                 messageText: msg
+//             );
+// // #endif   
     }
     private string Chk_E_164_Phone(string phne)
     {

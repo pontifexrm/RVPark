@@ -122,6 +122,7 @@ switch (smsProvider.ToLowerInvariant())
         builder.Services.AddSmsMockService();
         break;
 }
+builder.Services.AddScoped<IEmailSender<ApplicationUser>, EmailSender>();
 
 
 //builder.Services.AddSingleton<IEnvironmentInfoService, EnvironmentInfoService>();
@@ -155,7 +156,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration.GetSection("AuthMessageSenderOptions"));
 //builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, EmailSender>();
+//builder.Services.AddSingleton<IEmailSender<ApplicationUser>, EmailSender>();
 
 // Register IHttpContextAccessor and the custom service
 builder.Services.AddHttpContextAccessor();
