@@ -166,8 +166,9 @@ builder.Services.AddScoped<HttpContextAccessorService>();
 //builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 // Blazor Syncfusion
-builder.Services.AddSyncfusionBlazor(options => { }); 
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JFaF5cXGRCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWH5cd3RWRmRdV0NwX0dWYEg= ");
+builder.Services.AddSyncfusionBlazor(options => { });//         Ngo9BigBOggjHTQxAR8/V1JGaF5cXGpCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWH1ccnRRQmReV0x+W0pWYEs=
+//Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JFaF5cXGRCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWH5cd3RWRmRdV0NwX0dWYEg= ");
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JGaF5cXGpCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWH1ccnRRQmReV0x+W0pWYEs=");
 
 var app = builder.Build();
 
