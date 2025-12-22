@@ -13,9 +13,7 @@
 @using RVParking.Services.SMS   
 @using Microsoft.AspNetCore.Identity.EntityFrameworkCore
 @using Microsoft.EntityFrameworkCore
-@* @using TNZAPI.NET;
-@using TNZAPI.NET.Core;
-@using TNZAPI.NET.Api.Addressbook.Contact.Dto; *@
+
 @using Syncfusion.Blazor.Buttons
 
 @inject UserManager<ApplicationUser> UserManager
@@ -860,22 +858,6 @@
         else { verificationResult = string.Concat("Email Confirmation could NOT be sent to ", emailTo); }
 
 
-        // // #if !DEBUG
-
-        // var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-        // {
-        //     AuthToken = configuration["TNZ:AuthToken"]
-        // };
-        // var client = new TNZApiClient(apiUser);
-
-        // var reponseEmail = client.Messaging.Email.SendMessage(
-        //     fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-        //     emailSubject: subjectMsg,
-        //     messagePlain: bodyMsg,
-        //     destination: emailTo
-        // );
-        // // #endif
-
     }
     private async Task SendTxtConfirmationCode(string txtrept) // txtrept is a phone number in E.164 format and this message is FULL LENGTH expensive.
     {
@@ -891,21 +873,6 @@
         if (smsresultMsg.Success) { verificationResult += string.Concat(" SMS Msg Confirmation sent to ", txtrept); }
         else { verificationResult += string.Concat("SMS Msg Confirmation could NOT be sent to ", txtrept); }
 
-
-
-        // // #if !DEBUG
-        // var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-        // {
-        //     AuthToken = configuration["TNZ:AuthToken"]
-        // };
-        // var client = new TNZApiClient(apiUser);
-
-        // var response = client.Messaging.SMS.SendMessage
-        //     (
-        //         destination: txtrept,
-        //         messageText: msg
-        //     );
-        // // #endif
     }
 
 

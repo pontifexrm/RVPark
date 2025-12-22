@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore.Internal;
 //using Microsoft.VisualStudio.TextTemplating;
 using RVParking.Components.Pages;
 using System;
-using TNZAPI.NET.Api.Addressbook.Group.Dto;
 
 namespace RVParking.Data
 {

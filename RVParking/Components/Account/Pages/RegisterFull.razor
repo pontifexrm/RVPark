@@ -13,9 +13,6 @@
 @using Microsoft.AspNetCore.Identity.EntityFrameworkCore
 @using Microsoft.EntityFrameworkCore
 @using System.Threading.Tasks
-@* @using TNZAPI.NET;
-@using TNZAPI.NET.Core;
-@using TNZAPI.NET.Api.Addressbook.Contact.Dto; *@
 
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
@@ -399,23 +396,6 @@
         string bodyMsg = $"Your Email Confirmation code is: {generatedEmailCode}";
         await EmailService.SendEmailAsync(emailTo, subjectMsg, bodyMsg);
 
-
-        // // #if !DEBUG
-
-        //         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-        //             {
-        //                 AuthToken = configuration["TNZ:AuthToken"]
-        //             };
-        //         var client = new TNZApiClient(apiUser);
-
-        //         var reponseEmail = client.Messaging.Email.SendMessage(
-        //             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-        //             emailSubject: subjectMsg,
-        //             messagePlain: bodyMsg,
-        //             destination: emailTo
-        //         );
-        // // #endif
-
     }
     private async Task SendTxtConfirmationCode(string txtrept) // txtrept is a phone number in E.164 format and this message is FULL LENGTH expensive.
     {
@@ -426,20 +406,6 @@
             Message = msg
         };
         await SmsService.SendSmsAsync(smsRequest);
-
-// // #if !DEBUG
-//         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-//         {
-//             AuthToken = configuration["TNZ:AuthToken"]
-//         };
-//         var client = new TNZApiClient(apiUser);
-
-//         var response = client.Messaging.SMS.SendMessage
-//             (
-//                 destination: txtrept,
-//                 messageText: msg
-//             );
-// // #endif   
     }
     private string Chk_E_164_Phone(string phne)
     {

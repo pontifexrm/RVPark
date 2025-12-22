@@ -6,9 +6,6 @@ using RVParking.Data;
 using RVParking.Services.Email;
 using System.Net.Mail;
 using System.Net.NetworkInformation;
-using TNZAPI.NET;
-using TNZAPI.NET.Api.Addressbook.Contact.Dto;
-using TNZAPI.NET.Core;
 
 
 namespace RVParking.Components.Account
@@ -44,19 +41,6 @@ namespace RVParking.Components.Account
             await emailService.SendEmailAsync(toEmail, subject, message);
             logger.LogInformation("Email to {EmailAddress} sent!", toEmail);
 
-
-            //string authToken = string.Empty; string fromEmail = string.Empty;
-            //if (string.IsNullOrEmpty(Options.AuthToken))
-            //{
-            //    authToken = configuration["TNZAPI:AuthToken"];
-            //    fromEmail = configuration["TNZAPI:fromEmail"];
-            //}
-            //else
-            //{
-            //    authToken = Options.AuthToken;
-            //    fromEmail = Options.fromEmail;
-            //}
-            //await Execute(authToken, fromEmail, subject, message, toEmail);
         }
 
         public async Task Execute(string authToken,  string fromEmail, string subject, string message,
@@ -66,16 +50,6 @@ namespace RVParking.Components.Account
             await emailService.SendEmailAsync(toEmail, subject, message);
             logger.LogInformation("Email to {EmailAddress} sent!", toEmail);
 
-            //var apiUser = new TNZApiUser() { AuthToken = authToken };
-            //var client = new TNZApiClient(apiUser);
-            //await client.Messaging.Email.SendMessageAsync(
-            //                               fromEmail: fromEmail,
-            //                               emailSubject: subject,
-            //                               messageHTML: message,
-            //                               destination: toEmail
-            //                             );
-
-            //logger.LogInformation("Email to {EmailAddress} sent!", toEmail);
         }
     }
 }

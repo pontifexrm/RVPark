@@ -1,6 +1,7 @@
 ﻿@using RVParking.Data
 @using RVParking.Components.Account
-
+@using RVParking.Services.Email
+@using RVParking.Services.SMS
 @using Microsoft.AspNetCore.Identity.EntityFrameworkCore
 @using Microsoft.EntityFrameworkCore
 @using System.ComponentModel.DataAnnotations
@@ -8,9 +9,8 @@
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
-@using TNZAPI.NET;
-@using TNZAPI.NET.Core;
-@using TNZAPI.NET.Api.Addressbook.Contact.Dto;
+
+
 
 @* Is Being Used *@
 
@@ -25,6 +25,8 @@
 
 @inject ApplicationDbContext ApplicationDbContext
 @inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@inject IEmailService EmailService
+@inject ISmsService SmsService
 
 @inject IConfiguration configuration
 <!-- Page header with title and button to add a new Booking -->
@@ -727,54 +729,34 @@ else
         sendConfirmMsg = false;
 
     }
-    private void SendEmailConfirmation(string emailTo)
+    private async Task SendEmailConfirmation(string emailTo)
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-    " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
-        // emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
-        //     "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentBooking.Bkg_User);
+              " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
+        var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, ConfirmBkgMsg());
 
-        // emailMessage.Subject = subjectMsg;
-#if !DEBUG
-        // Using TNZ
-        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
-        var client = new TNZApiClient(apiUser);
-
-        var reponseEmail = client.Messaging.Email.SendMessage(
-            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-            emailSubject: subjectMsg,
-            messagePlain: ConfirmBkgMsg(),
-            destination: emailTo
-        );
-#endif
         sendConfirmMsg = false;
     }
-    private void SendTxtConfirmation(string txtrept)
+    private async Task SendTxtConfirmation(string txtrept)
     {
         string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"));
 
-        // emailMessage = new EmailMessage(currentBooking.Bkg_User.UserEmail,
-        //     "Booking Confirmation", "", currentBooking.DateArrive, currentBooking.DateDepart, currentBooking.Bkg_User);
+        var smsrqst = new SmsRequest
+        {
+            To = txtrept,
+            Message = subjectMsg
+        };
+        SmsResponse resultMsg = await SmsService.SendSmsAsync(smsrqst);
+        if (resultMsg.Success)
+        {
+            modalTitle = "Adhoc Email Sent"; modalMessage = string.Concat("Txt Confirmation sent to ", txtrept);
+        }
+        else
+        {
+            modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Txt Confirmation could NOT be sent to ", txtrept);
+        }
 
-        // emailMessage.Subject = subjectMsg;
-        // Using TNZ
-#if !DEBUG
-        var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-            {
-                AuthToken = configuration["TNZ:AuthToken"]
-            };
-        var client = new TNZApiClient(apiUser);
-
-        var response = client.Messaging.SMS.SendMessage
-            (
-                destination: txtrept,
-                messageText: ConfirmBkgMsg()
-            );
-#endif
         sendConfirmMsg = false;
     }
     private string ConfirmBkgMsg()

@@ -14,9 +14,7 @@
 @using RVParking.Services
 @using RVParking.Services.Email
 @using RVParking.Services.SMS
-@* @using TNZAPI.NET;
-@using TNZAPI.NET.Core;
-@using TNZAPI.NET.Api.Addressbook.Contact.Dto; *@
+
 @using Syncfusion.Blazor.Buttons
 @inject IConfiguration configuration
 @inject ApplicationDbContext ApplicationDbContext
@@ -340,40 +338,6 @@
         else { verificationResult += string.Concat("SMS Msg Confirmation could NOT be sent to ", rept); }
 
 
-// #if !DEBUG
-//         // Using TNZ
-//         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-//         {
-//             AuthToken = configuration["TNZ:AuthToken"]
-//         };
-//         var client = new TNZApiClient(apiUser);
-//         // TODO: Add property description if selected. If not also ignore dates.
-
-//         var reponseEmail = client.Messaging.Email.SendMessage(
-//             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-//             emailSubject: ContactInput.Subject,
-//             messagePlain: emailMessage.ChkMsg,
-//             destination: emailMessage.Email
-//         );
-//         var reponseEmailcc = client.Messaging.Email.SendMessage(
-//             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-//             emailSubject: "cc'd msg re: " + emailMessage.Email + "|" + emailMessage.Subject,
-//             messagePlain: emailMessage.ChkMsg + " " + userIpAddress,
-//             destination: configuration["TNZ:CCemail"]
-//         );
-
-//         // next send an SMS to admin to say we have a contact.
-//         // emailMessage.Phone = "";
-//         string rept = configuration["SMSSettings:SMSrept"]; //"+64273042002";    // this shoild come from configuration injection
-//         //const string txtmsg = "From RVPark using TNZ API out of Blazor";
-//         var response = client.Messaging.SMS.SendMessage
-//                     (
-//                         destination: rept,                     // Recipient
-//                         messageText: emailMessage.smsMsg + " " + userIpAddress      // SMS Message
-//                                                                                     //sendMode: Enums.SendModeType.Test           // TEST Mode - Remove this to send live traffic
-//                     );
-// #endif
-
     }
 
     private async Task SendEmailConfirmation()
@@ -386,22 +350,6 @@
         else { verificationResult = string.Concat("Email Confirmation could NOT be sent to ", emailMessage.Email); }
 
 
-// #if !DEBUG
-//         // Using TNZ
-//         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-//         {
-//             AuthToken = configuration["TNZ:AuthToken"]
-//         };
-//         var client = new TNZApiClient(apiUser);
-
-//         var reponseEmail = client.Messaging.Email.SendMessage(
-//             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-//             emailSubject: subjectMsg,
-//             messagePlain: ConfirmBkgMsg(),
-//             destination: currentBooking.Bkg_User.UserEmail
-//         );
-// #endif
-        //sendConfirmMsg = false;
     }
     private async Task SendCCEmailConfirmation()
     {
@@ -414,23 +362,6 @@
 
 
 
-
-// #if !DEBUG
-//         // Using TNZ
-//         var apiUser = new TNZApiUser()  // this should come from configuration injection
-//         {
-//             AuthToken = configuration["TNZ:AuthToken"]
-//         };
-//         var client = new TNZApiClient(apiUser);
-
-//         var reponseEmail = client.Messaging.Email.SendMessage(
-//             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-//             emailSubject: subjectMsg,
-//             messagePlain: ConfirmBkgMsg(),
-//             destination: configuration["TNZ:CCemail"]
-//         );
-// #endif
-        //sendConfirmMsg = false;
     }
     private void SendTxtConfirmation()
     {
@@ -456,22 +387,6 @@
         else { verificationResult += string.Concat("SMS Msg Confirmation could NOT be sent to ", txtrept); }
 
 
-
-        // Using TNZ
-// #if !DEBUG
-//         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-//         {
-//             AuthToken = configuration["TNZ:AuthToken"]
-//         };
-//         var client = new TNZApiClient(apiUser);
-
-//         var response = client.Messaging.SMS.SendMessage
-//             (
-//                 destination: txtrept,
-//                 messageText: ConfirmTxtBkgMsg()
-//             );
-// #endif
-        // sendConfirmMsg = false;
     }
     private async Task  SendTxtConfirmationNoEmail(string txtrept)
     {

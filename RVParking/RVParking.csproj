@@ -46,6 +46,8 @@
     <Content Remove="Components\Pages\Auth.razor" />
     <Content Remove="Components\Pages\Availability01.razor" />
     <Content Remove="Components\Pages\Availabilityold.razor" />
+    <Content Remove="Components\Pages\ContactUs.razor" />
+    <Content Remove="Components\Pages\ContactUs01.razor" />
     <Content Remove="Components\Pages\TabComponents\DBTblNavMenu.razor" />
     <Content Remove="Components\Pages\TabComponents\DB_Maint.razor" />
     <Content Remove="Components\Pages\TabComponents\DynamicCRUD.razor" />

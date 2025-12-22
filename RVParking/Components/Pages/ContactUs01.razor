@@ -9,6 +9,13 @@
 @using Microsoft.AspNetCore.WebUtilities
 @using Microsoft.EntityFrameworkCore
 @using RVParking.Data
+@using RVParking.Services
+@using RVParking.Services.Logging
+
+
+@using RVParking.Services.Email;
+@using RVParking.Services.SMS;
+
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity.EntityFrameworkCore
 
@@ -16,9 +23,6 @@
 @using System.ComponentModel
 @using Microsoft.AspNetCore.Components
 
-@using TNZAPI.NET;
-@using TNZAPI.NET.Core;
-@using TNZAPI.NET.Api.Addressbook.Contact.Dto;
 
 
 @* @inject IEmailSender EmailSender *@
@@ -32,6 +36,9 @@
 
 @inject IConfiguration configuration
 @inject HttpContextAccessorService httpContextAccessorService
+@inject IEmailService EmailService
+@inject ISmsService SmsService
+@inject IAppLogger AppLogger
 
 <PageTitle>RV Park Contact Us</PageTitle>
 
@@ -170,21 +177,9 @@ else
             return;
         }
         isSubmitting = true;
-        #region
-        // try
-        // {
-        //     result = "sending your request...";
-        //     await EmailSender.SendEmailAsync(emailMessage.Email, "RV Park Wgtn: " + emailMessage.Subject, emailMessage.ChkMsg);
-        // }
-        // catch (Exception ex)
-        // {
-        //     result = "Woops and Error:\n" + ex.Message;
-        // }
-        // finally
-        // {
-        //     isSubmitting = false;
-        // }
-        #endregion
+
+        var resultMsg = await EmailService.SendEmailAsync(emailMessage.Email, subjectMsg, ConfirmBkgMsg());
+
 //#if !DEBUG
         // Using TNZ
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection

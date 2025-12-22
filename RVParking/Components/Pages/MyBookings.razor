@@ -14,9 +14,8 @@
 
 @using RVParking.Services
 @using RVParking.Services.Logging
-@using TNZAPI.NET;
-@using TNZAPI.NET.Core;
-@using TNZAPI.NET.Api.Addressbook.Contact.Dto;
+
+
 @using RVParking.Services.Email;
 @using RVParking.Services.SMS;
 
@@ -705,22 +704,6 @@
             modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);
         }
 
-
-        // #if !DEBUG
-        //         // Using TNZ
-        //         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-        //             {
-        //                 AuthToken = configuration["TNZ:AuthToken"]
-        //             };
-        //         var client = new TNZApiClient(apiUser);
-
-        //         var reponseEmail = client.Messaging.Email.SendMessage(
-        //             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-        //             emailSubject: subjectMsg,
-        //             messagePlain: ConfirmBkgMsg(),
-        //             destination: currentBooking.Bkg_User.UserEmail
-        //         );
-        // #endif
         sendConfirmMsg = false;
     }
     private async Task SendCCEmailConfirmation()
@@ -739,23 +722,6 @@
             modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);
         }
 
-
-
-        // #if !DEBUG
-        //         // Using TNZ
-        //         var apiUser = new TNZApiUser()  // this should come from configuration injection
-        //             {
-        //                 AuthToken = configuration["TNZ:AuthToken"]
-        //             };
-        //         var client = new TNZApiClient(apiUser);
-
-        //         var reponseEmail = client.Messaging.Email.SendMessage(
-        //             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-        //             emailSubject: subjectMsg,
-        //             messagePlain: ConfirmBkgMsg(),
-        //             destination: configuration["EmailSettings:CCEmail"]
-        //         );
-        // #endif
         sendConfirmMsg = false;
     }
     private async Task SendCCEmailDeleteConfirmation(string subjectMsg, string DeleteMsg)

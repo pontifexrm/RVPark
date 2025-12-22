@@ -16,9 +16,6 @@
 @using System.Threading.Tasks
 @using RVParking.Services
 @using RVParking.Services.Logging
-@using TNZAPI.NET;
-@using TNZAPI.NET.Core;
-@using TNZAPI.NET.Api.Addressbook.Contact.Dto;
 @using RVParking.Services.Email;
 @using RVParking.Services.SMS;
 
@@ -810,17 +807,7 @@
         else {
             modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);}
 
-        // #if !DEBUG
-        //         var apiUser = new TNZApiUser()  
-        //             { AuthToken = configuration["TNZ:AuthToken"] };
-        //         var client = new TNZApiClient(apiUser);
-        //         var reponseEmail = client.Messaging.Email.SendMessage(
-        //             fromEmail: configuration["TNZ:fromEmail"],  
-        //             emailSubject: subjectMsg,
-        //             messagePlain: ConfirmBkgMsg(),
-        //             destination: emailTo
-        //         );
-        // #endif
+
         sendConfirmMsg = false;
     }
     private void SendAdhocConfirmation()
@@ -882,21 +869,6 @@
         else {
             modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);    }
 
-        // #if !Debug
-        //         // Using TNZ
-        //         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
-        //             {
-        //                 AuthToken = configuration["TNZ:AuthToken"]
-        //             };
-        //         var client = new TNZApiClient(apiUser);
-
-        //         var reponseEmail = client.Messaging.Email.SendMessage(
-        //             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-        //             emailSubject: subjectMsg,
-        //             messagePlain: ConfirmAdHocBkgMsg(emailTo),
-        //             destination: emailTo
-        //         );
-        // #endif
         sendConfirmMsg = false;
     }
     private async Task SendCCEmailConfirmation()
@@ -910,21 +882,6 @@
         else {
             modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);}
 
-        // #if !DEBUG
-        //         // Using TNZ
-        //         var apiUser = new TNZApiUser()  // this should come from configuration injection
-        //             {
-        //                 AuthToken = configuration["TNZ:AuthToken"]
-        //             };
-        //         var client = new TNZApiClient(apiUser);
-
-        //         var reponseEmail = client.Messaging.Email.SendMessage(
-        //             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-        //             emailSubject: subjectMsg,
-        //             messagePlain: ConfirmBkgMsg(),
-        //             destination: configuration["EmailSettings:CCEmail"]
-        //         );
-        // #endif
         sendConfirmMsg = false;
     }
     private async Task SendCCEmailConfirmation(string chngmsg)
@@ -942,20 +899,6 @@
         else {
             modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);}
 
-    //     #if !DEBUG
-    //     // Using TNZ
-    //     var apiUser = new TNZApiUser()  // this should come from configuration injection
-    //         {
-    //             AuthToken = configuration["TNZ:AuthToken"]
-    //         };
-    //     var client = new TNZApiClient(apiUser);
-    //     var reponseEmail = client.Messaging.Email.SendMessage(
-    //         fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-    //         emailSubject: subjectMsg,
-    //         messagePlain: CCMsg,
-    //         destination: configuration["EmailSettings:CCEmail"]
-    //     );
-    // #endif
         sendConfirmMsg = false;
     }
 
@@ -975,21 +918,6 @@
         }
 
 
-// #if !DEBUG
-//         // Using TNZ
-//         var apiUser = new TNZApiUser()  // this should come from configuration injection
-//             {
-//                 AuthToken = configuration["TNZ:AuthToken"]
-//             };
-//         var client = new TNZApiClient(apiUser);
-
-//         var reponseEmail = client.Messaging.Email.SendMessage(
-//             fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
-//             emailSubject: subjectMsg,
-//             messagePlain: subjectMsg,
-//             destination: configuration["EmailSettings:CCEmail"]
-//         );
-// #endif
         sendConfirmMsg = false;
     }
     private async Task SendTxtConfirmation(string txtrept)
