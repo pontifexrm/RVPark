@@ -65,7 +65,10 @@
                         <option value="">Select</option>
                         @foreach (var property in properties)
                         {
-                            <option value="@property.PropertyId">@property.Name</option>
+                            @if (property.PropertyId == 1)
+                            {
+                                <option value="@property.PropertyId">@property.Name</option>                    
+                            }
                         }
                     </select>
                 </div>

@@ -51,7 +51,10 @@
                             <option value="">Select Property</option>
                             @foreach (var property in BkgProperties)
                             {
-                                <option value="@property.PropertyId">@property.Name</option>
+                                @if (property.PropertyId == 1)
+                                {
+                                    <option value="@property.PropertyId">@property.Name</option>
+                                }
                             }
                         </InputSelect>
                     </div>
