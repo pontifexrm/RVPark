@@ -46,11 +46,11 @@
                 </div>
                 <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 1%;">
                     <label for="fmdate">From Date</label>
-                    <InputDate @bind-Value="searchFromDate" class="form-control" id="fmdate" />
+                    <InputDate @bind-Value="searchFromDate" class="form-control" id="fmdate" Format="dd/MM/yyyy" Locale="en-NZ" />
                 </div>
                 <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 1%;">
                     <label for="todate">To Date</label>
-                    <InputDate @bind-Value="searchToDate" class="form-control" id="todate" />
+                    <InputDate @bind-Value="searchToDate" class="form-control" id="todate" Format="dd/MM/yyyy" Locale="en-NZ" />
                 </div>
                 <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 1%;">
                     <label for="availStatus">Availability Status</label>
@@ -135,8 +135,8 @@
                     <div class="form-group" style="display:flex;flex-direction:row; margin-bottom: 1%">
                         <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 2%">
                             <label for="fmdate">From Date</label>
-                            <SfDatePicker class="form-group" TValue="DateTime?" Value="@Fmdate" Placeholder='Choose a Date' ID="fmdate">
-                                <DatePickerEvents TValue="DateTime?" ValueChange="DteFmChnge"></DatePickerEvents>
+                            <SfDatePicker class="form-group" TValue="DateTime?" Value="@Fmdate" Placeholder='Choose a Date' ID="fmdate" Format="dd/MM/yyyy" Locale="en-NZ">
+                                <DatePickerEvents TValue="DateTime?" ValueChange="DteFmChnge" ></DatePickerEvents>
 
                             </SfDatePicker>
                             @*                     <InputDate @bind-Value=Fmdate class="form-control" id="fmdate" style="margin-left: 2px;" />
@@ -144,7 +144,7 @@
                         </div>
                         <div class="form-group" style="max-width: 30%; text-align:center; margin-left: 2%;">
                             <label for="todate">To Date</label>
-                            <SfDatePicker class="form-control" TValue="DateTime?" Value="@Todate" Placeholder='Choose a Date' ID="todate">
+                            <SfDatePicker class="form-control" TValue="DateTime?" Value="@Todate" Placeholder='Choose a Date' ID="todate" Format="dd/MM/yyyy" Locale="en-NZ">
                                 <DatePickerEvents TValue="DateTime?" ValueChange="DteToChnge"></DatePickerEvents>
 
                             </SfDatePicker>
@@ -188,7 +188,7 @@
                         @foreach (var availability in availabilities)
                         {
                             <tr>
-                                <td style="border: 1px solid #929292;">@availability.DateAvailable.ToShortDateString()</td>
+                                <td style="border: 1px solid #929292;">@availability.DateAvailable.ToString("dd/MM/yyyy")</td>
                                 <td style="border: 1px solid #929292;">@availability.Bkg_Property?.Name</td>
                                 <td style="border: 1px solid #929292;">@(availability.Available ? "Y" : "N")</td>
                                 <td style="border: 1px solid #929292;">@availability.AvailabilityStatus</td>
@@ -285,6 +285,7 @@
     private string status = string.Empty;
     private ApplicationDbContext _dbContext;
 
+    
     private List<Bkg_Property> BkgPropertiesAvail = new List<Bkg_Property>();
     private List<Bkg_Availability> availabilities = new List<Bkg_Availability>();
 
