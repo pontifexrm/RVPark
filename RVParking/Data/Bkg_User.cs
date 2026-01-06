@@ -23,7 +23,7 @@ namespace RVParking.Data
         public string UserStatus { get; set; } = string.Empty;
         public string UserPassword { get; set; } = string.Empty;
         public string UserComments { get; set; } = string.Empty;
-        public DateTime CreatedDte { get; set; } = DateTime.Now;
+        public DateTime CreatedDte { get; set; } = DateTime.UtcNow;
 
         public ICollection<Bkg_Property> Bkg_Properties { get; set; }
         public ICollection<Bkg_Booking> Bkg_Bookings { get; set; }

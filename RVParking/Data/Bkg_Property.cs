@@ -43,7 +43,8 @@ namespace RVParking.Data
         public string BedroomDescription { get; set; } = string.Empty;
         public string BathroomDescription { get; set; } = string.Empty;
         public string LivingAreaDescription { get; set; } = string.Empty;
-        
+        public bool Enabled { get; set; } = true;
+
         public ICollection<Bkg_Availability>? Bkg_Availabilities { get; set; }
         public ICollection<Bkg_Booking>? Bkg_Bookings { get; set; }  
 

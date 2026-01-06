@@ -511,6 +511,9 @@ namespace RVParking.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("HasBathroom")
                         .HasColumnType("bit");
 

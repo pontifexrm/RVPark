@@ -44,7 +44,7 @@
                 {
                     <div class="card mb-2">
                         <div class="card-body">
-                            <h5 class="card-title">@property.Name</h5>
+                            <h5 class="card-title">@property.Name</h5> Is Enabled <InputCheckbox @bind-Value="property.Enabled" Disabled="true" />
                             <p class="card-text">
                                 <strong>Description:</strong> @property.Description<br />
                                 <strong>Address:</strong> @property.Address, @property.City, @property.State, @property.Zip, @property.Country<br />
@@ -123,6 +123,10 @@
                                 <div class="form-group">
                                     <label for="name">Name</label>
                                     <InputText id="name" class="form-control" @bind-Value="currentProperty.Name" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="isEnabled">Is Enabled</label>
+                                    <InputCheckbox id="isEnabled" @bind-Value="currentProperty.Enabled" />
                                 </div>
                                 <div class="form-group">
                                     <label for="description">Description</label>

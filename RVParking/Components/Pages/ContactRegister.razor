@@ -548,7 +548,9 @@
         {
             bkg_Engine = new Bkg_Engine(ApplicationDbContext);
         }
-        properties = await ApplicationDbContext.bkg_Properties.ToListAsync() ?? new List<Bkg_Property>();
+        properties = await ApplicationDbContext.bkg_Properties
+                                .Where(p => p.Enabled)
+                                .ToListAsync() ?? new List<Bkg_Property>();
         userIpAddress = httpContextAccessorService.GetUserIpAddress();
 
         RegistrationInput.Fmdate = DateHelper.GetCurrentDateInNZ();;

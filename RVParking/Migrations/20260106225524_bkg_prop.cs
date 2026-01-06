@@ -6,11 +6,49 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RVParking.Migrations
 {
     /// <inheritdoc />
-    public partial class @int : Migration
+    public partial class bkg_prop : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "AppLogs",
+                columns: table => new
+                {
+                    AppLogId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    LogLevel = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Exception = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppLogs", x => x.AppLogId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AppParameters",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ParamKey = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ParamValue = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    ParamDescription = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    ParamType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppParameters", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -102,6 +140,40 @@ namespace RVParking.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_contacts", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LoginLogs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IpAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Success = table.Column<bool>(type: "bit", nullable: false),
+                    Timestamp = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LoginLogs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "VisitLogs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Path = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    QueryString = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IpAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserAgent = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Timestamp = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VisitLogs", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -271,6 +343,7 @@ namespace RVParking.Migrations
                     BedroomDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     BathroomDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LivingAreaDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Enabled = table.Column<bool>(type: "bit", nullable: false),
                     Bkg_UserUserId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -367,6 +440,12 @@ namespace RVParking.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_AppParameters_ParamKey",
+                table: "AppParameters",
+                column: "ParamKey",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
                 column: "RoleId");
@@ -440,6 +519,12 @@ namespace RVParking.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "AppLogs");
+
+            migrationBuilder.DropTable(
+                name: "AppParameters");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
@@ -468,6 +553,12 @@ namespace RVParking.Migrations
 
             migrationBuilder.DropTable(
                 name: "contacts");
+
+            migrationBuilder.DropTable(
+                name: "LoginLogs");
+
+            migrationBuilder.DropTable(
+                name: "VisitLogs");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

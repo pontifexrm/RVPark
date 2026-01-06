@@ -411,7 +411,10 @@
             // Use the currentUser as needed
         }
         Todate = AddOneDay(Fmdate);
-        BkgProperties = await ApplicationDbContext.bkg_Properties.ToListAsync();
+        // BkgProperties = await ApplicationDbContext.bkg_Properties.ToListAsync();
+        BkgProperties = await ApplicationDbContext.bkg_Properties
+                .Where(p => p.Enabled)
+                .ToListAsync() ?? new List<Bkg_Property>();
         await LoadBookings();
 
     }
