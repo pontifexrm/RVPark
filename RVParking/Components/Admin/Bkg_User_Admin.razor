@@ -109,6 +109,40 @@
                     </div>
                 </EditForm>
             }
+
+            <!-- Filter Section -->
+            <div class="row" style="margin: 20px 0;">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control" 
+                               placeholder="Filter by Name, Email, or Comments..." 
+                               @bind="filterText" 
+                               @bind:event="oninput"
+                               @onkeyup="FilterUsers" />
+                        @if (!string.IsNullOrEmpty(filterText))
+                        {
+                            <button class="btn btn-outline-secondary" type="button" @onclick="ClearFilter">
+                                <i class="bi bi-x-circle"></i> Clear
+                            </button>
+                        }
+                    </div>
+                    @* <small class="text-muted">Showing @filteredUsers.Count of @users.Count users</small> *@
+                </div>
+                <div class="col-md-6 text-end">
+                    <label class="me-2">Rows per page:</label>
+                    <select class="form-select d-inline-block" style="width: auto;" @bind="pageSize" @bind:after="UpdatePagination">
+                        <option value="05">05</option>
+                        <option value="10">10</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="table-responsive">
                 <table class="table">
                     <thead>
@@ -131,7 +165,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var user in users)
+                        @foreach (var user in pagedUsers)
                         {
                             <tr>
                                 <td style="border: 1px solid #929292;">@user.UserName</td>
@@ -165,6 +199,36 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination Controls -->
+            @if (totalPages > 1)
+            {
+                <nav aria-label="User pagination">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(1)" disabled="@(currentPage == 1)">First</button>
+                        </li>
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(currentPage - 1)" disabled="@(currentPage == 1)">Previous</button>
+                        </li>
+                        
+                        @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                        {
+                            var pageNum = i;
+                            <li class="page-item @(currentPage == pageNum ? "active" : "")">
+                                <button class="page-link" @onclick="() => ChangePage(pageNum)">@pageNum</button>
+                            </li>
+                        }
+                        
+                        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(currentPage + 1)" disabled="@(currentPage == totalPages)">Next</button>
+                        </li>
+                        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(totalPages)" disabled="@(currentPage == totalPages)">Last</button>
+                        </li>
+                    </ul>
+                </nav>
+            }
 
         }
 
@@ -209,26 +273,81 @@
             </div>
         }
 
-
-
-
-
     </Authorized>
 </AuthorizeView>
 
-
-
 @code {
     private List<Bkg_User> users;
+    private List<Bkg_User> filteredUsers = new();
+    private List<Bkg_User> pagedUsers = new();
     private Bkg_User currentUser = new Bkg_User();
     private bool isEditing = false;
     private bool showErrorModal = false;
     private bool showYesErrorModal = false;
     private string errorMessage;
+    
+    // Filter and pagination properties
+    private string filterText = string.Empty;
+    private int currentPage = 1;
+    private int pageSize = 10;
+    private int totalPages => (int)Math.Ceiling((double)filteredUsers.Count / pageSize);
 
     protected override async Task OnInitializedAsync()
     {
         users = await ApplicationDbContext.bkg_Users.ToListAsync();
+        filteredUsers = users;
+        UpdatePagedUsers();
+    }
+
+    private void FilterUsers()
+    {
+        if (string.IsNullOrWhiteSpace(filterText))
+        {
+            filteredUsers = users;
+        }
+        else
+        {
+            var searchTerm = filterText.ToLower();
+            filteredUsers = users.Where(u =>
+                (!string.IsNullOrEmpty(u.UserName) && u.UserName.ToLower().Contains(searchTerm)) ||
+                (!string.IsNullOrEmpty(u.UserFirstName) && u.UserFirstName.ToLower().Contains(searchTerm)) ||
+                (!string.IsNullOrEmpty(u.UserLastName) && u.UserLastName.ToLower().Contains(searchTerm)) ||
+                (!string.IsNullOrEmpty(u.UserEmail) && u.UserEmail.ToLower().Contains(searchTerm)) ||
+                (!string.IsNullOrEmpty(u.UserComments) && u.UserComments.ToLower().Contains(searchTerm))
+            ).ToList();
+        }
+        
+        currentPage = 1; // Reset to first page when filtering
+        UpdatePagedUsers();
+    }
+
+    private void ClearFilter()
+    {
+        filterText = string.Empty;
+        FilterUsers();
+    }
+
+    private void UpdatePagination()
+    {
+        currentPage = 1;
+        UpdatePagedUsers();
+    }
+
+    private void ChangePage(int page)
+    {
+        if (page >= 1 && page <= totalPages)
+        {
+            currentPage = page;
+            UpdatePagedUsers();
+        }
+    }
+
+    private void UpdatePagedUsers()
+    {
+        pagedUsers = filteredUsers
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
     }
 
     private void EditUser(Bkg_User user)
@@ -245,6 +364,7 @@
             ApplicationDbContext.bkg_Users.Remove(user);
             await ApplicationDbContext.SaveChangesAsync();
             users.Remove(user);
+            FilterUsers(); // Refresh the filtered and paged lists
         }
     }
 
@@ -279,6 +399,7 @@
             }
             await ApplicationDbContext.SaveChangesAsync();
             users = await ApplicationDbContext.bkg_Users.ToListAsync();
+            FilterUsers(); // Refresh the filtered and paged lists
             isEditing = false;
             currentUser = new Bkg_User();
         }
@@ -293,20 +414,24 @@
         isEditing = false;
         currentUser = new Bkg_User();
     }
+
     private void OpenAddModal()
     {
         currentUser = new Bkg_User();
         isEditing = true;
     }
+
     private void CloseErrorModal()
     {
         showErrorModal = false;
     }
+
     private void CloseYesErrorModal()
     {
         // Need to do whatever the question asked in the message
         showYesErrorModal = false;
     }
+
     private void CloseYesErrorModalYes()
     {
         // Need to do whatever the question asked in the message
