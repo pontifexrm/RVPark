@@ -12,7 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RVPark.Components;
 using RVPark.Components.Account;
-using RVPark.Components.Admin;
 using RVPark.Data;
 using RVPark.Features.Authentication.Services;
 using RVPark.Features.Bookings.Services;
