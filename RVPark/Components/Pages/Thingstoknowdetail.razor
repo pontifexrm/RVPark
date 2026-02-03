@@ -1,0 +1,251 @@
+﻿@page "/thingsdetail"
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Navigations
+
+@rendermode InteractiveServer
+
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.EntityFrameworkCore
+@using RVPark.Data
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
+
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject NavigationManager NavigationManager
+@inject ApplicationDbContext ApplicationDbContext
+
+@inject IConfiguration configuration
+
+<PageTitle>RV Park Things in Detail</PageTitle>
+<h3>RV Park Things to Know in Detail </h3> (Click on each to see details)
+<AuthorizeView>
+    <Authorized>
+         <SfAccordion  Width="98%" ExpandMode="ExpandMode.Single">
+    <Syncfusion.Blazor.Navigations.AccordionItems>
+        <Syncfusion.Blazor.Navigations.AccordionItem >
+            <HeaderTemplate>
+                        <b>Location</b>: Northern suburbs of Wellington.
+            </HeaderTemplate>
+            <ContentTemplate>
+                    <div class="content">
+                        We are located in the northern suburbs of Wellington to the east a few blocks from the northern motorway (SH1) 10km from the ferry terminals, 15mins Normal traffic 30mins Peak hour.<br />
+                       <b> Address is </b><br />
+                    &nbsp;&nbsp;22 Fitzpatrick St <br />
+                    &nbsp;&nbsp;Newlands<br />
+                    &nbsp;&nbsp;Wellington 6037 NZ <br />
+                        Access is best from Stewart Drive. Either from the north where you would exit SH1 at Johnsonville or from the South also through Johnsonville's main street. Turn into Fitzpatrick St from Stewart Drive is best.<br />
+                        We are on the left corner of the 2nd street on the left going up Fitzpatrick St.<br />
+                        <a href="https://www.rvpark.nz/directions"> Click for map from the South </a>  &nbsp;&nbsp;-&nbsp;OR &nbsp;&nbsp;
+                        <a href="https://www.rvpark.nz/directionsnorth">Click for map from the North </a><br />
+
+                        Access from Stewart Drive is also possible via Quigley St. Follow Quigley Street around until it T-intercects with Fitzpatrick St. Your park is then on the left of that interection.<br />
+                    <b>PLEASE BE AWARE: Some of the roads in Newlands are NOT suitable for RVs and larger vehicles SO DO NOT FOLLOW THE Map Apps THEY WILL GET YOU STUCK... Really We Are Not Kidding.</b>
+                    </div>
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Access and Space:</b> The site is flat and is 8 x 3.9-4.0 meters.
+            </HeaderTemplate>
+            <ContentTemplate>
+                <div class="content">
+                    The site is flat with easy access from the
+                    street, able to park either front or rear facing. It's 8 x 3.9-4.0 meters, room for most RVs even with Slide-Out. There is on street
+                    parking for anything you might be towing or towing with. There are trees close by but not overhead. The site is well shelterred from the southerly winds but we do catch the northerly.
+                </div>
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Power</b>: 16A caravan socket, protected at 16amp.
+            </HeaderTemplate>
+            <ContentTemplate>
+                The external power is a 16A caravan socket from a protected 16amp outlet. You will find the socket in the grey box on the retaining wall at the end of the pad. It is very close to the pad. The RCB and Circuit breaker are in the switch box on the house wall up and inside the back gate.
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Internet</b>: There is good WIFI.
+            </HeaderTemplate>
+            <ContentTemplate>
+                We have good WIFI available in this location, fed from fibre, you should have no speed wobbles.<br />
+                Its name and security details are in the Info Pack we will give you when you arrive.
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Tap water</b>: Tap in on the park pad on the rear wall.
+            </HeaderTemplate>
+            <ContentTemplate>
+                        Tap in on the park pad by the gully trap on the rear wall, very close by. It is a standard garden tap with a hose fitting. You will need to bring your own hose, filter and fittings.
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Grey Water Waste</b>: It is to the rear end of the Pad.
+            </HeaderTemplate>
+            <ContentTemplate>
+                We have a gully trap on the parking pad suitable for disposing of your grey water waste. You likely will need to lift the cover to prevent overflowing the grill. There is a tool with a yellow handle that should allow you to get it open freely.
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Dump Site</b>: The public dump site at Ngauranga is just 5k away.
+            </HeaderTemplate>
+            <ContentTemplate>
+                The public dump site at Ngauranga is just
+                5k away. It is on the left as you come off the motorway at Ngauranga. It is a free dump site and has potable water available.
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Mobile coverage</b>: Mobile coverage is good.
+            </HeaderTemplate>
+            <ContentTemplate>
+                Mobile coverage is good from both Spark and OneNZ cell phone towers. You should have no issues with either of these providers.
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Satellite Reception</b>: Sorry it is Not good.
+            </HeaderTemplate>
+            <ContentTemplate>
+                Sorry it is NOT Good. Sadly we have a big tree doing its blocking move. If the antenna is close to the house and near the street it works better. Freeview streaming TV or SkyGo over the Wifi works.
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Laundry</b>: There is a Washer-Dryer all-in-one machine and laundry tub at the back of our garages. Please contact us if you wish to use it.
+            </HeaderTemplate>
+            <ContentTemplate>
+                        The laundry is behind the garage so contact us if you wish to use it.<br />
+                        <ul style="list-style-type: disc;" >
+                            <li> There is a small laundry tub and a Washer/Dryer All-In-One. </li>
+                            <li> The washer/dryer is a 10kg washer and 6kg dryer. (dry weight of cloths). </li>
+                            <li> There are NO ironing facilities. </li>
+                            <li> It is suitable for light load to wash and dry. Large loads need to be washed then dried separately.</li>
+                            <li> There is a copy of the machine manual by the machine. We have prepared a simple "Cheat Sheet" for the laundry tasks we have found work.</li>                           
+                        </ul>
+                        If you have not used one of these before here is what we have found works.
+                        <ul style="list-style-type: disc;">
+                            <li> <b>For light loads</b>, 2 or 3 days of summer weight cloths for two people then the <b>Wash and Dry 60'</b> seems to work well.</li>
+                            <li> If the cloths are still damp the run the <b>Dry</b> program once more.</li>
+                            <li> <b>For larger and heavier loads</b> Towels trousers woolen etc. the <b>Wash and Dry</b> program seems OK. </li>
+                            <li> Again.. If the cloths are still damp the run the <b>Dry</b> program once more or maybe remove the very heavy and damp items and dry them separately.</li>                            
+                        </ul>
+
+                    </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>        
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>EV Charger</b>: Type 1 cable 16-32 Amp.
+            </HeaderTemplate>
+            <ContentTemplate>
+                We have an EV Chargers with a Type1 cable. It is inside the garage so if you wish to use it, please contact us to make the arrangements. We also have a Type 2 to Type 1 adapter if you need it.
+                The charger is a 16-32 Amp charger and is available and there would be a small additional charge for its use.
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Aircraft Overhead</b>: Yep we are on the Airport's flight path.
+            </HeaderTemplate>
+            <ContentTemplate>
+                Wellington’s Northern Suburbs is on the Airports flight path so there is some noise when planes are landing from the north. We have been here 50 years, and we do not notice it.
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Pets</b>: Your pets are just fine.
+            </HeaderTemplate>
+            <ContentTemplate>
+                We are happy to have your pets with you. Please keep them on a lead and clean up after them. The road is very close.
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Check In</b>: Check in is from midday.
+            </HeaderTemplate>
+            <ContentTemplate>
+                Check in is after 12pm. There is no problem to very late arrivals. There are automatic lights by the power box and you will find your Info Pack in that box if we are not around to meet you. <br />
+                Text us if you have a late arrival please. Arriving early on the day is fine please look on the availabilty page on this site to if there is a previous day booking.
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Check Out</b>: Check out is before midday.
+            </HeaderTemplate>
+            <ContentTemplate>
+                Check out is by 12pm midday. If we do not have a booking for the following night then there naturally is flexibiliy here.
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+                <Syncfusion.Blazor.Navigations.AccordionItem>
+                    <HeaderTemplate>
+                        <b>Parking Term</b>: Un-attended parking is OK.
+                    </HeaderTemplate>
+                    <ContentTemplate>
+                        We are happy for long term un-attended parking should you wish to leave your RV for the time you are doing other things. Please let us know if you are going to be away for a while so we can keep an eye on your rig.
+                    </ContentTemplate>
+                </Syncfusion.Blazor.Navigations.AccordionItem>
+                <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Payment</b>: By bank transfer, Wise card, or cash.
+            </HeaderTemplate>
+            <ContentTemplate>
+                If you have not already paid you can do so via Bank Transfer, Wise Card or cash. Payment via credit card (Other than Wise Card) is not available. However if this is a real problem for you we may in the near future add the Paymate payment gateway for which there would be an additional fee of about $1.50 per night. Please let us know if credit card payments are a must for you.
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Cancellation</b>: Cancellation is fine.
+            </HeaderTemplate>
+            <ContentTemplate>
+                Cancellation is fine either via this website, phone, email or text us. Normally we refund is within a day except if we have turned away another booking for that night, in which case you will be charged for the first night.
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Local Facilities</b>: Shopping malls close by.
+            </HeaderTemplate>
+            <ContentTemplate>
+                Wellington’s Northern Suburbs have a shopping mall, four supermarkets, several laundromats and many takeaway food and dining facilities, some within walking distance. There are several playgrounds locally with one about 300m away.
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Accommodation</b>: D/S One Bedroom Apartment.
+            </HeaderTemplate>
+            <ContentTemplate>
+                Our house has in addition an optional downstairs area we may be able to offer at an additional fee. It has a large bedroom, small kitchenette, small bathroom - shower basin and toilet, and modest living area with TV. It is sometimes available at an additional fee.
+                The bedroom has a Queen size bed and there is a sofa that converts to another double bed or two single. Comfortable for two people and maybe two addition little ones.
+                We have a washing machine and dryer upstairs that you may talk to us about using as part of the accommodation.
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+        <Syncfusion.Blazor.Navigations.AccordionItem>
+            <HeaderTemplate>
+                <b>Local Transport</b>: Bus Train close by.
+            </HeaderTemplate>
+            <ContentTemplate>
+                View the "Metlink" app for Wellington to see the location of the train station and a number of close bus stops that service our area. Being close to the Wellington CBD hire Uber rides are not out of this world. The buses and trains that run regularly to the city and surrounding areas. The bus stop is just a few minutes walk down Fitzpatrick St. Many people bike into Wellington from here and that is a good option if you are carying bikes.
+            </ContentTemplate>
+        </Syncfusion.Blazor.Navigations.AccordionItem>
+  
+    </Syncfusion.Blazor.Navigations.AccordionItems>
+</SfAccordion>
+    </Authorized>
+    <NotAuthorized>
+        <h4>- You are NOT AUTHORIZED -</h4>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+}

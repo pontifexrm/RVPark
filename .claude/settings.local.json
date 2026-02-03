@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(wc:*)",
+      "Bash(git -C /mnt/c/Users/Owner/source/repos/RVPark remote -v)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(xargs basename:*)"
+    ]
+  }
+}

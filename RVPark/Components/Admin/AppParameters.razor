@@ -1,0 +1,353 @@
+@page "/appparameters"
+@rendermode InteractiveServer
+<PageTitle>RV Park Administer App Parameters</PageTitle>
+
+@using RVPark.Data
+@using RVPark.Components.Account
+@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityUserAccessor UserAccessor
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ApplicationDbContext ApplicationDbContext
+@inject IServiceProvider ServiceProvider
+@inject IConfiguration configuration
+
+<AuthorizeView Roles="Admin" Context="authContext">
+    <Authorized>
+        <h4>Manage Application Parameters</h4>
+        
+        <div class="search-bar">
+            <div class="form-group" style="display:flex;flex-direction:row; margin-bottom: 1%;">
+                <div class="form-group" style="max-width: 40%; text-align:center;">
+                    <label for="searchKey">Parameter Key</label>
+                    <input type="text" class="form-control" id="searchKey" @bind="searchKey" />
+                </div>
+                <div class="form-group" style="max-width: 40%; text-align:center; margin-left: 1%;">
+                    <label for="searchValue">Parameter Value</label>
+                    <input type="text" class="form-control" id="searchValue" @bind="searchValue" />
+                </div>
+                <div class="form-group" style="max-width: 40%; text-align:center; margin-left: 1%;">
+                    <label for="searchValue">Parameter Type</label>
+                    <input type="text" class="form-control" id="searchValue" @bind="searchType" />
+                </div>
+                <button class="bi form-control" style="margin-top: 28px; width: 40px; height: 32px; margin-left: 4px;"
+                        @onclick="ClearSearchParameters">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <button class="bi form-control" style="margin-top: 28px; width: 40px; height: 32px; margin-left: 4px;"
+                        @onclick="SearchParameters">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="tab-content" style="border: 1px solid #929292; max-width: 80%; display: flex; justify-content: space-between; align-items: center;">
+            @* <h5 style="margin-left: 10px;">Add New Parameter</h5> *@
+            <div style="display:flex;flex-direction:row; ">
+@*                 <button class="class="btn btn-primary"  @onclick="OpenAddModal">
+
+                    <i>Add New Parameter</i></button> *@
+                @* </button> *@
+                            <button class="btn btn-primary" @onclick="OpenAddModal">Add New Parameter</button>
+
+            </div>
+        </div>
+
+        @if (isAddModalOpen)
+        {
+            <div class="form-group" style="border: 1px solid #929292; max-width: 80%; padding: 15px;">
+                <div class="form-group" style="display:flex;flex-direction:row; margin-bottom: 1%;">
+                    <div class="form-group" style="text-align:center; margin-left: 2%; flex: 1;">
+                        <label for="Key">Parameter Key</label>
+                        <input type="text" class="form-control" id="Key" @bind="newParameter.ParamKey" />
+                    </div>
+                    <div class="form-group" style="text-align:center; margin-left: 2%; flex: 1;">
+                        <label for="newValue">Parameter Value</label>
+                        <input type="text" class="form-control" id="newValue" @bind="newParameter.ParamValue" />
+                    </div>
+                    <div class="form-group" style="text-align:center; margin-left: 2%; flex: 1;">
+                        <label for="newType">Parameter Type</label>
+                        <select class="form-control" id="newType" @bind="newParameter.ParamType">
+                            <option value="">-- Select Type --</option>
+                            <option value="Setting">Setting</option>
+                            <option value="FeatureFlag">FeatureFlag</option>
+                            <option value="Enum">Enum</option>
+                            <option value="Config">Config</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="text-align:center; margin-left: 2%; flex: 1;">
+                        <label for="newDescription">Description</label>
+                        <input type="text" class="form-control" id="newDescription" @bind="@newParameter.ParamDescription" />
+                    </div>
+                </div>
+                <div>
+                    <button class="btn btn-primary" style="min-width: 20%; margin-left: 2%;" @onclick="CreateParameter">Create Parameter</button>
+                    <button class="btn btn-secondary" style="min-width: 20%; margin-left: 2%;" @onclick="CloseAddModal">Cancel</button>
+                </div>
+            </div>
+        }
+
+        @if (appParameters == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table" style="max-width: 80%;">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid #929292;">Parameter Key</th>
+                            <th style="border: 1px solid #929292;">Parameter Value</th>
+                            <th style="border: 1px solid #929292;">Parameter Type</th>
+                            <th style="border: 1px solid #929292;">Description</th>
+                            <th style="border: 1px solid #929292;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var parameter in appParameters)
+                        {
+                            <tr>
+                                <td style="border: 1px solid #929292;">@parameter.ParamKey</td>
+                                <td style="border: 1px solid #929292;">@parameter.ParamValue</td>
+                                <td style="border: 1px solid #929292;">@parameter.ParamType</td>
+                                <td style="border: 1px solid #929292;">@parameter.ParamDescription</td>
+                                <td style="border: 1px solid #929292;">
+                                    <div class="tab-content" style="display:flex;flex-direction:row;">
+                                        <button class="bi form-control" style="width: 40px; height: 32px;"
+                                                @onclick="() => EditParameter(parameter)">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </button>
+                                        <button class="bi form-control" style="width: 40px; height: 32px;"
+                                                @onclick="() => DeleteParameter(parameter)">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <h4>- You are NOT AUTHORIZED -</h4>
+    </NotAuthorized>
+</AuthorizeView>
+
+@if (isEditing)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Parameter</h5>
+                    <small class="bi-alert">@ErrorMessage</small>
+                    <button type="button" class="btn-close" @onclick="CancelEdit"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="currentParameter" OnValidSubmit="SaveParameter">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="form-group">
+                            <label for="paramKey">Parameter Key</label>
+                            <InputText id="paramKey" @bind-Value="currentParameter.ParamKey" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="paramValue">Parameter Value</label>
+                            <InputText id="paramValue" @bind-Value="currentParameter.ParamValue" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="paramType">Parameter Type</label>
+                            <InputSelect id="paramType" @bind-Value="currentParameter.ParamType" class="form-control">
+                                <option value="">-- Select Type --</option>
+                                <option value="Setting">Setting</option>
+                                <option value="FeatureFlag">FeatureFlag</option>
+                                <option value="Enum">Enum</option>
+                                <option value="Config">Config</option>
+                            </InputSelect>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="paramDescription">Description</label>
+                            <InputText id="paramDescription" @bind-Value="currentParameter.ParamDescription" class="form-control" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<AppParameter> appParameters = new List<AppParameter>();
+    private AppParameter? currentParameter = new AppParameter();
+    private AppParameter newParameter = new AppParameter();
+
+    private string ErrorMessage = string.Empty;
+
+    private string searchKey = string.Empty;
+    private string searchValue = string.Empty;
+    private string searchType = string.Empty;
+
+    private bool isEditing = false;
+    private bool isAddModalOpen = false;
+    private bool _isDataLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!_isDataLoaded)
+        {
+            await LoadParameters();
+            _isDataLoaded = true;
+        }
+    }
+
+    private async Task LoadParameters()
+    {
+        var query = ApplicationDbContext.AppParameters.AsQueryable();
+
+        if (!string.IsNullOrEmpty(searchKey))
+        {
+            query = query.Where(p => p.ParamKey.Contains(searchKey));
+        }
+
+        if (!string.IsNullOrEmpty(searchValue))
+        {
+            query = query.Where(p => p.ParamValue.Contains(searchValue));
+        }
+        if (!string.IsNullOrEmpty(searchType))
+        {
+            query = query.Where(p => p.ParamType.Contains(searchType));
+        }
+        query = query.OrderBy(p => p.ParamKey);
+        appParameters = await query.AsNoTracking().ToListAsync();
+        StateHasChanged();
+    }
+
+    private async Task SearchParameters()
+    {
+        await LoadParameters();
+    }
+
+    private async Task ClearSearchParameters()
+    {
+        searchKey = string.Empty;
+        searchValue = string.Empty;
+        await SearchParameters();
+    }
+
+    private void OpenAddModal()
+    {
+        newParameter = new AppParameter();
+        isAddModalOpen = true;
+    }
+
+    private void CloseAddModal()
+    {
+        isAddModalOpen = false;
+    }
+
+    private async Task CreateParameter()
+    {
+        using var scope = ServiceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+        var freshDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        freshDbContext.AppParameters.Add(newParameter);
+        await freshDbContext.SaveChangesAsync();
+
+        await LoadParameters();
+        CloseAddModal();
+    }
+
+    private void EditParameter(AppParameter parameter)
+    {
+        currentParameter = new AppParameter
+        {
+            Id = parameter.Id,
+            ParamKey = parameter.ParamKey,
+            ParamValue = parameter.ParamValue,
+            ParamDescription = parameter.ParamDescription,
+            ParamType = parameter.ParamType
+        };
+        isEditing = true;
+    }
+
+    private void CancelEdit()
+    {
+        currentParameter = null;
+        isEditing = false;
+    }
+
+    private async Task SaveParameter()
+    {
+        using var scope = ServiceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+        var freshDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        if (currentParameter != null)
+        {
+            try
+            {
+                freshDbContext.Attach(currentParameter);
+                freshDbContext.Entry(currentParameter).State = EntityState.Modified;
+                await freshDbContext.SaveChangesAsync();
+                await LoadParameters();
+                isEditing = false;
+                ErrorMessage = "";
+            }            
+            catch (Exception ex)
+            {
+                ErrorMessage = "Error trying to save this Parameter. Please try again";// Handle concurrency exception as needed
+            }
+        }
+        StateHasChanged();
+    }
+
+    private async Task DeleteParameter(AppParameter parameter)
+    {
+        currentParameter = new AppParameter
+        {
+            Id = parameter.Id,
+            ParamKey = parameter.ParamKey,
+            ParamValue = parameter.ParamValue,
+            ParamType = parameter.ParamType,
+            ParamDescription = parameter.ParamDescription
+        };
+
+        using var scope = ServiceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+        var freshDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        if (currentParameter != null)
+        {
+            try{ 
+                freshDbContext.Attach(currentParameter);
+                freshDbContext.Entry(currentParameter).State = EntityState.Deleted;
+                await freshDbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "Error trying to delete this Parameter. Please try again";// Handle concurrency exception as needed
+            }
+
+        }
+
+        await LoadParameters();
+        StateHasChanged();
+    }
+}

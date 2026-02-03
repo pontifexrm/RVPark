@@ -1,0 +1,48 @@
+@page "/admin/properties-vsa"
+@attribute [Authorize(Roles = "Admin")]
+@inject IMediator Mediator
+
+<PageTitle>Properties (VSA)</PageTitle>
+
+<h3>Properties</h3>
+
+@if (_loading)
+{
+    <p><em>Loading properties...</em></p>
+}
+else if (_properties == null || _properties.Count == 0)
+{
+    <p>No properties found.</p>
+}
+else
+{
+    <SfGrid DataSource="@_properties" AllowPaging="true" AllowSorting="true">
+        <GridPageSettings PageSize="10" />
+        <GridColumns>
+            <GridColumn Field="@nameof(PropertyDto.PropertyId)" HeaderText="ID" Width="60" />
+            <GridColumn Field="@nameof(PropertyDto.Name)" HeaderText="Name" Width="150" />
+            <GridColumn Field="@nameof(PropertyDto.Description)" HeaderText="Description" Width="200" />
+            <GridColumn Field="@nameof(PropertyDto.PricePerPeriod)" HeaderText="Price/Period" Format="C2" Width="120" />
+            <GridColumn Field="@nameof(PropertyDto.MaxGuestNbr)" HeaderText="Max Guests" Width="100" />
+            <GridColumn Field="@nameof(PropertyDto.Enabled)" HeaderText="Enabled" Width="80" />
+        </GridColumns>
+    </SfGrid>
+}
+
+@code {
+    private List<PropertyDto>? _properties;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Use MediatR to fetch properties - demonstrates VSA pattern
+            _properties = await Mediator.Send(new GetAllPropertiesQuery(EnabledOnly: false));
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

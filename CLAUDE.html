@@ -1,0 +1,102 @@
+<h1 id="claude.md">CLAUDE.md</h1>
+<p>This file provides guidance to Claude Code (claude.ai/code) when
+working with code in this repository.</p>
+<h2 id="project-overview">Project Overview</h2>
+<p>RVPark is an RV Park booking and management system built with ASP.NET
+Core 10.0 Blazor (Interactive Server-Side Rendering). It manages RV park
+properties, bookings, availability calendars, and user accounts.</p>
+<h2 id="build-run-commands">Build &amp; Run Commands</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">dotnet</span> build</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">dotnet</span> build <span class="at">-c</span> Release</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Run locally (HTTP: localhost:5000, HTTPS: localhost:5001)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">dotnet</span> run</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Database migrations</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="ex">dotnet</span> ef database update</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Publish profiles available in Properties/PublishProfiles/</span></span></code></pre></div>
+<h2 id="technology-stack">Technology Stack</h2>
+<ul>
+<li><strong>Framework:</strong> ASP.NET Core 10.0, Blazor Server</li>
+<li><strong>Database:</strong> SQL Server with Entity Framework Core
+10.0.1</li>
+<li><strong>Auth:</strong> ASP.NET Core Identity with roles (Admin,
+Manager, User)</li>
+<li><strong>UI Components:</strong> Syncfusion Blazor 32.x,
+Blazor.Bootstrap 3.5, Bootstrap 5.3</li>
+<li><strong>Email:</strong> MailKit (primary), SMTP, TNZ API (pluggable
+via DI)</li>
+<li><strong>SMS:</strong> SMSEveryone, TNZ SMS (pluggable via DI)</li>
+<li><strong>Mapping:</strong> AutoMapper 16.0</li>
+</ul>
+<h2 id="architecture">Architecture</h2>
+<pre><code>RVPark/
+├── Components/           # Razor components (UI)
+│   ├── Account/          # Identity/auth components
+│   ├── Admin/            # Admin management pages
+│   ├── Layout/           # MainLayout, NavMenu, NavBar
+│   └── Pages/            # Public-facing pages
+├── Data/                 # Entity models &amp; DbContext
+│   ├── ApplicationDbContext.cs
+│   ├── Bkg_*.cs          # Booking domain models
+│   └── Bkg_Engine.cs     # Booking business logic (618 lines)
+├── Services/             # Business logic &amp; integrations
+│   ├── Email/            # IEmailService implementations
+│   ├── SMS/              # ISmsService implementations
+│   ├── Logging/          # IAppLogger, request middleware
+│   └── ServiceExtensions.cs
+├── Migrations/           # EF Core migrations
+└── Program.cs            # Startup configuration</code></pre>
+<h2 id="core-domain-models-data">Core Domain Models (Data/)</h2>
+<ul>
+<li><strong>Bkg_Property</strong> - RV park property with amenities</li>
+<li><strong>Bkg_Booking</strong> - Booking record (DateArrive,
+DateDepart, TotalPrice, Status)</li>
+<li><strong>Bkg_Availability</strong> - Daily availability calendar per
+property</li>
+<li><strong>Bkg_User</strong> - Guest profile (separate from Identity
+user)</li>
+<li><strong>Bkg_Payment</strong> - Payment tracking</li>
+<li><strong>Bkg_Review</strong> - Guest reviews/ratings</li>
+<li><strong>Bkg_Engine</strong> - Central booking business logic</li>
+</ul>
+<h2 id="key-pages">Key Pages</h2>
+<ul>
+<li><strong>Availability.razor</strong> - Property availability
+search</li>
+<li><strong>Booking.razor</strong> - Booking workflow</li>
+<li><strong>MyBookings.razor</strong> - User’s bookings view</li>
+<li><strong>AllBookings.razor</strong> - Admin booking management</li>
+<li><strong>ViewBkgCalendar.razor</strong> - Calendar-based booking
+view</li>
+<li><strong>ContactRegister.razor</strong> - Registration and contact
+form</li>
+</ul>
+<h2 id="services-pattern">Services Pattern</h2>
+<p>Email and SMS services use pluggable implementations configured in
+<code>appsettings.json</code>: - Email: <code>IEmailService</code> →
+MailKitEmailService, SmtpEmailService, TNZEmailService, MockEmailService
+- SMS: <code>ISmsService</code> → SmsEveryoneService, SmsTNZService,
+SmsMockService</p>
+<p>Services registered in <code>Program.cs</code> and
+<code>Services/ServiceExtensions.cs</code>.</p>
+<h2 id="configuration">Configuration</h2>
+<ul>
+<li><code>appsettings.json</code> - Main config (connection strings,
+email/SMS settings)</li>
+<li><code>appsettings.Development.json</code> /
+<code>appsettings.Production.json</code> - Environment overrides</li>
+<li>Localization: en-NZ (New Zealand English)</li>
+<li>Authentication: 5-day session expiration, 3-hour token lifespan</li>
+</ul>
+<h2 id="database">Database</h2>
+<ul>
+<li>Local dev: <code>RONSHPLAPTOP\SQLEXPRESS</code>, database
+<code>db_ac1621_rvpark</code></li>
+<li>Migrations managed via dotnet-ef tool</li>
+<li>DbContext includes helper methods for booking/availability
+queries</li>
+</ul>

@@ -1,0 +1,88 @@
+﻿@page "/availability01"
+@rendermode InteractiveServer
+<PageTitle>RV Park Availability</PageTitle>
+
+
+@using RVPark.Data
+@using RVPark.Components.Account
+
+@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using TNZAPI.NET;
+@using TNZAPI.NET.Core;
+@using TNZAPI.NET.Api.Addressbook.Contact.Dto;
+
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Calendars
+
+
+@* Is Being Used *@
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityUserAccessor UserAccessor
+
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@inject ApplicationDbContext ApplicationDbContext
+
+@inject IConfiguration configuration
+
+
+
+<h3 style="color:darkolivegreen;">Availability - See what dates are available.</h3>
+<div class="form-group" style="text-align:left; max-width: 30%; margin-left: 1%;">
+    <label>Property</label>
+    <InputSelect select class="form-control" @bind-Value="@currentBooking.PropertyId">
+        <option value="">Select Property</option>
+        @foreach (var property in BkgProperties)
+        {
+            <option value="@property.PropertyId">@property.Name</option>
+        }
+    </InputSelect>
+</div>
+<div>
+
+    <SfCalendar TValue="DateTime?" Value="@Calendar1Value"></SfCalendar>
+
+</div>
+
+@code {
+    private string BkgType = "RVPark On Fitz";
+    private Bkg_Booking currentBooking = new();
+    private List<Bkg_Property> BkgProperties = new List<Bkg_Property>();
+    public DateTime Calendar1Value { get; set; } = new DateTime(2025, 4, 1); // April
+    public DateTime Calendar2Value { get; set; } = new DateTime(2025, 5, 1); // May
+    public DateTime Calendar3Value { get; set; } = new DateTime(2025, 6, 1); // June
+
+    public DateTime MinDate { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddDays(1.0);
+    public DateTime MaxDate { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddMonths(12);
+    public DateTime DateValue { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).AddMonths(1);
+
+
+    // public List<Event> Calendar1Events { get; set; } = new List<Event> {
+    //     new Event { Start = new DateTime(2025, 4, 5), End = new DateTime(2025, 4, 5), Title = "Event 1" }
+    // };
+    // public List<Event> Calendar2Events { get; set; } = new List<Event> {
+    //     new Event { Start = new DateTime(2025, 5, 10), End = new DateTime(2025, 5, 10), Title = "Event 2" }
+    // };
+    // public List<Event> Calendar3Events { get; set; } = new List<Event> {
+    //     new Event { Start = new DateTime(2025, 6, 15), End = new DateTime(2025, 6, 15), Title = "Event 3" }
+    // };
+    protected override async Task OnInitializedAsync()
+    {
+
+        BkgProperties = await ApplicationDbContext.bkg_Properties.ToListAsync();
+      //  await LoadBookings();
+
+    }
+
+}

@@ -1,0 +1,136 @@
+﻿@page "/admin"
+@rendermode InteractiveServer
+<PageTitle>RV Park Administration</PageTitle>
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.EntityFrameworkCore
+@using RVPark.Data
+
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject NavigationManager NavigationManager
+@inject ApplicationDbContext ApplicationDbContext
+@* //@inject Bkg_UserService Bkg_UserService// *@
+@* <h3>RV Park Booking, Data and User Administration</h3> *@
+
+
+
+<AuthorizeView> 
+    <Authorized>
+        <div class="tabs">
+            @* <button class="@(activeTab == "Tab1" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab1"))">Booking Admin</button> *@
+            @* <button class="@(activeTab == "Tab6" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab6"))">Booking Availability</button> *@
+            @* <button class="@(activeTab == "Tab7" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab7"))">Booking Users</button> *@
+            @* <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">ApplicationUser</button> *@
+            <button class="@(activeTab == "Tab3" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab3"))">User/Role Maint.</button>
+            <button class="@(activeTab == "Tab4" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab4"))">Role Maint.</button>
+            <button class="@(activeTab == "Tab5" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab5"))">Property Maint.</button>
+            @* <button class="@(activeTab == "Tab9" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab9"))">Application User</button> *@
+            @* <button class="@(activeTab == "Tab2" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab2"))">Current Bookings</button> *@
+            @* <button class="@(activeTab == "Tab8" ? "active" : "")" @onclick="@(() => SetActiveTab("Tab8"))">DB Maint.</button> *@
+
+        </div>
+        <hr />
+        @* <div id="Tab1" class="tabcontent" style="@(activeTab == "Tab1" ? "display: block;" : "display: none;")"> *@
+        @* <RVPark.Components.Pages.TabComponents.Bkg_Bookings_Maint /> *@
+
+        @* <RVPark.Components.Pages.TabComponents.BkgUser_Bookings /> *@
+        @*  <h4>New Booking for <b>@BkgType</b></h4>
+    <div class="form-group" style="display:flex;flex-direction:row;">
+        <div class="form-group" style="max-width: 25%; text-align:center; margin-left: 2%">
+            <label for="fmdate">Arriving</label>
+            <InputDate @bind-Value=Fmdate class="form-control" id="fmdate" />
+            @* <ValidationMessage For="() => emailMessage.Fmdate" /> *@
+        @*     </div>
+        <div class="form-group" style="max-width: 25%; text-align:center; margin-left: 2%;">
+            <label for="todate">Departing</label>
+            <InputDate @bind-Value=Todate class="form-control" id="todate" />
+            @* <ValidationMessage For="() => emailMessage.Todate" /> 
+        </div>
+    </div>
+    <div>
+        <button class="btn btn-primary" style="min-width: 40%; align-content: center;" @onclick="CheckBkgRequest">Request Booking</button>
+    </div> *@ 
+        @* </div> *@
+
+        @* <div id="Tab2" class="tabcontent" style="@(activeTab == "Tab2" ? "display: block;" : "display: none;")"> *@
+            @* <RVPark.Components.Pages.TabComponents.AspNetUser_Maint /> *@
+            @* BkgAvail_BulkChange.razor *@
+        @* </div> *@
+        <div id="Tab3" class="tabcontent" style="@(activeTab == "Tab3" ? "display: block;" : "display: none;")">
+            <RVPark.Components.Pages.TabComponents.AspNetUserRoles_Maint />
+        </div>
+        <div id="Tab4" class="tabcontent" style="@(activeTab == "Tab4" ? "display: block;" : "display: none;")">
+            <RVPark.Components.Pages.TabComponents.AspNetRoles_Maint />
+        </div>
+        <div id="Tab5" class="tabcontent" style="@(activeTab == "Tab5" ? "display: block;" : "display: none;")">
+            @*     <RVPark.Components.Pages.TabComponents.Bkg_Property_Maint BkgProperties="BkgProperties" />
+ *@   
+            <RVPark.Components.Pages.TabComponents.Bkg_Property_Maint />
+        </div>
+        @* <div id="Tab6" class="tabcontent" style="@(activeTab == "Tab6" ? "display: block;" : "display: none;")"> *@
+        @*     <RVPark.Components.Pages.TabComponents.Bkg_Availability_Maint BkgPropertiesAvail="BkgProperties" />*@
+        @* <RVPark.Components.Pages.TabComponents.Bkg_Availability_Maint /> *@
+        @* </div> *@
+
+
+@*         <div id="Tab7" class="tabcontent" style="@(activeTab == "Tab7" ? "display: block;" : "display: none;")">
+            <RVPark.Components.Pages.TabComponents.Bkg_User_Maint />
+        </div> *@
+        @* <div id="Tab8" class="tabcontent" style="@(activeTab == "Tab8" ? "display: block;" : "display: none;")">
+    <RVPark.Components.Pages.TabComponents.DB_Maint />
+</div> *@
+@*         <div id="Tab9" class="tabcontent" style="@(activeTab == "Tab9" ? "display: block;" : "display: none;")">
+            <RVPark.Components.Pages.TabComponents.AspNetUser_Maint />
+        </div> *@
+
+    </Authorized>
+    <NotAuthorized>
+        <h4>- You are NOT AUTHORIZED -</h4>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    private string activeTab = "Tab7";
+    // [Parameter]
+    // public EventCallback RefreshChildAvailCallback { get; set; }
+
+    // private string BkgType = "RVPark On Fitz";
+    // private string isAvail = "Yes";
+    // public DateTime Fmdate { get; set; } = DateTime.Now.Date;
+    // public DateTime Todate { get; set; } = DateTime.Now.Date;
+    // private bool allDatesAvailable = false;
+    // private string toDelete = "no";
+    // private string status = string.Empty;
+
+    // private List<Bkg_Property> BkgProperties = new List<Bkg_Property>();
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
+
+    private void SetActiveTab(string tabName)
+    {
+        activeTab = tabName;
+        // if (activeTab == "Tab6")
+        // {
+        //     await RefreshChildAvail();
+        // }
+    }
+    // private async Task RefreshChildAvail()
+    // {
+    //     await RefreshChildAvailCallback.InvokeAsync(null);
+    //     StateHasChanged();
+    // }
+   
+}
+
+
+

@@ -1,0 +1,476 @@
+﻿@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.SplitButtons
+@using Syncfusion.Blazor.Buttons    
+@using Microsoft.AspNetCore.Components.Routing
+@rendermode InteractiveServer
+@implements IDisposable
+
+@inject NavigationManager NavigationManager 
+@inject IJSRuntime JS
+@inject IWebHostEnvironment Env
+@inject IConfiguration configuration
+@inject RVPark.Services.Environment.IEnvironmentInfoService EnvInfo
+
+
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        @* <a class="navbar-brand" href="">RVPark</a> *@
+        @* <div style="font-size: 0.6em; color: aliceblue; text-align:left;"><br /><br />ver: 0.0.12</div> *@
+        <a class="navbar-brand" href="/">
+            <img src="images/RVParkB.png" width="100" height="40" class="d-inline-block align-top mb-1 mt-1 ms-lg-2"
+            alt="RVPark Booking Logo"> 
+
+        </a>
+        @* <div style="font-size: 0.6em; color: aliceblue; text-align:left;"><br /><br />ver: 0.0.12</div> *@
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+      
+        <AuthorizeView>
+            <NotAuthorized>
+                @if (!showAdminItems)
+                {
+                    @if (showtestItems)
+                    {
+                        <div class="nav-item  px-3">
+                            <NavLink class="nav-link" href="availability">
+                                <span class="bi bi-calendar-nav-menu" aria-hidden="true"></span> View Availability
+                            </NavLink>
+                        </div>
+                    }
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="things">
+                            <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Things to Know
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="contactregister">
+                            <span class="bi bi-envelope-nav-menu" aria-hidden="true"></span> Contact Us - Book
+                        </NavLink>
+                    </div>
+                }
+            </NotAuthorized>
+            <Authorized>
+
+                @if (!context.User.IsInRole("Admin"))
+                {
+                    @if (showtestItems)
+                    {
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="availability">
+                                <span class="bi bi-calendar-nav-menu" aria-hidden="true"></span> View Availability
+                            </NavLink>
+                        </div>
+                    }
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="thingsdetail">
+                            <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Things to Know
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="askusfmuser">
+                            <span class="bi bi-envelope-nav-menu" aria-hidden="true"></span> Ask Us or Request
+                        </NavLink>
+                    </div>
+                }
+            </Authorized>
+        </AuthorizeView>
+
+
+
+        <AuthorizeView>
+            <NotAuthorized>
+
+            </NotAuthorized>
+
+            <Authorized>
+                @if (!context.User.IsInRole("Admin"))
+                {
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="information">
+                            <span class="bi bi-book-nav-menu" aria-hidden="true"></span> Site Info
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="mybookings">
+                            <span class="bi bi-book-nav-menu" aria-hidden="true"></span> New / My Bkgs 
+                        </NavLink>
+                    </div>
+
+                    @if (!showtestItems)
+                    {
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="availabilityrv">
+                                <span class="bi bi-calendar-nav-menu" aria-hidden="true"></span> RV Availability
+                            </NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="availabilityapmt">
+                                <span class="bi bi-calendar-nav-menu" aria-hidden="true"></span> Apmt Availability
+                            </NavLink>
+                        </div>
+                    }
+                }
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Manage">
+                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span>@context.User.Identity?.Name
+                    </NavLink>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="information">
+                        
+                        <span class="bi bi-book-nav-menu" aria-hidden="true"></span> Have a Look
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/RegisterFull">
+                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                    </NavLink>
+                </div>
+
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Login">
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken />
+                        @*                         <input type="hidden" name="ReturnUrl" value="@currentUrl"  />  After Logout return to Home Nav Itwm as the old Auth page was still showing*@
+                        <input type="hidden" name="ReturnUrl" value="" />
+                        <button type="submit" class="nav-link">
+                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                        </button>
+                    </form>
+                </div>
+
+            </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView Roles="Admin" Context="authContext">
+            <Authorized>
+                @if (showtestItems)
+                {
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="availability">
+                            <span class="bi bi-calendar-nav-menu" aria-hidden="true"></span> View Availability
+                        </NavLink>
+                    </div>
+                }
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="allbookings">
+                        <span class="bi bi-book-nav-menu" aria-hidden="true"></span> All Bookings
+                    </NavLink>
+                </div>
+                <div class="nav-item nav-link px-3">
+                    <NavLink class="nav-link" href="sitestats">
+                        <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>Site Statistics
+                    </NavLink>
+                </div>
+                <div class="nav-item nav-link px-3">
+                    <NavLink class="nav-link" href="bkg_user_admin">
+                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Bkg User Admin
+                    </NavLink>
+                </div>
+                <div class="nav-item nav-link px-3">
+                    <NavLink class="nav-link" href="aspnetuser_admin">
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span>AppUser Admin
+                    </NavLink>
+                </div>
+                <div class="nav-item nav-link px-3">
+                    <NavLink class="nav-link" href="bookingavailability">
+                        <span class="bi bi-book-nav-menu" aria-hidden="true"></span> Booking Avail_Mnt
+                    </NavLink>
+                </div>
+                <div class="nav-item nav-link px-3">
+                    <NavLink class="nav-link" href="user-bookings">
+                        <span class="bi bi-book-nav-menu" aria-hidden="true"></span> User Bookings
+                    </NavLink>
+                </div>
+                <div class="nav-item nav-link px-3">
+                    <NavLink class="nav-link" href="bkgproperty_admin">
+                        <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>Property Admin
+                    </NavLink>
+                </div>
+                <div class="nav-item nav-link px-3">
+                    <NavLink class="nav-link" href="asprole_admin">
+                        <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>Role Admin
+                    </NavLink>
+                </div>
+                <div class="nav-item nav-link px-3">
+                    <NavLink class="nav-link" href="aspuserrole_admin">
+                        <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>User to Role Admin
+                    </NavLink>
+                </div>
+
+
+@*                 <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Admin/Manage">
+                        <span class="bi bi-database-nav-menu" aria-hidden="true"></span> Admin Tools
+                    </NavLink>
+                </div>
+ *@ 
+ @*                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link" \>
+                            <button type="button" class="btn btn-secondary" @onclick="AdminAccess">@(showAdminItems ? "Return Main Menu" : "Administration Menu")  </button>
+                        </NavLink>
+                    </div> *@
+
+            </Authorized>
+        </AuthorizeView>
+         @* } *@
+        @*        else
+        {
+        <AuthorizeView Roles="Admin" Context="authContext">
+            <Authorized>
+                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link"  href="allbookings">
+                                <span class="bi bi-book-nav-menu" aria-hidden="true"></span> All Bookings
+                            </NavLink>
+                        </div>
+
+                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link"  href="bkg_user_admin">
+                            <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> Bkg User Admin
+                            </NavLink>
+                        </div>
+                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link"  href="aspnetuser_admin">
+                                <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span>AppUser Admin
+                            </NavLink>
+                        </div>
+                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link"  href="bookingavailability">
+                                <span class="bi bi-book-nav-menu" aria-hidden="true"></span> Booking Avail_Mnt
+                            </NavLink>
+                        </div>
+                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link"  href="user-bookings">
+                                <span class="bi bi-book-nav-menu" aria-hidden="true"></span> User Bookings
+                            </NavLink>
+                        </div>
+                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link"  href="bkgproperty_admin">
+                                <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>Property Admin
+                            </NavLink>
+                        </div>
+                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link"  href="asprole_admin">
+                                <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>Role Admin
+                            </NavLink>
+                        </div>
+                    <div class="nav-item nav-link px-3">
+                        <NavLink class="nav-link"  href="aspuserrole_admin">
+                                <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>User to Role Admin
+                            </NavLink>
+                        </div>
+                <div class="nav-item nav-link px-3">
+                            <NavLink class="nav-link"  href="sitestats">
+                                <span class="bi bi-asterisk-nav-menu" aria-hidden="true"></span>Site Statistics
+                            </NavLink>
+                        </div>
+
+@*                 <div class="nav-item nav-link px-3">
+                    <NavLink class="nav-link" \>
+                        <button type="button" class="btn btn-secondary" @onclick="AdminAccess">@(showAdminItems ? "Return Main Menu" : "Administration Menu")  </button>
+                    </NavLink>
+                </div> *@
+                @* </Authorized> *@
+        @* </AuthorizeView> *@
+        @* } *@
+
+</nav>
+
+    <div style="font-size: 0.6em; color: aliceblue; text-align:center;">
+        <br />Ver: 1.0.62 2025-12-12<br />
+    </div>
+    @if (EnvInfo.ShouldDisplayEnvInfo)
+    {
+        <div class="env-info" aria-hidden="false" style="color:hotpink" >
+            <div class="env-line env-name">Env: @EnvInfo.EnvironmentName</div>
+            <div class="env-line env-server">Svr: @EnvInfo.ServerName</div>
+            <div class="env-line env-db">DB : @EnvInfo.DatabaseName</div>
+        </div>
+    }
+    
+    @* <br/>
+    <br />
+    <br />
+    <div class="nav-item px-3 nav-bottom center" >
+            
+        <a href="https://www.SmarterASP.NET/index?r=PontifexRM">
+            <img src="https://www.SmarterASP.NET/affiliate/234x60.gif" border="0">
+        </a>
+    </div> *@
+</div>
+
+@code {
+    private string? currentUrl;
+    private bool showtestItems = true;
+    private bool showAdminItems = false;
+    private bool _expandSubNav = false;
+    public bool expandSubNav { set; get; } = false;
+
+
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+
+    }
+    public void AdminAccess()
+    {
+        showAdminItems = !showAdminItems;
+        // Navigate to the home location after toggling admin view
+        NavigationManager.NavigateTo("/", forceLoad: false, replace: true);
+        StateHasChanged();
+    }
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}
+
+<style>
+    html, body, #app {
+      height: 100%;
+    }
+
+    .nav-scrollable {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 56px);
+    }
+    /* The nav becomes the scrollable area and sits above the pinned footer */
+    .nav-scrollable nav {
+        position: relative;
+        z-index: 2; /* ensure nav content renders above the nav-bottom */
+        flex: 1 1 auto;
+        overflow: auto;
+    }
+
+    /* Pinned bottom item */
+    .nav-scrollable .nav-bottom {
+            position: absolute; /* pin to bottom of the .nav-scrollable container */
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1; /* lower than nav so nav items can scroll over (hide) it */
+            text-align: left; /* default: left aligned */
+            padding: 0.5rem 1rem; /* mirror nav item padding */
+            background: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+    }
+            /* Force left alignment and override other CSS that might push the item right */
+            .nav-scrollable .nav-bottom.left {
+                justify-content: flex-start !important;
+                text-align: left !important;
+            }
+
+                /* Ensure the anchor and image do not have auto margins pushing them right */
+                .nav-scrollable .nav-bottom.left a,
+                .nav-scrollable .nav-bottom.left img {
+                    margin: 0 !important;
+                }
+
+                .nav-scrollable .nav-bottom.left img {
+                    display: inline-block;
+                    height: auto;
+                    max-width: 100%;
+                }
+
+            /* Center variation, if needed later */
+            .nav-scrollable .nav-bottom.center {
+                justify-content: center;
+            }
+    .env-badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        color: #fff;
+        font-weight: 600;
+        text-transform: capitalize;
+        white-space: nowrap;
+        box-shadow: 0 0 0 1px rgba(0,0,0,0.05) inset;
+    }
+
+    .env-dev {
+        background: #198754;
+    }
+    /* green */
+    .env-testing {
+        background: #fd7e14;
+    }
+    /* orange */
+    .env-staging {
+        background: #0d6efd;
+    }
+    /* blue */
+    .env-local {
+        background: #6f42c1;
+    }
+    /* purple */
+    .env-prod {
+        background: #6c757d;
+    }
+    /* muted gray for production */
+    .env-other {
+        background: #343a40;
+    }
+    /* dark */
+        /* Environment indicator styling - closely formed rows, left-justified */
+    .env-info {
+        display: inline-block;
+        text-align: left;
+        color: aliceblue;
+        font-size: 0.62rem;
+        line-height: 1.05; /* closely formed rows */
+        margin: 1rem ;
+        padding: 0;
+        white-space: nowrap;
+    }
+
+    .env-info .env-line {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* optional color classes for other uses */
+    .env-dev { background: #198754; }
+    .env-testing { background: #fd7e14; }
+    .env-staging { background: #0d6efd; }
+    .env-local { background: #6f42c1; }
+    .env-prod { background: #6c757d; }
+    .env-other { background: #343a40; }
+    
+</style>
+

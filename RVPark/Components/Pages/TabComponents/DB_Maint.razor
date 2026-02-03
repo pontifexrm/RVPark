@@ -1,0 +1,17 @@
+﻿@inherits LayoutComponentBase
+@layout RVPark.Components.Layout.MainLayout
+
+@* <h4>Database Table CRUD</h4> *@
+
+<div>
+    @* <h2>DB Table Name</h2> *@
+    @* <hr /> *@
+    <div class="row">
+        <div class="col-lg-2">
+            <DBTblNavMenu />
+        </div>
+        <div class="col-lg-10">
+            @Body
+        </div>
+    </div>
+</div>

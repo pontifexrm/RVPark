@@ -1,0 +1,494 @@
+﻿@page "/availability"
+@* // this verison uses a calendar grid to show availability for public viewing detailing each day and all properties *@
+@rendermode InteractiveServer
+<PageTitle>RV+Apmt Availability</PageTitle>
+
+
+@using RVPark.Data
+@using RVPark.Components.Account
+@using RVPark.Utilities
+@using System.Globalization
+@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using System.Security.Claims
+
+
+@* Is Being Used *@
+
+@inject IdentityUserAccessor UserAccessor
+
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@inject ApplicationDbContext ApplicationDbContext
+
+@inject IConfiguration configuration
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject IJSRuntime JSRuntime
+
+
+
+
+        <div class="print-section">
+            <h3 style="color:darkolivegreen;">RVPark and Apartment on Fitz. Availability - See what dates are available.</h3>
+            
+            <div class="calendar-navigation" style="display:flex;flex-direction:row; text-align:center;">
+                <div class="form-group" style="text-align:center; margin-left: 1%;">
+                    <button class="btn btn-primary" @onclick="PreviousMonth">&lt;</button>
+                </div>
+                <div style="width: 140px; text-align: center;">
+                    <span class="current-month">@CurrentMonth.ToString("MMMM yyyy")</span>
+                </div>
+                <div class="form-group" style="text-align:center; margin-left: 1%;">
+                    <button class="btn btn-primary" @onclick="NextMonth">&gt;</button>
+                </div>
+        <AuthorizeView Roles="Admin" Context="authContext">
+            <Authorized>
+                <div class="form-group" style="text-align:center; margin-left:1%;">
+                    <button class="btn btn-secondary no-print" @onclick="PrintCalendar">Print Calendar</button>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+            </div>
+
+            <div class="calendar-grid table-responsive">
+                <div class="calendar-header">
+                    @* set for monday start of week, else for Sunday us (var day in culture.DateTimeFormat.AbbreviatedDayNames) below *@
+                    @foreach (var day in culture.DateTimeFormat.AbbreviatedDayNames.Skip(1).Concat(culture.DateTimeFormat.AbbreviatedDayNames.Take(1)))
+                    {
+                        <div class="calendar-day-header">@day</div>
+                    }
+                </div>
+
+                <div class="calendar-body">
+                    @foreach (var dy in calendarDays)
+                    {
+                        <div class="calendar-day @dy.DayStatusCss" @onclick="() => ShowDayDetails(dy)">
+                            <div class="date-number" >@dy.Date.Day</div>
+
+                            <div class="day-status-list">
+                                @foreach (var p in dy.Properties)
+                                {
+                                    @if(p.Status != "")
+                                    {
+        @*                                 <span class="prop-status @p.StatusCss" title="@p.PropName">
+                                                <strong>@p.PropName</strong>: @(!string.IsNullOrEmpty(p.Status) ? p.Status : "")
+                                            </span> <br /> *@
+                                        <div class="calendar-day @p.StatusCss">
+                                            <span class="prop-status" title="@p.PropName">
+                                                <strong>@p.PropName</strong>: @(!string.IsNullOrEmpty(p.Status) ? p.Status : "")
+                                            </span>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Add print button outside the print section -->
+        @* <button class="btn btn-secondary no-print" @onclick="PrintCalendar">Print Calendar</button> *@
+
+@*         @if (showDayDetail)
+        {
+            <div class="day-detail-modal">
+                <div class="modal-content">
+                    <h4>@selectedDay.Date.ToString("D")</h4>
+                    <select class="form-control" @bind="selectedDay.Status">
+                        <option value="Available">Available</option>
+                        <option value="Busy">Busy</option>
+                        <option value="Unavailable">Unavailable</option>
+                    </select>
+                    <button class="btn btn-primary mt-2" @onclick="CloseDetails">Close</button>
+                </div>
+            </div>
+        } *@
+
+
+
+
+@code {
+    private string BkgType = "RVPark On Fitz";
+    private Bkg_Booking currentBooking = new();
+    private List<Bkg_Property> BkgProperties = new List<Bkg_Property>();
+    private List<Bkg_Availability> availabilities = new List<Bkg_Availability>();
+
+    private DateTime CurrentMonth = DateHelper.GetCurrentDateInNZ(); //DateTime.Today;
+    private List<DayEntry> calendarDays = new();
+    private bool showDayDetail = false;
+    private DayEntry selectedDay = new();
+    private readonly CultureInfo culture = CultureInfo.CurrentCulture;
+    private int propertyID = 1; // should be id of first in loaded properties
+
+    private bool isAdmin = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentMonth = DateHelper.GetCurrentDateInNZ();
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        isAdmin = user.IsInRole("Admin");
+
+
+        BkgProperties = await ApplicationDbContext.bkg_Properties.ToListAsync();
+        //  await LoadBookings();
+        await GenerateCalendar();
+
+    }
+
+    private async Task GenerateCalendar()
+    {
+        calendarDays.Clear();
+
+        var monthStart = new DateTime(CurrentMonth.Year, CurrentMonth.Month, 1);
+        var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+        var startDate = monthStart.AddDays(-((int)monthStart.DayOfWeek) + 1);
+        if (monthStart.DayOfWeek == DayOfWeek.Sunday) startDate = monthStart.AddDays(-6);
+        var endDate = monthEnd.AddDays(7 - (int)monthEnd.DayOfWeek);
+
+        var todaydte = DateHelper.GetCurrentDateInNZ().Date.AddDays(-1);
+        if (isAdmin) todaydte = monthStart;
+
+        availabilities = new List<Bkg_Availability>();
+        await GetAvailability(monthStart, monthEnd);
+
+        // Build a lookup: date -> (propertyId -> availability)
+        var availByDate = availabilities
+            .GroupBy(a => a.DateAvailable.Date)
+            .ToDictionary(
+                g => g.Key,
+                g => g.ToDictionary(a => a.Bkg_PropertyId, a => a)
+            );
+
+        if (propertyID > 0)
+        {
+            for (var date = startDate; date <= endDate; date = date.AddDays(1))
+            {
+                string dayStatus = string.Empty; int dayBooked = 0; int dayBlocked = 0; bool isothermth = false;
+                // Create one PropertyDayStatus per property for this date
+                var propsForDate = new List<PropertyDayStatus>(BkgProperties.Count);
+                foreach (var prop in BkgProperties)
+                {
+                    string status;
+                    // if we have an availability row for this date/property
+                    if (availByDate.TryGetValue(date.Date, out var perProp) &&
+                        perProp.TryGetValue(prop.PropertyId, out var availability))
+                    {
+                        status = availability.Available ? "Available" : "Booked";
+                        dayBooked = !availability.Available ? dayBooked++ : dayBooked;
+                    }
+                    else
+                    {
+                        status = "N/A";
+                        dayBlocked++;  //no record
+                    }
+
+                    // hide dates outside current month or before today for non-admins
+                    if (date.Month != CurrentMonth.Month || date < todaydte)
+                    {
+                        status = "";
+                        isothermth = true;
+                    }
+
+                    propsForDate.Add(new PropertyDayStatus
+                    {
+                        PropName = StringExtensions.FirstWord(prop.Name) ?? $"#{prop.PropertyId}",
+                        Status = status,
+                        StatusCss = string.IsNullOrEmpty(status) ? "other-month" : GetStatusCss(status, date)
+                    });
+                }
+
+                // so if both available daybooked == 0 AND dayavail == 0 all available
+                if (dayBooked == 0 && dayBlocked == 0) dayStatus = "DayAllOk";
+                else if (dayBooked == 2) dayStatus = "DayNOTOk";
+                else if (dayBooked == 1 ) dayStatus = "DayPartOk";
+                else if (dayBlocked == 1) dayStatus = "DayPartOk";
+                else if (dayBlocked == 2) dayStatus = "N/A";
+                // if daybooked == 2 don't care dayavailable then neither available
+                // if daybooled == 1 don't care dayavailable then partial available
+         
+
+                calendarDays.Add(new DayEntry
+                {
+                    Date = date,
+                    // so if both available daybooked == 0
+                    DayStatusCss = isothermth ? "other-month" : GetStatusCss(dayStatus, date),
+                    Properties = propsForDate
+                });
+            }
+        }
+
+        StateHasChanged();
+
+    }
+    private async Task GetAvailability(DateTime dteStart, DateTime dteEnd)
+    {
+        var query = ApplicationDbContext.bkg_Availabilities
+               .Include(a => a.Bkg_Property)
+               .AsQueryable();
+
+        // if (currentBooking.PropertyId != null)
+        // {
+        //     query = query.Where(a => a.Bkg_PropertyId == propertyID);
+        // }
+
+        if (dteStart != null)
+        {
+            query = query.Where(a => a.DateAvailable >= dteStart);
+        }
+
+        if (dteEnd != null)
+        {
+            query = query.Where(a => a.DateAvailable <= dteEnd);
+        }
+        query = query.OrderBy(a => a.DateAvailable).ThenBy(a => a.Bkg_PropertyId);
+
+        // if (!string.IsNullOrEmpty(searchStatus))
+        // {
+        //     query = query.Where(a => a.AvailabilityStatus == searchStatus);
+        // }
+
+        // if (!string.IsNullOrEmpty(searchIsAvail))
+        // {
+        //     bool isAvailable = searchIsAvail == "Yes";
+        //     query = query.Where(a => a.Available == isAvailable);
+        // }
+        try
+        {
+
+            availabilities = await query.AsNoTracking().ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            // Console.WriteLine($"Error ordering availability: {ex.Message}");
+        }
+        //availabilities = await query.AsNoTracking().ToListAsync();   // Simulate getting availability status
+        // return GetRandomStatus();
+    }
+    // private string GetStatusCss(DateTime date)
+    // {
+    //     if (date.Month != CurrentMonth.Month) return "other-month";
+    //     return selectedDay.Status switch
+    //     {
+    //         "Available" => "status-available",
+    //         "Booked" => "status-busy",
+    //         "Unavailable" => "status-unavailable",
+    //         _ => ""
+    //     };
+    // }
+    private string GetStatusCss(string daystatus, DateTime date)
+    {
+        if (date.Month != CurrentMonth.Month) return "other-month";
+
+        return daystatus switch
+        {
+            "Available" => "status-available",
+            "Booked" => "status-busy",
+            "N/A" => "status-unavailable",
+            "DayAllOk" =>"status-dayallavailable",
+            "DayNOTOk" =>"status-dayallbusy",
+            "DayPartOk" =>"status-daypartavailable",
+            _ => ""
+        };
+    }
+
+    private string GetRandomStatus()
+    {
+        var statuses = new[] { "Available", "Busy", "Unavailable" };
+        return statuses[new Random().Next(statuses.Length)];
+    }
+    private async Task propertyChanged()
+    {
+        await GenerateCalendar();
+    }
+    private async Task PreviousMonth()
+    {
+        CurrentMonth = CurrentMonth.AddMonths(-1);
+        await GenerateCalendar();
+    }
+
+    private async Task NextMonth()
+    {
+        CurrentMonth = CurrentMonth.AddMonths(1);
+        await GenerateCalendar();
+    }
+
+    private async Task ShowDayDetails(DayEntry day)
+    {
+        // selectedDay = day;
+        // showDayDetail = true;
+    }
+
+    private async Task CloseDetails()
+    {
+        // showDayDetail = false;
+        // GenerateCalendar(); // Refresh calendar after changes
+    }
+
+    public class DayEntryOld
+    {
+        public DateTime Date { get; set; }
+        public string Status { get; set; } = "Available";
+        public string StatusCss { get; set; } = "";
+    }
+    public class DayEntry01
+    {
+        public DateTime Date { get; set; }
+        public string Status { get; set; } = "Available";
+        public string StatusCss { get; set; } = "";
+    }
+    public class DayEntry02
+    {
+        public DateTime Date { get; set; }
+        public string Status { get; set; } = "Available";
+        public string StatusCss { get; set; } = "";
+    }
+
+    /// <summary>
+    /// Represents availability information for a single calendar date across multiple properties.
+    /// </summary>
+    public class DayEntry
+    {
+        public DateTime Date { get; set; }
+        public string DayStatusCss { get; set; } = string.Empty;
+        /// <summary>
+        /// One entry per property. The list length varies with the number of properties.
+        /// </summary>
+        public List<PropertyDayStatus> Properties { get; set; } = new List<PropertyDayStatus>();
+    }
+
+    /// <summary>
+    /// Availability status for a single property on a specific date.
+    /// </summary>
+    public class PropertyDayStatus
+    {
+        public string PropName { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string StatusCss { get; set; } = string.Empty;
+    }
+    private void PrintCalendar()
+    {
+        // Trigger browser print dialog
+        NavigationManager.NavigateTo("javascript:window.print();", forceLoad: false);
+    }
+    // private async Task PrintCalendar()
+    // {
+    //     await JSRuntime.InvokeVoidAsync("window.print");
+    // }
+}
+
+<style>
+    .calendar-navigation {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        border: 4px solid #ddd;
+    }
+
+    .calendar-header, .calendar-body {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1px;
+        background-color: #ddd;
+    }
+
+    .calendar-day-header {
+        padding: 10px;
+        text-align: center;
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+
+    .calendar-day {
+        min-height: 40px;
+        padding: 5px;
+        background-color: white;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .calendar-body {
+        border: 2px solid #ddd;
+    }
+    .other-month {
+        background-color: #f8f9fa;
+        color: #6c757d;
+    }
+
+    .date-number {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .day-status {
+        font-size: 0.8em;
+    }
+
+    .status-available {
+        background-color: lightgreen;
+    }
+    .status-dayallavailable {
+        background-color: lightgreen;
+    }
+
+    .status-daypartavailable {
+        background-color: lightgreen;
+    }
+    .status-dayallbusy {
+        background-color: lightsteelblue;
+    }
+
+    .status-busy {
+        background-color: beige;
+    }
+
+    .status-unavailable {
+        background-color: darkgrey;
+    }
+
+    .status-dayallunavailable {
+        background-color: darkgrey;
+    }
+
+    .day-detail-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 5px;
+        min-width: 300px;
+    }
+
+
+</style>

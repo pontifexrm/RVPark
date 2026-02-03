@@ -1,0 +1,163 @@
+﻿@page "/Admin/user-bookings"
+@rendermode InteractiveServer
+
+@using RVPark.Data
+@using Microsoft.EntityFrameworkCore
+@using RVPark.Components.Account
+
+@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using TNZAPI.NET;
+@using TNZAPI.NET.Core;
+@using TNZAPI.NET.Api.Addressbook.Contact.Dto;
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityUserAccessor UserAccessor
+
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@inject ApplicationDbContext ApplicationDbContext
+
+@inject IConfiguration configuration
+
+<h3>Users and Their Bookings</h3>
+<div class="pagination-controls">
+    <button class="btn btn-primary" @onclick="UserPreviousPage" disabled="@(userCurrentPage == 1)">Previous</button>
+    <span>Page @userCurrentPage of @userTotalPages</span>
+    <button class="btn btn-primary" @onclick="UserNextPage" disabled="@(userCurrentPage == userTotalPages)">Next</button>
+</div>
+
+@if (users == null || users.Count == 0)
+{
+    <p><em>Loading users...</em></p>
+}
+else
+{
+    <div class="row">
+        <!-- Master Section: List of Users -->
+        <div class="col-md-3">
+            <h4>Users</h4>
+            <ul class="list-group">
+                @foreach (var user in PaginatedUsers)
+                {
+                    <div class="list-group-item" style="width:100%;" @onclick="() => SelectUser(user)">
+                        @user.UserFirstName @user.UserLastName (@user.UserName)
+                    </div>
+                }
+            </ul>
+        </div>
+
+        <!-- Detail Section: Bookings for Selected User -->
+        <div class="col-md-8">
+            @if (selectedUser == null)
+            {
+                <p>Select a user to view their bookings.</p>
+            }
+            else
+            {
+                <h4>Bookings for @selectedUser.UserName</h4>
+                @if (bookings == null || bookings.Count == 0)
+                {
+                    <p><em>No bookings found for this user.</em></p>
+                }
+                else
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th>Arrival</th>
+                                <th>Departure</th>
+                                <th>Nights</th>
+                                <th>Status</th>
+                                <th>Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var booking in bookings)
+                            {
+                                <tr>
+                                    <td>@booking.Bkg_Property.Name</td>
+                                    <td>@booking.DateArrive.ToString("dd/MM/yyyy")</td>
+                                    <td>@booking.DateDepart.ToString("dd/MM/yyyy")</td>
+                                    <td>@booking.Nights</td>
+                                    <td>@booking.BookingStatus</td>
+                                    <td>@booking.BookingComments</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private List<Bkg_User> users = new();
+    private Bkg_User? selectedUser;
+    private List<Bkg_Booking> bookings = new();
+    private bool showAll = false;
+    private int userCurrentPage = 1; // Current page for users
+    private int userPageSize = 8;   // Number of users per page
+    private int userTotalPages => (int)Math.Ceiling((double)users.Count / userPageSize);
+
+    private IEnumerable<Bkg_User> PaginatedUsers => users
+        .Skip((userCurrentPage - 1) * userPageSize)
+        .Take(userPageSize);
+
+    private void UserNextPage()
+    {
+        if (userCurrentPage < userTotalPages)
+        {
+            userCurrentPage++;
+            selectedUser = null;
+        }
+    }
+
+    private void UserPreviousPage()
+    {
+        if (userCurrentPage > 1)
+        {
+            userCurrentPage--;
+            selectedUser = null;
+        }
+    }
+    
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load all users
+        // users = await ApplicationDbContext.bkg_Users.ToListAsync();
+
+        // Load Users with order by Usernames
+        users = await ApplicationDbContext.bkg_Users
+           .OrderBy(u => u.UserFirstName)
+           .ThenBy(u => u.UserLastName)
+           .ThenBy(u => u.UserName)
+           .ToListAsync();
+            
+    }
+
+
+    private async Task SelectUser(Bkg_User user)
+    {
+        selectedUser = user;
+
+        // Load bookings for the selected user
+        bookings = await ApplicationDbContext.bkg_Bookings
+            .Include(b => b.Bkg_Property)
+            .Where(b => b.UserId == user.UserId)
+            .ToListAsync();
+        
+    }
+}

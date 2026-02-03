@@ -1,0 +1,562 @@
+﻿@page "/AskUsFmUser"
+@rendermode InteractiveServer
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Identity
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.SignalR
+@using Microsoft.AspNetCore.WebUtilities
+@using RVPark.Data
+@using RVPark.Components.Account
+@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore
+@using RVPark.Services
+@using RVPark.Services.Email
+@using RVPark.Services.SMS
+
+@using Syncfusion.Blazor.Buttons
+@inject IConfiguration configuration
+@inject ApplicationDbContext ApplicationDbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContext
+
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpContextAccessorService httpContextAccessorService
+@inject IEmailService EmailService
+@inject ISmsService SmsService
+@inject RVPark.Features.Bookings.Services.IBookingEngine BookingEngine
+
+<style>
+
+
+    .e-switch-wrapper .e-switch-on, .e-css.e-switch-wrapper .e-switch-on {
+        background-color: rgb(25, 135, 84);
+        color: #fff;
+    }
+</style>
+
+<PageTitle>Ask Us</PageTitle>
+
+<h1>Ask, Check Availability, maybe Book.</h1>
+
+<div class="row">
+    <div class="col-lg-6">
+            <EditForm Model="ContactInput" OnValidSubmit="@ExitForm" FormName="ContactForm">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" role="alert" />
+                <span>
+                    <small>
+                        Please register, you can then view bkg-availablility. You can Opt out.<br />
+                    </small>
+                </span>
+
+                <br />
+                <span><i><b>Query Availability for RV Park or Apartment with In/Out Dates.</b></i></span>
+
+                <div class="form-group" style="text-align:left; max-width: 75%; margin-left: 2%;">
+                    <label>RVPark/Apartment</label>
+                    <select style="flex: 1 1 600px;  margin-left: 2%;" @bind="searchPropertyId">
+                        <option value="">Select</option>
+                        @foreach (var property in properties)
+                        {
+                            @if (property.PropertyId == 1)
+                            {
+                                <option value="@property.PropertyId">@property.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group" style="display:flex;flex-direction:row;">
+                    <div class="form-group" style=" text-align:center; width: 180px; margin-left: 1%">
+                        <label for="fmdate">Arriving</label>
+                    <SfDatePicker TValue="DateTime ?" Value="@Fmdate" Placeholder='Choose a Date' ID="fmdate" Format="dd/MM/yyyy" Locale="en-NZ">
+                            <DatePickerEvents TValue="DateTime?" ValueChange="DteAriveChnge"></DatePickerEvents>
+                        </SfDatePicker>
+                    </div>
+
+                    <div class="form-group" style=" text-align:center; width: 180px; margin-left: 1%">
+                        <label for="tmdate">Departing</label>
+                    <SfDatePicker TValue="DateTime ?" Value="@Todate" Placeholder='Choose a Date' ID="todate" Format="dd/MM/yyyy" Locale="en-NZ">
+                            <DatePickerEvents TValue="DateTime?" ValueChange="DteDepartChnge"></DatePickerEvents>
+                        </SfDatePicker>
+                    </div>
+
+@*                     <div class="form-group" style="max-width: 25%;  margin-left: 2%">
+                        <label for="fmdate">From</label>
+                        <InputDate @bind-Value=ContactInput.Fmdate class="form-control" id="fmdate" />
+                        <ValidationMessage For="() => ContactInput.Fmdate" />
+                    </div>
+                    <div class="form-group" style="max-width: 25%;  margin-left: 2%">
+                        <label for="todate">To</label>
+                        <InputDate @bind-Value=ContactInput.Todate class="form-control" id="todate" />
+                        <ValidationMessage For="() => ContactInput.Todate" />
+                    </div> *@
+
+                </div>
+                <br/>
+                <span><i><b>Contact Us with a message or question.</b></i></span>
+                <div class="form-group" style="max-width: 75%;width: 500px; margin-left: 2%">
+                    <label for="subject">Subject</label>
+                    <InputText @bind-Value="ContactInput.Subject" class="form-control" id="subject" />
+                    <ValidationMessage For="() => ContactInput.Subject" />
+                </div>
+                <div class="form-group" style="max-width: 75%;width:500px;  margin-left: 2%">
+                    <label for="message">Message</label>
+                    <InputTextArea @bind-Value="ContactInput.Message" class="form-control" id="message" />
+
+                </div>
+                @if(currentStep == 1)
+                {
+                    <button type="button" class="w-100 btn btn-lg btn-primary" @onclick="CheckBkgAvailable">Check Availability, Message US. </button>
+                }
+                else
+                {
+                    @if (verificationResult != null)
+                    {
+                        <p>@verificationResult</p>
+                    } 
+                    @if (bkgAvailable)
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="SaveBooking">Save</button>
+                    }
+                    <button type="button" class="btn btn-secondary" @onclick="ExitForm">Cancel</button>
+                }
+            </EditForm>
+    </div>
+</div>
+@if (confirmSent)
+{
+    <div class="modal show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmation has been sent!</h5>
+                    <button type="button" class="btn-close" @onclick="CloseSent"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Emails may take many minutes to arrive depending on the email server delay they encounter. Do Please Wait.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseSent">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool isSubmitting = false;
+    private int currentStep = 1;
+
+    private string? verificationResult;
+
+    private int searchPropertyId = 0; // should be id of first in loaded properties
+
+    public EmailMessage emailMessage { get; set; } = new EmailMessage();
+    private string userIpAddress = string.Empty;
+
+    private List<Bkg_Property> properties = new();
+
+    private ContactInputModel ContactInput { get; set; } = new();
+
+    private Bkg_Booking newBooking = new();
+    private Bkg_Booking currentBooking = new();
+    private Bkg_Booking orgnBkg = new();
+    private Bkg_User currentUser = new();
+
+    public DateTime Fmdate { get; set; } = DateHelper.GetCurrentDateInNZ();
+    public DateTime Todate { get; set; } = DateHelper.GetCurrentDateInNZ();
+    private bool bkgAvailable = false;
+    private bool confirmSent = false;
+    private void CloseSent()
+    {
+        confirmSent = false;
+        ExitForm();
+    }
+    private sealed class ContactInputModel
+    {
+        public DateTime Fmdate { get; set; } = DateHelper.GetCurrentDateInNZ();
+        public DateTime Todate { get; set; } = DateHelper.GetCurrentDateInNZ();
+        public string Subject { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // properties = await ApplicationDbContext.bkg_Properties.ToListAsync() ?? new List<Bkg_Property>();
+        properties = await ApplicationDbContext.bkg_Properties
+                .Where(p => p.Enabled)
+                .ToListAsync() ?? new List<Bkg_Property>();
+        userIpAddress = httpContextAccessorService.GetUserIpAddress();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            var userName = user.Identity.Name;
+            currentUser = await ApplicationDbContext.bkg_Users.FirstOrDefaultAsync(u => u.UserName == userName);
+            // Use the currentUser as needed
+        }
+        ContactInput.Fmdate = DateHelper.GetCurrentDateInNZ();;
+        ContactInput.Todate = AddOneDay(ContactInput.Fmdate);
+        Todate = ContactInput.Todate;
+        Fmdate = ContactInput.Fmdate;   
+
+
+
+    }
+
+    private async Task CheckBkgAvailable ()
+    {
+        if (searchPropertyId != 0 && ContactInput.Fmdate < ContactInput.Todate)
+        {
+            newBooking = new Bkg_Booking();
+            newBooking.DateArrive = ContactInput.Fmdate.Date;
+            newBooking.DateDepart = ContactInput.Todate.Date;
+            newBooking.UserId = currentUser.UserId;
+            newBooking.PropertyId = searchPropertyId;
+            newBooking.BookingStatus = "Requested";
+            newBooking.Bkg_User = currentUser;
+            //        newBooking.Bkg_Property = BkgProperties.FirstOrDefault(p => p.PropertyId == rqstPropertyId);
+            currentBooking = newBooking;  // maybe ???
+
+            bkgAvailable = BookingEngine.RequestBooking(newBooking);
+            if (bkgAvailable)
+            {
+                verificationResult = "✅ Your booking request is AVAILABLE. You can SAVE it if you like. Press Cancel if you do not.";
+            }
+            else
+            {
+                verificationResult = "❌  Sorry but your booking request is not possible. ";
+            }
+        }
+        else
+        {
+            verificationResult = "❌  Sorry but your booking request is not possible or you have not made one. ";
+        }
+        if(ContactInput.Subject != string.Empty || ContactInput.Message != string.Empty)
+        {
+            verificationResult += " We have your message and will get back to you shortly. Meantime you will recieve an email copy of your message.";
+            JustSendContactUs();
+        }
+
+        currentStep = 2;
+    }
+    private Task ExitForm()
+    {
+        NavigationManager.NavigateTo("/");
+        return Task.CompletedTask;
+    }
+    private async Task SaveBooking()
+    {
+        currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
+        currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
+        string s = configuration["SMSSettings:SMSrept"];
+        string txtrept = Chk_E_164_Phone(s);
+        //        currentBooking.DateArrive = Fmdate; currentBooking.DateDepart = Todate;
+
+        // if a new booking then we need to Create it else Change it.
+        if (currentBooking.BookingId == 0) // A new booking
+        {
+            currentBooking.DateArrive = Fmdate.Date; currentBooking.DateDepart = Todate.Date;
+            currentBooking.CreatedDte = DateTime.UtcNow;
+            currentBooking.UpdatedDte = DateTime.UtcNow;
+            var savedOK = await BookingEngine.CreateBookingAsync(currentBooking);
+            if (!savedOK)
+            {
+                verificationResult += "❌ Error found saving this new Booking";
+            }
+            else
+            {
+                // will send an email confirmation
+                SendEmailConfirmation();
+                SendTxtConfirmation(txtrept); //send a txt to System Admin
+                // Need to send a cc'd to rvpark@pontifex.nz
+                SendCCEmailConfirmation();
+            }
+        }
+        else // editing existing bkg
+        {
+            currentBooking.UpdatedDte = DateTime.UtcNow;
+
+            var savedOK = await BookingEngine.EditBookingAsync(orgnBkg, currentBooking);
+            if (!savedOK)
+            {
+                verificationResult += "❌ Error found saving this edited Booking";
+
+            }
+            else
+            {
+                // will send an email confirmation
+                SendEmailConfirmation();
+                SendTxtConfirmation(txtrept); //send a txt to System Admin
+                // Need to send a cc'd to rvpark@pontifex.nz
+                SendCCEmailConfirmation();
+            }
+
+        }
+        confirmSent = true;
+        StateHasChanged();
+        //ExitForm();
+    }
+    private async Task JustSendContactUs()
+    {
+        if (isSubmitting)
+            return;
+
+        isSubmitting = true;
+        emailMessage.Name = currentUser.UserFirstName + " " + currentUser.UserLastName;
+        emailMessage.Email = currentUser.UserEmail;
+        emailMessage.Phone = currentUser.UserPhone;
+        emailMessage.Subject = ContactInput.Subject;
+        emailMessage.Message = ContactInput.Message;
+        emailMessage.Nzmca = currentUser.UserNZMCA;
+        emailMessage.Fmdate = ContactInput.Fmdate.Date;
+        emailMessage.Todate = ContactInput.Todate.Date;
+        emailMessage.PropertyId = searchPropertyId;
+        emailMessage.Properties = properties;
+
+        var resultMsg = await EmailService.SendEmailAsync(emailMessage.Email, emailMessage.Subject, emailMessage.ChkMsg);
+        if (resultMsg){verificationResult = string.Concat("Email Confirmation sent to ", emailMessage.Email);}
+        else {verificationResult = string.Concat("Email Confirmation could NOT be sent to ", emailMessage.Email);}
+
+        // Now send a CC to admin
+        string ccemail = configuration["EmailSettings:CCEmail"];
+        resultMsg = await EmailService.SendEmailAsync(ccemail, "cc'd msg re: " + emailMessage.Email + "|" + emailMessage.Subject, emailMessage.ChkMsg + " " + userIpAddress);
+        if (resultMsg) { verificationResult = string.Concat("Email Confirmation sent to ", emailMessage.Email); }
+        else { verificationResult = string.Concat("Email Confirmation could NOT be sent to ", emailMessage.Email); }
+
+        // Now send an SMS Msg
+        string rept = configuration["SMSSettings:SMSrept"];
+        var smsrqst = new SmsRequest
+        {
+            To = rept,
+            Message = ConfirmTxtBkgMsg()
+        };
+        SmsResponse smsresultMsg = await SmsService.SendSmsAsync(smsrqst);
+        if (smsresultMsg.Success) {verificationResult += string.Concat(" SMS Msg Confirmation sent to ", rept);}
+        else { verificationResult += string.Concat("SMS Msg Confirmation could NOT be sent to ", rept); }
+
+
+    }
+
+    private async Task SendEmailConfirmation()
+    {
+        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
+
+        var resultMsg = await EmailService.SendEmailAsync(currentBooking.Bkg_User.UserEmail, subjectMsg, ConfirmBkgMsg());
+        if (resultMsg) { verificationResult = string.Concat("Email Confirmation sent to ", emailMessage.Email); }
+        else { verificationResult = string.Concat("Email Confirmation could NOT be sent to ", emailMessage.Email); }
+
+
+    }
+    private async Task SendCCEmailConfirmation()
+    {
+        string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
+
+        var resultMsg = await EmailService.SendEmailAsync(configuration["EmailSettings:CCemail"], subjectMsg, ConfirmBkgMsg());
+        if (resultMsg) { verificationResult += string.Concat("Email Confirmation sent to ", emailMessage.Email); }
+        else { verificationResult += string.Concat("Email Confirmation could NOT be sent to ", emailMessage.Email); }
+
+
+
+    }
+    private void SendTxtConfirmation()
+    {
+        SendTxtConfirmation("");
+    }
+    private async Task SendTxtConfirmation(string txtrept)
+    {
+        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
+
+        if (txtrept.Length == 0)
+        {
+            txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
+        }
+        // Now send an SMS Msg
+        var smsrqst = new SmsRequest
+        {
+            To = txtrept,
+            Message = subjectMsg
+        };
+        SmsResponse smsresultMsg = await SmsService.SendSmsAsync(smsrqst);
+        if (smsresultMsg.Success) { verificationResult += string.Concat(" SMS Msg Confirmation sent to ", txtrept); }
+        else { verificationResult += string.Concat("SMS Msg Confirmation could NOT be sent to ", txtrept); }
+
+
+    }
+    private async Task  SendTxtConfirmationNoEmail(string txtrept)
+    {
+        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
+
+        if (txtrept.Length == 0)
+        {
+            txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
+        }
+
+        var smsrqst = new SmsRequest
+        {
+            To = txtrept,
+            Message = ConfirmBkgMsg()
+        };
+        SmsResponse smsresultMsg = await SmsService.SendSmsAsync(smsrqst);
+        if (smsresultMsg.Success) { verificationResult += string.Concat(" SMS Msg Confirmation sent to ", txtrept); }
+        else { verificationResult += string.Concat("SMS Msg Confirmation could NOT be sent to ", txtrept); }
+
+
+    }
+
+
+    private string ConfirmBkgMsg()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("Kia ora ");
+        sb.Append(currentBooking.Bkg_User.UserFirstName);
+        sb.Append(" ");
+        sb.Append(currentBooking.Bkg_User.UserLastName);
+        sb.Append("\n\n");
+        sb.Append("BkgRef:");
+        sb.Append(currentBooking.BookingId.ToString());
+        sb.Append(" Has been confirmed for ");
+        sb.Append(currentBooking.Bkg_Property.Name);
+        sb.Append(" arriving after mid-day ");
+        sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
+        sb.Append(" departing before mid-day ");
+        sb.Append(currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
+        sb.Append("\n\n");
+        sb.Append("Address is\r\n" +
+                  "        22 Fitzpatrick St\r\n" +
+                  "        Newlands\r\n" +
+                  "        Wellington 6037\r\n\r\n" +
+                  "Access is best from Stewart Drive. Either from the north where you would exit SH1 at Johnsonville or from the South also through Johnsonville's main street. Turn into Fitzpatrick St from Stewart Drive is best. " +
+                  "We are on the left corner of the 2nd street on the left going up Fitzpatrick St.\r\n\r\n" +
+                  "Access from Stewart Drive is also possible via Quigley St. Follow Quigley Street around until it T-intersects with Fitzpatrick St. Your park is then on the left of that intersection.\r\n\r\n" +
+                  "https://www.rvpark.nz/directions click for map from the South \r\n" +
+                  "https://www.rvpark.nz/directionsnorth click for map from the North \r\n" +
+                  "PLEASE BE AWARE: Some of the roads in Newlands are NOT suitable for RVs and larger vehicles SO DO NOT FOLLOW THE Map Apps THEY WILL GET YOU STUCK... Really We Are Not Kidding.\r\n\r\n" +
+                  "Payment is $30 for the night with NZMCA Memebrship otherwise $45 per night, payable in advance please to our bank account.\r\n" +
+                  "        Ronald Pontifex\r\n" +
+                  "        03 0525 0253043 000\r\n" +
+                  "(We have Wise Card if that suits you better.)\r\n\r\n" +
+                  "Please text us on arrival and we shall come out to meets you etc.\r\n" +
+                  "Again many thanks\r\n" +
+                  "Ron Pontifex\r\n" +
+                  "WELLINGTON New Zealand\r\n" +
+                  "Ph 027 304 2002\r\n" +
+                  "E - Mail : rvpark@pontifex.nz\r\n"); return sb.ToString();
+    }
+    private string ConfirmBkgMsgNoEmail()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("Kia ora ");
+        sb.Append(currentBooking.Bkg_User.UserFirstName);
+        sb.Append(" ");
+        sb.Append(currentBooking.Bkg_User.UserLastName);
+        sb.Append("\n\n");
+        sb.Append("BkgRef:");
+        sb.Append(currentBooking.BookingId.ToString());
+        sb.Append(" Has been confirmed for ");
+        sb.Append(currentBooking.Bkg_Property.Name);
+        sb.Append(" arriving after mid-day ");
+        sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
+        sb.Append(" departing before mid-day ");
+        sb.Append(currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
+        sb.Append("\n\n");
+        sb.Append("Address is\r\n" +
+                  "        22 Fitzpatrick St\r\n" +
+                  "        Newlands\r\n" +
+                  "        Wellington 6037\r\n\r\n" +
+                  "Access is best from Stewart Drive. Either from the north where you would exit SH1 at Johnsonville or from the South also through Johnsonville's main street. Turn into Fitzpatrick St from Stewart Drive is best. " +
+                  "We are on the left corner of the 2nd street on the left going up Fitzpatrick St.\r\n\r\n" +
+                  "Access from Stewart Drive is also possible via Quigley St. Follow Quigley Street around until it T-intersects with Fitzpatrick St. Your park is then on the left of that intersection.\r\n\r\n" +
+                  "https://www.rvpark.nz/directions click for map from the South \r\n" +
+                  "https://www.rvpark.nz/directionsnorth click for map from the North \r\n" +
+                  "PLEASE BE AWARE: Some of the roads in Newlands are NOT suitable for RVs and larger vehicles SO DO NOT FOLLOW THE Map Apps THEY WILL GET YOU STUCK... Really We Are Not Kidding.\r\n\r\n" +
+                  "Payment is $30 for the night with NZMCA Memebrship otherwise $45 per night, payable in advance please to our bank account.\r\n" +
+                  "        Ronald Pontifex\r\n" +
+                  "        03 0525 0253043 000\r\n" + // this needs to be a parameter from setup.......
+                  "(We have Wise Card if that suits you better.)\r\n\r\n" +
+                  "Please text us on arrival and we shall come out to meets you etc.\r\n" +
+                  "Again many thanks\r\n" +
+                  "Ron Pontifex\r\n" +
+                  "WELLINGTON New Zealand\r\n" +
+                  "Ph 027 304 2002\r\n" +
+                  "E - Mail : rvpark@pontifex.nz\r\n"); return sb.ToString();
+    }
+    private string ConfirmTxtBkgMsg()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("Kia ora ");
+        sb.Append(currentBooking.Bkg_User.UserFirstName);
+        sb.Append(" ");
+        sb.Append(currentBooking.Bkg_User.UserLastName);
+        sb.Append("\n\n");
+        sb.Append("BkgRef:");
+        sb.Append(currentBooking.BookingId.ToString());
+        sb.Append(" Has been confirmed for ");
+        sb.Append(currentBooking.Bkg_Property.Name);
+        sb.Append(" arriving after mid-day ");
+        sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
+        sb.Append(" departing before mid-day ");
+        sb.Append(currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
+        sb.Append("\n\n");
+        sb.Append("Please refer to your Bkg confirmation Email for full Details.\r\n" +
+                 "from : rvpark@pontifex.nz\r\n"); return sb.ToString();
+    }
+    private string Chk_E_164_Phone(string phne)
+    {
+        string srtn = string.Empty;
+        if (phne.Length > 0)
+        {
+            if (phne.StartsWith("+")) // then likely in the corect format already
+            {
+                srtn = phne.Trim();
+            }
+            else if (phne.StartsWith("0"))// then likely miss country code so remove the "0" and add "+64"
+            {
+                srtn = string.Concat("+64" + phne[1..]); // this prefix should be a configurable for the ountry the app is being run in.
+            }
+        }
+        return srtn;
+    }
+
+    private DateTime AddOneDay(DateTime date)
+    {
+        return date.AddDays(1);
+    }
+    private DateTime SubOneDay(DateTime date)
+    {
+        return date.AddDays(-1);
+    }
+    private void DteAriveChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
+    {
+        Fmdate = args.Value ?? DateHelper.GetCurrentDateInNZ(); Fmdate = Fmdate.Date;
+        if (Todate <= Fmdate)
+        {
+            Todate = AddOneDay(Fmdate);
+        }
+        ContactInput.Fmdate = Fmdate.Date;
+        ContactInput.Todate = Todate.Date;
+        StateHasChanged();
+    }
+    private void DteDepartChnge(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
+    {
+        Todate = args.Value ?? DateHelper.GetCurrentDateInNZ(); Todate = Todate.Date;
+        if (Todate <= Fmdate)
+        {
+
+            Fmdate = SubOneDay(Todate);
+        }
+        ContactInput.Fmdate = Fmdate.Date;
+        ContactInput.Todate = Todate.Date;
+        StateHasChanged();
+    }
+
+
+}

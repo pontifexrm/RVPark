@@ -1,0 +1,340 @@
+﻿@page "/admin/sitestats"
+@rendermode InteractiveServer
+
+@using RVPark.Data
+@using RVPark.Services
+@using Microsoft.EntityFrameworkCore
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Grids
+@using Microsoft.AspNetCore.Components.QuickGrid
+
+
+@* @inject DataTransferService TransferService *@
+@inject ApplicationDbContext dbContext
+<h3>Site Statistics</h3>
+<AuthorizeView Roles="Admin" Context="authContext">
+    <NotAuthorized>
+        <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h4>- You are NOT AUTHORIZED -</h4>
+            </div>
+        </div>
+    </NotAuthorized>
+    <Authorized>
+@* PSEUDOCODE PLAN:
+   1. Replace inline max-width styles on the three card anchors with specific classes:
+      - add `card-1`, `card-2`, `card-3` to give unequal flex sizing.
+      - keep the existing Razor logic and content unchanged inside each card.
+   2. Use a flex container for `.card-list.product-list`:
+      - set `display: flex`, `gap: 0` to eliminate gaps between cards.
+      - ensure full-width layout with no default margins/padding on the container.
+   3. For unequal portions:
+      - assign `.card-1 { flex: 1 1 25%; }`
+      - assign `.card-2 { flex: 1 1 35%; }`
+      - assign `.card-3 { flex: 1 1 40%; }`
+      - these flex rules let cards grow/shrink while targeting those base percentages.
+   4. Make each `.card` a block-level flex column so content fills height:
+      - `display: flex; flex-direction: column;`
+      - `min-width: 0` to prevent overflow.
+   5. Remove gaps and default anchor decorations:
+      - `gap: 0`, `text-decoration: none`, `color: inherit`.
+   6. Add responsive rule:
+      - at `max-width: 900px` switch `.card-list.product-list` to `flex-direction: column` so cards stack.
+      - ensure stacked cards stretch 100% width and have no horizontal gaps.
+   7. Add small visual separators when stacked (optional): use top border for stacked items.
+   8. Preserve all Razor C# code and behavior; only modify markup classes and add CSS.
+*@
+
+<h3>Retreive Log data from RVPark and Display Stats</h3>
+<p>
+    This page allows you to manually trigger the transfer of log data from the RVPark.nz website to the local database,
+    and view statistics on login attempts and visit logs.
+</p>
+<button type="button" class="btn btn-secondary" @onclick="GetLoginStats"> Refresh and Show Statistics </button>
+<br />
+<br />
+    <SfAccordion  Width="98%" ExpandMode="ExpandMode.Single">
+        <Syncfusion.Blazor.Navigations.AccordionItems>
+            <Syncfusion.Blazor.Navigations.AccordionItem >
+                <HeaderTemplate>
+                        <h4 class="card-title">Login Statistics</h4>
+                </HeaderTemplate>
+                <ContentTemplate>
+                        @if (loginStats != null)
+                        {
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Time Period</th>
+                                            <th>Successful Logins</th>
+                                            <th>Failed Logins</th>
+                                            <th>TOTAL Logins</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Last 24 Hours</td>
+                                            <td>@loginStats.SuccessLast24Hours</td>
+                                            <td>@loginStats.FailedLast24Hours</td>
+                                            <td>@loginStats.TotalLoginAttempts24Hours</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Last Week</td>
+                                            <td>@loginStats.SuccessLastWeek</td>
+                                            <td>@loginStats.FailedLastWeek</td>
+                                            <td>@loginStats.TotalLoginAttemptsWeek</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Last Month</td>
+                                            <td>@loginStats.SuccessLastMonth</td>
+                                            <td>@loginStats.FailedLastMonth</td>
+                                            <td>@loginStats.TotalLoginAttemptsMonth</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Last Year</td>
+                                            <td>@loginStats.SuccessLastYear</td>
+                                            <td>@loginStats.FailedLastYear</td>
+                                            <td>@loginStats.TotalLoginAttemptsYear</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        }
+                </ContentTemplate>
+            </Syncfusion.Blazor.Navigations.AccordionItem>
+                <Syncfusion.Blazor.Navigations.AccordionItem>
+                    <HeaderTemplate>
+                        <h4 class="card-title">Pages Visited Statistics</h4>
+                    </HeaderTemplate>
+                    <ContentTemplate>
+                        @if (visitStats != null)
+                        {
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Location</th>
+                                            <th>Count24h</th>
+                                            <th>Unique24h</th>
+                                            <th>CountWeek</th>
+                                            <th>UniqueWeek</th>
+                                            <th>CountMonth</th>
+                                            <th>UniqueMonth</th>
+                                            <th>CountYear</th>
+                                            <th>UniqueYear</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var locn in visitStats)
+                                        {
+                                            <tr>
+                                                <td>@locn.Location</td>
+                                                <td>@locn.Count24h</td>
+                                                <td>@locn.UniqueUsers24h</td>
+                                                <td>@locn.CountWeek</td>
+                                                <td>@locn.UniqueUsersWeek</td>
+                                                <td>@locn.CountMonth</td>
+                                                <td>@locn.UniqueUsersMonth</td>
+                                                <td>@locn.CountYear</td>
+                                                <td>@locn.UniqueUsersYear</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        }
+
+                    </ContentTemplate>
+                </Syncfusion.Blazor.Navigations.AccordionItem>
+                <Syncfusion.Blazor.Navigations.AccordionItem>
+                    <HeaderTemplate>
+                        <h4 class="card-title">User Visit Statistics</h4>
+                    </HeaderTemplate>
+                    <ContentTemplate>
+                        @if (userVisitStats != null)
+                        {
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>User Name</th>
+                                            <th>Location</th>
+                                            <th>Count24h</th>
+                                            <th>CountWeek</th>
+                                            <th>CountMonth</th>
+                                            <th>CountYear</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var locn in userVisitStats)
+                                        {
+                                            <tr>
+                                                <td>@locn.UserNameIpAddr</td>
+                                                <td>@locn.Location</td>
+                                                <td>@locn.Count24h</td>
+                                                <td>@locn.CountWeek</td>
+                                                <td>@locn.CountMonth</td>
+                                                <td>@locn.CountYear</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        }
+
+                    </ContentTemplate>
+                </Syncfusion.Blazor.Navigations.AccordionItem>
+                <Syncfusion.Blazor.Navigations.AccordionItem>
+                    <HeaderTemplate>
+                        <h4>AppLog (Application Logger) Viewer</h4>
+                    </HeaderTemplate>
+                    <ContentTemplate>
+                        @if (filteredAppLogs != null && filteredAppLogs.Any())
+                        {
+                            <QuickGrid Items="@filteredAppLogs.AsQueryable()" Pagination="@pagination" Class="applog-grid">
+                                <PropertyColumn Property="@(log => log.AppLogId)" Title="ID" Sortable="true" />
+                                <PropertyColumn Property="@(log => log.CreatedAtNZST)" Title="Created At (NZST)" Sortable="true" />
+                                <PropertyColumn Property="@(log => log.LogLevel)" Title="Level" Sortable="true" />
+                                <PropertyColumn Property="@(log => log.Category)" Title="Category" Sortable="true" />
+                                <PropertyColumn Property="@(log => log.Message)" Title="Message" Sortable="true" />
+                                <PropertyColumn Property="@(log => log.Exception)" Title="Exception" Sortable="true" />
+                            </QuickGrid>
+    
+                            <Paginator State="@pagination" />
+                        }
+                        else
+                        {
+                            <p>No application logs available. Click "Refresh and Show Statistics" to load data.</p>
+                        }
+
+                    </ContentTemplate>
+                </Syncfusion.Blazor.Navigations.AccordionItem>
+                
+
+        </Syncfusion.Blazor.Navigations.AccordionItems>
+    </SfAccordion>
+
+</Authorized>
+</AuthorizeView>
+
+
+
+@code {
+    private List<AppLog> appLogs;
+    private LoginStats? loginStats;
+    private List<VisitStats> visitStats;
+    private List<UserVisitStats> userVisitStats;
+    private List<AppLog> filteredAppLogs = new List<AppLog>();
+    private bool isTransferring = false;
+    protected override async Task OnInitializedAsync()
+    {
+        
+        await GetLoginStats();
+    }
+
+    // Add pagination state
+    private PaginationState pagination = new PaginationState { ItemsPerPage = 20 };
+    
+    private async Task GetLoginStats()
+    {
+
+        loginStats = await dbContext.LoginLogs
+           .GroupBy(l => 1) // group everything into one bucket
+           .Select(g => new LoginStats
+           {
+               FailedLast24Hours = g.Count(l => !l.Success && l.Timestamp >= DateTime.Now.AddDays(-1)),
+               FailedLastWeek = g.Count(l => !l.Success && l.Timestamp >= DateTime.Now.AddDays(-7)),
+               FailedLastMonth = g.Count(l => !l.Success && l.Timestamp >= DateTime.Now.AddMonths(-1)),
+               FailedLastYear = g.Count(l => !l.Success && l.Timestamp >= DateTime.Now.AddYears(-1)),
+               SuccessLast24Hours = g.Count(l => l.Success && l.Timestamp >= DateTime.Now.AddDays(-1)),
+               SuccessLastWeek = g.Count(l => l.Success && l.Timestamp >= DateTime.Now.AddDays(-7)),
+               SuccessLastMonth = g.Count(l => l.Success && l.Timestamp >= DateTime.Now.AddMonths(-1)),
+               SuccessLastYear = g.Count(l => l.Success && l.Timestamp >= DateTime.Now.AddYears(-1))
+           })
+           .FirstOrDefaultAsync();
+
+        await GetVisitLogStatsAsync();
+        await GetUserVisitLogStatsAsync();
+        await LoadAppLogsAsync();
+    }
+
+    private async Task GetVisitLogStatsAsync()
+    {
+        // Implement visit log statistics retrieval if needed
+        var now = DateTime.UtcNow; // or DateTime.Now if you store NZ local time
+        var last24h = now.AddHours(-24);
+        var lastWeek = now.AddDays(-7);
+        var lastMonth = now.AddMonths(-1);
+        var lastYear = now.AddYears(-1);
+
+        visitStats = await dbContext.VisitLogs
+            .GroupBy(v => v.Path)
+            .Select(g => new VisitStats
+            {
+                Location = g.Key,
+                Count24h = g.Count(v => v.Timestamp >= last24h),
+                CountWeek = g.Count(v => v.Timestamp >= lastWeek),
+                CountMonth = g.Count(v => v.Timestamp >= lastMonth),
+                CountYear = g.Count(v => v.Timestamp >= lastYear),
+                UniqueUsers24h = g.Where(v => v.Timestamp >= last24h).Select(v => v.UserId ?? v.IpAddress).Distinct().Count(),
+                UniqueUsersWeek = g.Where(v => v.Timestamp >= lastWeek).Select(v => v.UserId ?? v.IpAddress).Distinct().Count(),
+                UniqueUsersMonth = g.Where(v => v.Timestamp >= lastMonth).Select(v => v.UserId ?? v.IpAddress).Distinct().Count(),
+                UniqueUsersYear = g.Where(v => v.Timestamp >= lastYear).Select(v => v.UserId ?? v.IpAddress).Distinct().Count()
+            })
+            .OrderByDescending(vs => vs.CountYear)
+           .ToListAsync();
+    }
+
+    private async Task GetUserVisitLogStatsAsync()
+    {
+        // Implement user visit log statistics retrieval 
+        var now = DateTime.UtcNow; // or DateTime.Now if you store NZ local time
+        var last24h = now.AddHours(-24);
+        var lastWeek = now.AddDays(-7);
+        var lastMonth = now.AddMonths(-1);
+        var lastYear = now.AddYears(-1);
+        //
+        // Left join VisitLogs to bkg_Users on AppUserId so anonymous visits still appear.
+        userVisitStats = await (from v in dbContext.VisitLogs
+                                join b in dbContext.bkg_Users on v.UserId equals b.AppUserId into ub
+                                from b in ub.DefaultIfEmpty()
+                                group v by new
+                                {
+                                    UserNameIpAddr = (b != null && b.UserName != null && b.UserName != "") ? b.UserName : (v.IpAddress ?? "Unknown"),
+                                    Path = v.Path
+                                } into g
+                                select new UserVisitStats
+                                {
+                                    UserNameIpAddr = g.Key.UserNameIpAddr,
+                                    Location = g.Key.Path,
+                                    Count24h = g.Count(v => v.Timestamp >= last24h),
+                                    CountWeek = g.Count(v => v.Timestamp >= lastWeek),
+                                    CountMonth = g.Count(v => v.Timestamp >= lastMonth),
+                                    CountYear = g.Count(v => v.Timestamp >= lastYear)
+                                })
+                                .OrderByDescending(vs => vs.CountYear)
+                                .ToListAsync();
+    }
+
+    private async Task LoadAppLogsAsync()
+    {
+        filteredAppLogs = await dbContext.AppLogs
+            .OrderByDescending(log => log.CreatedAt)
+            .ToListAsync();
+    }
+    private string FormatNZTime(DateTime utcDateTime)
+    {
+        var timeZoneId = OperatingSystem.IsWindows()
+            ? "New Zealand Standard Time"
+            : "Pacific/Auckland";
+        var nzTimeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+        var nzTime = TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, nzTimeZone);
+        return nzTime.ToString("yyyy-MM-dd HH:mm:ss");
+    }
+}
+
