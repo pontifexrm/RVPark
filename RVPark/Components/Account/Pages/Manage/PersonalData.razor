@@ -1,34 +1,58 @@
-﻿@page "/Account/Manage/PersonalData"
+@page "/Account/Manage/PersonalData"
 
-@inject IdentityUserAccessor UserAccessor
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using RVPark.Data
+
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 
 <PageTitle>Personal Data</PageTitle>
 
-<StatusMessage />
 <h3>Personal Data</h3>
 
-<div class="row">
-    <div class="col-md-6">
-        <p>Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
-        <p>
-            <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-        </p>
-        <form action="Account/Manage/DownloadPersonalData" method="post">
-            <AntiforgeryToken />
-            <button class="btn btn-primary" type="submit">Download</button>
-        </form>
-        <p>
-            <a href="Account/Manage/DeletePersonalData" class="btn btn-danger" style="color:pink; background-color:darkred">Delete</a>
-        </p>
+@if (user == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6">
+            <p>Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
+            <p>
+                <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
+            </p>
+            <form action="Account/Manage/DownloadPersonalData" method="post">
+                <AntiforgeryToken />
+                <button class="btn btn-primary" type="submit">Download</button>
+            </form>
+            <p>
+                <a href="Account/Manage/DeletePersonalData" class="btn btn-danger" style="color:pink; background-color:darkred">Delete</a>
+            </p>
+        </div>
     </div>
-</div>
+}
 
 @code {
-    [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
+    private ApplicationUser? user;
 
     protected override async Task OnInitializedAsync()
     {
-        _ = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var claimsPrincipal = authState.User;
+
+        if (claimsPrincipal.Identity?.IsAuthenticated != true)
+        {
+            NavigationManager.NavigateTo("Account/Login");
+            return;
+        }
+
+        user = await UserManager.GetUserAsync(claimsPrincipal);
+        if (user == null)
+        {
+            NavigationManager.NavigateTo("Account/InvalidUser");
+        }
     }
 }
