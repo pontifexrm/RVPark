@@ -803,6 +803,7 @@
 
 
         sendConfirmMsg = false;
+        StateHasChanged();
     }
     private void SendAdhocConfirmation()
     {
@@ -864,6 +865,7 @@
             modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);    }
 
         sendConfirmMsg = false;
+        StateHasChanged();
     }
     private async Task SendCCEmailConfirmation()
     { // this is a CC email to the configured CC email address for New Bookings CC ToEmail
@@ -877,6 +879,7 @@
             modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);}
 
         sendConfirmMsg = false;
+        StateHasChanged();
     }
     private async Task SendCCEmailConfirmation(string chngmsg)
     {
@@ -894,6 +897,7 @@
             modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);}
 
         sendConfirmMsg = false;
+        StateHasChanged();
     }
 
     private async Task SendCCEmailDeleteConfirmation(string subjectMsg, string DeleteMsg)
@@ -913,6 +917,7 @@
 
 
         sendConfirmMsg = false;
+        StateHasChanged();
     }
     private async Task SendTxtConfirmation(string txtrept)
     {
