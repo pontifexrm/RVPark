@@ -2,40 +2,33 @@
 @rendermode InteractiveServer
 <PageTitle>RV Park My Bookings</PageTitle>
 
-@using System.ComponentModel.DataAnnotations
 @using System.Text
-@using System.Text.Encodings.Web
-@using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.WebUtilities
-@using Microsoft.EntityFrameworkCore
 @using RVPark.Data
 @using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.AspNetCore.Identity.EntityFrameworkCore
+@using MediatR
 
-@using RVPark.Services
 @using RVPark.Services.Logging
+@using RVPark.Services.Email
+@using RVPark.Services.SMS
 
-
-@using RVPark.Services.Email;
-@using RVPark.Services.SMS;
-
+@using RVPark.Features.Bookings.DTOs
+@using RVPark.Features.Bookings.Queries.GetUserBookings
+@using RVPark.Features.Bookings.Queries.GetBkgUserByUsername
+@using RVPark.Features.Bookings.Queries.CheckAvailability
+@using RVPark.Features.Bookings.Commands.CreateBooking
+@using RVPark.Features.Bookings.Commands.EditBooking
+@using RVPark.Features.Bookings.Commands.DeleteBooking
+@using RVPark.Features.Properties.DTOs
+@using RVPark.Features.Properties.Queries.GetAllProperties
+@using RVPark.Shared
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
-
-@inject UserManager<ApplicationUser> UserManager
-@inject IUserStore<ApplicationUser> UserStore
-@inject SignInManager<ApplicationUser> SignInManager
-@inject IEmailSender<ApplicationUser> EmailSender
 @inject NavigationManager NavigationManager
-@inject ApplicationDbContext ApplicationDbContext
-@inject IDbContextFactory<ApplicationDbContext> DbContext
-
-
+@inject IMediator Mediator
 @inject IConfiguration configuration
 @inject IEmailService EmailService
 @inject ISmsService SmsService
 @inject IAppLogger AppLogger
-@inject RVPark.Features.Bookings.Services.IBookingEngine BookingEngine
 
 
 
@@ -77,7 +70,7 @@
                     <button class="btn btn-primary" style="min-width: 90%; text-align:center; " @onclick="CheckBkgRequest">Request Booking</button>
                 </div>
             </a>
-            @if (currentUser == null)
+            @if (currentBkgUser == null)
             {
                 <p><em>Loading...</em></p>
             }
@@ -88,20 +81,20 @@
                     <div class="form-group" style="display:flex;flex-direction:row;">
                         <div class="form-group" style=" text-align:center; margin-left: 1%">
                             <label for="username">User Name</label>
-                            <InputText class="form-control" @bind-Value="currentUser.UserName" readonly="true" id="username" />
+                            <input class="form-control" value="@currentBkgUser?.UserName" readonly id="username" />
                         </div>
                         <div class="form-group" style=" text-align:center; margin-left: 1%">
                             <label for="firstname">First Name</label>
-                            <InputText class="form-control" @bind-Value=@currentUser.UserFirstName readonly="true" id="firstname" />
+                            <input class="form-control" value="@currentBkgUser?.UserFirstName" readonly id="firstname" />
                         </div>
                         <div class="form-group" style=" text-align:center; margin-left: 1%">
                             <label for="lastname">Last Name</label>
-                            <InputText class="form-control" @bind-Value=@currentUser.UserLastName readonly="true" id="lastname" />
+                            <input class="form-control" value="@currentBkgUser?.UserLastName" readonly id="lastname" />
                         </div>
 
                         <div class="form-group" style="text-align:center; margin-left: 2%;">
                             <label for="userphone">Phone</label>
-                            <InputText class="form-control" @bind-Value=@currentUser.UserPhone readonly="true" id="userphone" />
+                            <input class="form-control" value="@currentBkgUser?.UserPhone" readonly id="userphone" />
                         </div>
                         <div class="form-group" style="max-width: 100%; margin-left: 2% ">
                             <label for="checked">Show All</label>
@@ -150,15 +143,15 @@
                         {
                             <tr>
                                 <td style="border: 1px solid #929292;">@booking.DateArrive.ToString("dd/MM/yyyy") to @booking.DateDepart.ToString("dd/MM/yyyy")</td>
-                                <td style="border: 1px solid #929292;">@booking.Bkg_User.UserFirstName</td>
-                                <td style="border: 1px solid #929292;">@booking.Bkg_User.UserLastName</td>
-                                <td style="border: 1px solid #929292;">@booking.Bkg_Property.Name</td>
+                                <td style="border: 1px solid #929292;">@booking.UserFirstName</td>
+                                <td style="border: 1px solid #929292;">@booking.UserLastName</td>
+                                <td style="border: 1px solid #929292;">@booking.PropertyName</td>
                                 <td style="border: 1px solid #929292;">@booking.Nights</td>
                                 <td style="border: 1px solid #929292;">@booking.BookingId</td>
                                 <td style="border: 1px solid #929292;">@(booking.Paid ? "Y" : "N")</td>
                                 <td style="border: 1px solid #929292;">@booking.BookingStatus</td>
                                 <td style="border: 1px solid #929292;">@booking.BookingComments</td>
-                                <td style="border: 1px solid #929292;">@booking.Bkg_User.UserName</td>
+                                <td style="border: 1px solid #929292;">@booking.UserName</td>
                                 <td style="border: 1px solid #929292;">
                                     <div class="tab-content" style="display:flex;flex-direction:row;">
                                         <button class="bi form-control" style="width: 40px; height: 32px;"
@@ -222,7 +215,7 @@
                         </div> *@
                         <div class="form-group">
                             <label>Property</label>
-                            <InputSelect @bind-Value=currentBooking.PropertyId class="form-control">
+                                <InputSelect @bind-Value="currentBooking.PropertyId" class="form-control">
                                 @foreach (var property in BkgProperties)
                                 {
                                     <option value="@property.PropertyId">@property.Name</option>
@@ -357,14 +350,13 @@
     private string toDelete = "no";
     private string status = string.Empty;
     private int? rqstPropertyId;
-    private List<Bkg_Property> BkgProperties = new List<Bkg_Property>();
-    private Bkg_Booking currentBooking = new();
-    private Bkg_Booking orgnBkg = new();
-    private DateTime orgnArrive;
-    private DateTime orgnDepart;
-    private int orgnPropertyId = 0;
 
-    private Bkg_Booking newBooking = new();
+    // Properties list from MediatR query
+    private List<PropertyDto> BkgProperties = new();
+
+    // Form model for editing bookings (no longer entity)
+    private BookingFormModel currentBooking = new();
+    private BookingFormModel orgnBkg = new();
 
     private string modalTitle = string.Empty;
     private string modalMessage = string.Empty;
@@ -373,15 +365,20 @@
     private bool confirmSent = false;
     private bool confirmDelete = false;
 
-    private List<Bkg_Booking> bookings = new();
-    private List<Bkg_User> users = new();
-    private Bkg_User currentUser = new();
+    // Bookings list from MediatR query
+    private List<BookingDto> bookings = new();
+
+    // Current user from MediatR query
+    private BkgUserDto? currentBkgUser;
+
+    // Currently selected booking for email confirmation
+    private BookingDto? selectedBookingForEmail;
 
     private bool _showAll = false;
-    private bool showAll 
+    private bool showAll
     {
         get => _showAll;
-        set 
+        set
         {
             if (_showAll != value)
             {
@@ -403,47 +400,27 @@
         if (user.Identity != null && user.Identity.IsAuthenticated)
         {
             var userName = user.Identity.Name;
-            currentUser = await ApplicationDbContext.bkg_Users.FirstOrDefaultAsync(u => u.UserName == userName);
-            // Use the currentUser as needed
+            // Use MediatR query instead of direct DbContext
+            currentBkgUser = await Mediator.Send(new GetBkgUserByUsernameQuery(userName!));
         }
+
         Todate = AddOneDay(Fmdate);
-        // BkgProperties = await ApplicationDbContext.bkg_Properties.ToListAsync();
-        BkgProperties = await ApplicationDbContext.bkg_Properties
-                .Where(p => p.Enabled)
-                .ToListAsync() ?? new List<Bkg_Property>();
+
+        // Use MediatR query for properties instead of direct DbContext
+        BkgProperties = await Mediator.Send(new GetAllPropertiesQuery(EnabledOnly: true));
+
         await LoadBookings();
-
     }
-    private async Task LoadBookings() 
+    private async Task LoadBookings()
     {
-        if (showAll)
-        {
-            var query = ApplicationDbContext.bkg_Bookings
-                        .Include(b => b.Bkg_User)
-                        .Include(b => b.Bkg_Property)
-                        .Where(b => b.Bkg_User.UserName.Contains(currentUser.UserName))
-                        .AsQueryable();
+        if (currentBkgUser == null) return;
 
-            // Order by a specific field, for example, DateArrive
-            query = query.OrderBy(b => b.DateArrive);
-            bookings = await query.ToListAsync();
-
-        }
-        else
-        {
-            var query = ApplicationDbContext.bkg_Bookings
-                        .Include(b => b.Bkg_User)
-                        .Include(b => b.Bkg_Property)
-                        .Where(b => b.BookingStatus != "Closed")
-                        .Where(b => b.Bkg_User.UserName.Contains(currentUser.UserName))
-                        .AsQueryable();
-
-            // Order by a specific field, for example, DateArrive
-            query = query.OrderBy(b => b.DateArrive);
-            bookings = await query.ToListAsync();
-
-        }
-
+        // Use MediatR query instead of direct DbContext access
+        bookings = await Mediator.Send(new GetUserBookingsQuery(
+            UserId: currentBkgUser.UserId,
+            IncludeClosedBookings: showAll,
+            IncludeRelatedData: true
+        ));
     }
     private async Task RefreshTable(bool newValue)
     {
@@ -485,55 +462,78 @@
         StateHasChanged();
     }
 
-    private void CheckBkgRequest()
+    private async Task CheckBkgRequest()
     {
-        // LINQ query to check if all dates in the range are available
-        //var result =  Bkg_UserService.Bkg_AvailableAllSync(Fmdate, Todate);
+        if (currentBkgUser == null) return;
 
-        newBooking = new Bkg_Booking();
-        newBooking.DateArrive = Fmdate.Date; 
-        newBooking.DateDepart = Todate.Date;
-        newBooking.UserId = currentUser.UserId;
-        newBooking.PropertyId = currentBooking.PropertyId;
-        newBooking.BookingStatus = "Requested";
-        newBooking.Bkg_User = currentUser;
-        //        newBooking.Bkg_Property = BkgProperties.FirstOrDefault(p => p.PropertyId == rqstPropertyId);
-        currentBooking = newBooking;  // maybe ???
+        // Use MediatR query to check availability
+        var availResult = await Mediator.Send(new CheckAvailabilityQuery(
+            PropertyId: currentBooking.PropertyId,
+            DateArrive: Fmdate.Date,
+            DateDepart: Todate.Date
+        ));
 
-        var isAvail =  BookingEngine.RequestBooking(newBooking);
-        if (isAvail)
+        // Prepare form model for new booking
+        currentBooking = new BookingFormModel
+        {
+            BookingId = 0, // New booking
+            PropertyId = currentBooking.PropertyId,
+            UserId = currentBkgUser.UserId,
+            DateArrive = Fmdate.Date,
+            DateDepart = Todate.Date,
+            BookingStatus = "Requested",
+            PropertyName = BkgProperties.FirstOrDefault(p => p.PropertyId == currentBooking.PropertyId)?.Name
+        };
+
+        if (availResult.IsSuccess && availResult.Value)
         {
             modalTitle = "Booking Requested";
-            modalMessage = "Your booking request is AVAILABLE. Please press SAVE to confirm or CANEL to quit.";
+            modalMessage = "Your booking request is AVAILABLE. Please press SAVE to confirm or CANCEL to quit.";
             allDatesAvailable = true;
         }
         else
         {
             modalTitle = "Booking Request Failed";
-            modalMessage = "Sorry but your booking request is not possible.";
+            modalMessage = availResult.Error ?? "Sorry but your booking request is not possible.";
             allDatesAvailable = false;
         }
         showModal = true;
-
     }
 
-    private void EditBooking(Bkg_Booking booking)
+    private void EditBooking(BookingDto bookingDto)
     {
-        orgnBkg = new();
+        // Store original values for comparison
+        orgnBkg = new BookingFormModel
+        {
+            BookingId = bookingDto.BookingId,
+            PropertyId = bookingDto.PropertyId,
+            UserId = bookingDto.UserId,
+            DateArrive = bookingDto.DateArrive,
+            DateDepart = bookingDto.DateDepart,
+            TotalPrice = bookingDto.TotalPrice,
+            Paid = bookingDto.Paid,
+            BookingStatus = bookingDto.BookingStatus,
+            BookingComments = bookingDto.BookingComments ?? "",
+            PropertyName = bookingDto.PropertyName
+        };
 
-        currentBooking = booking;
-        orgnBkg.DateArrive = currentBooking.DateArrive.Date; Fmdate = booking.DateArrive;
-        orgnBkg.DateDepart = currentBooking.DateDepart.Date; Todate = booking.DateDepart.Date;
-        orgnBkg.PropertyId = currentBooking.PropertyId;
-        orgnBkg.BookingStatus = currentBooking.BookingStatus;
-        orgnBkg.UserId = currentBooking.UserId;
-        orgnBkg.BookingId = currentBooking.BookingId;
-        orgnBkg.BookingComments = currentBooking.BookingComments;
-        orgnBkg.Paid = currentBooking.Paid;
-        orgnBkg.Bkg_User = currentBooking.Bkg_User;
-        orgnBkg.Bkg_Property = currentBooking.Bkg_Property;
+        // Populate form model for editing
+        currentBooking = new BookingFormModel
+        {
+            BookingId = bookingDto.BookingId,
+            PropertyId = bookingDto.PropertyId,
+            UserId = bookingDto.UserId,
+            DateArrive = bookingDto.DateArrive,
+            DateDepart = bookingDto.DateDepart,
+            TotalPrice = bookingDto.TotalPrice,
+            Paid = bookingDto.Paid,
+            BookingStatus = bookingDto.BookingStatus,
+            BookingComments = bookingDto.BookingComments ?? "",
+            PropertyName = bookingDto.PropertyName
+        };
 
-
+        Fmdate = bookingDto.DateArrive;
+        Todate = bookingDto.DateDepart;
 
         modalTitle = "Edit Booking";
         modalMessage = "";
@@ -584,37 +584,54 @@
 
     private async Task ConfirmDelete()
     {
-        var booking = await ApplicationDbContext.bkg_Bookings.FindAsync(curBkgId);
-        if (booking != null)
+        // Find the booking in our list for confirmation message details
+        var bookingDto = bookings.FirstOrDefault(b => b.BookingId == curBkgId);
+        if (bookingDto == null)
         {
-            try
-            {
-                string subjectMsg = string.Concat("WARNING", " BkgRef: ", booking.BookingId.ToString(), " for ", booking.Bkg_Property.Name,
-                " from ", booking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", booking.DateDepart.Date.ToString("dd/MM/yyyy"), " HAS BEEN DELETED");
+            confirmDelete = false;
+            curBkgId = 0;
+            return;
+        }
 
-                string CCMsg = string.Concat("CC msg of email to:", booking.Bkg_User.UserEmail, " Warning BkgRef: ", booking.BookingId.ToString(),
-                " for ", booking.Bkg_Property.Name, " from ", booking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", booking.DateDepart.Date.ToString("dd/MM/yyyy"), " HAS BEEN DELETED");
+        try
+        {
+            string subjectMsg = string.Concat("WARNING", " BkgRef: ", bookingDto.BookingId.ToString(), " for ", bookingDto.PropertyName,
+            " from ", bookingDto.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", bookingDto.DateDepart.Date.ToString("dd/MM/yyyy"), " HAS BEEN DELETED");
 
-                await BookingEngine.DeleteBookingAsync(booking);
-                await LoadBookings();
-                string s = configuration["TNZ:SMSrept"];
-                string txtrept = Chk_E_164_Phone(s);
-                SendTxtConfirmation(subjectMsg,txtrept, "WARNING");
-                // Need to send a cc'd to rvpark@pontifex.nz
-                SendCCEmailDeleteConfirmation(CCMsg, subjectMsg);
+            string CCMsg = string.Concat("CC msg of email to:", bookingDto.UserEmail, " Warning BkgRef: ", bookingDto.BookingId.ToString(),
+            " for ", bookingDto.PropertyName, " from ", bookingDto.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", bookingDto.DateDepart.Date.ToString("dd/MM/yyyy"), " HAS BEEN DELETED");
 
-            }
-            catch (Exception ex)
+            // Use MediatR DeleteBookingCommand
+            var result = await Mediator.Send(new DeleteBookingCommand(curBkgId));
+
+            if (!result.IsSuccess)
             {
                 modalTitle = "Error found deleting this Booking";
-                modalMessage = ex.ToString();
+                modalMessage = result.Error ?? "Unable to delete booking";
                 allDatesAvailable = false;
                 showModal = true;
             }
-            curBkgId = 0;
-            confirmDelete = false;  
-            // await LoadBookings();
+            else
+            {
+                await LoadBookings();
+                StateHasChanged();
+                string s = configuration["TNZ:SMSrept"] ?? string.Empty;
+                string txtrept = Chk_E_164_Phone(s);
+                await SendTxtConfirmation(subjectMsg, txtrept, "WARNING");
+                // Need to send a cc'd to rvpark@pontifex.nz
+                await SendCCEmailDeleteConfirmation(CCMsg, subjectMsg);
+            }
         }
+        catch (Exception ex)
+        {
+            modalTitle = "Error found deleting this Booking";
+            modalMessage = ex.ToString();
+            allDatesAvailable = false;
+            showModal = true;
+        }
+
+        curBkgId = 0;
+        confirmDelete = false;
     }
 
     private void CloseModal()
@@ -630,54 +647,73 @@
         confirmSent = false;
     }
     private async Task SaveBooking()
-    { 
-        currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
-        currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
-        string s = configuration["SMSSettings:SMSrept"];
+    {
+        if (currentBkgUser == null) return;
+
+        string s = configuration["SMSSettings:SMSrept"] ?? string.Empty;
         string txtrept = Chk_E_164_Phone(s);
-        currentBooking.DateArrive = Fmdate; currentBooking.DateDepart = Todate;
+        currentBooking.DateArrive = Fmdate;
+        currentBooking.DateDepart = Todate;
+
+        // Get property name for confirmations
+        currentBooking.PropertyName = BkgProperties.FirstOrDefault(p => p.PropertyId == currentBooking.PropertyId)?.Name;
 
         // if a new booking then we need to Create it else Change it.
         if (currentBooking.BookingId == 0) // A new booking
         {
-            currentBooking.CreatedDte = DateHelper.GetCurrentDateTimeInNZ();//DateTime.Now;
-            currentBooking.UpdatedDte = DateHelper.GetCurrentDateTimeInNZ();//DateTime.Now;
-            var savedOK = await BookingEngine.CreateBookingAsync(currentBooking);
-            if (!savedOK)
+            // Use MediatR CreateBookingCommand
+            var result = await Mediator.Send(new CreateBookingCommand(
+                PropertyId: currentBooking.PropertyId,
+                UserId: currentBkgUser.UserId,
+                DateArrive: currentBooking.DateArrive,
+                DateDepart: currentBooking.DateDepart,
+                TotalPrice: currentBooking.TotalPrice,
+                BookingComments: currentBooking.BookingComments
+            ));
+
+            if (!result.IsSuccess)
             {
-                modalMessage = "Error found saving this new Booking";
+                modalMessage = result.Error ?? "Error found saving this new Booking";
                 allDatesAvailable = false;
                 showModal = true;
+                return;
             }
-            else
-            {
-                // will send an email confirmation
-                SendEmailConfirmation();
-                SendTxtConfirmation(txtrept); //send a txt to System Admin
-                // Need to send a cc'd to rvpark@pontifex.nz
-                SendCCEmailConfirmation();
-            }
+
+            // Update currentBooking with the new BookingId for confirmation messages
+            currentBooking.BookingId = result.Value?.BookingId ?? 0;
+
+            // Send confirmations
+            await SendEmailConfirmationForBooking();
+            await SendTxtConfirmation(txtrept);
+            await SendCCEmailConfirmation();
         }
         else // editing existing bkg
         {
-            currentBooking.UpdatedDte = DateHelper.GetCurrentDateTimeInNZ();// DateTime.Now;
+            // Use MediatR EditBookingCommand
+            var result = await Mediator.Send(new EditBookingCommand(
+                BookingId: currentBooking.BookingId,
+                PropertyId: currentBooking.PropertyId,
+                UserId: currentBooking.UserId,
+                DateArrive: currentBooking.DateArrive,
+                DateDepart: currentBooking.DateDepart,
+                TotalPrice: currentBooking.TotalPrice,
+                Paid: currentBooking.Paid,
+                BookingStatus: currentBooking.BookingStatus,
+                BookingComments: currentBooking.BookingComments
+            ));
 
-            var savedOK = await BookingEngine.EditBookingAsync(orgnBkg, currentBooking);
-            if (!savedOK)
-            { 
-                modalMessage = "Error found saving this edited Booking";
+            if (!result.IsSuccess)
+            {
+                modalMessage = result.Error ?? "Error found saving this edited Booking";
                 allDatesAvailable = false;
                 showModal = true;
-            }
-            else
-            {
-                // will send an email confirmation
-                SendEmailConfirmation();
-                SendTxtConfirmation(txtrept); //send a txt to System Admin
-                // Need to send a cc'd to rvpark@pontifex.nz
-                SendCCEmailConfirmation();
+                return;
             }
 
+            // Send confirmations
+            await SendEmailConfirmationForBooking();
+            await SendTxtConfirmation(txtrept);
+            await SendCCEmailConfirmation();
         }
 
         showModal = false;
@@ -687,16 +723,24 @@
     }
     private void SendEmailConfirmation(int bookingId)
     {
-        currentBooking = bookings.FirstOrDefault(b => b.BookingId == bookingId);
-        sendConfirmMsg = true;
+        // Find booking in list for email dialog
+        selectedBookingForEmail = bookings.FirstOrDefault(b => b.BookingId == bookingId);
+        if (selectedBookingForEmail != null)
+        {
+            sendConfirmMsg = true;
+        }
     }
+
     private async Task SendEmailConfirmation()
     {
-        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
+        // Called from modal dialog - uses selectedBookingForEmail
+        if (selectedBookingForEmail == null) return;
 
-        string emailTo = currentBooking.Bkg_User.UserEmail;
-        var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, ConfirmBkgMsg());
+        string subjectMsg = string.Concat("BkgRef: ", selectedBookingForEmail.BookingId.ToString(), " for ", selectedBookingForEmail.PropertyName,
+        " from ", selectedBookingForEmail.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", selectedBookingForEmail.DateDepart.Date.ToString("dd/MM/yyyy"));
+
+        string emailTo = selectedBookingForEmail.UserEmail ?? "";
+        var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, ConfirmBkgMsgForBooking(selectedBookingForEmail));
         if (resultMsg)
         {
             modalTitle = "Adhoc Email Sent"; modalMessage = string.Concat("Adhoc Email Confirmation sent to ", emailTo);
@@ -707,30 +751,46 @@
         }
 
         sendConfirmMsg = false;
+    }
+
+    private async Task SendEmailConfirmationForBooking()
+    {
+        // Called after save - uses currentBooking form model
+        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.PropertyName,
+        " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
+
+        string emailTo = currentBkgUser?.UserEmail ?? "";
+        var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, ConfirmBkgMsg());
+        if (resultMsg)
+        {
+            modalTitle = "Email Sent"; modalMessage = string.Concat("Email Confirmation sent to ", emailTo);
+        }
+        else
+        {
+            modalTitle = "Email NOT Sent"; modalMessage = string.Concat("Email Confirmation could NOT be sent to ", emailTo);
+        }
     }
     private async Task SendCCEmailConfirmation()
     {
-        string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        string subjectMsg = string.Concat("CC msg of email to:", currentBkgUser?.UserEmail, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.PropertyName,
         " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 
-        string emailTo = configuration["EmailSettings:CCEmail"];
+        string emailTo = configuration["EmailSettings:CCEmail"] ?? "";
         var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, ConfirmBkgMsg());
         if (resultMsg)
         {
-            modalTitle = "Adhoc Email Sent"; modalMessage = string.Concat("Adhoc Email Confirmation sent to ", emailTo);
+            modalTitle = "CC Email Sent"; modalMessage = string.Concat("CC Email Confirmation sent to ", emailTo);
         }
         else
         {
-            modalTitle = "Adhoc Email NOT Sent"; modalMessage = string.Concat("Adhoc Email Confirmation could NOT be sent to ", emailTo);
+            modalTitle = "CC Email NOT Sent"; modalMessage = string.Concat("CC Email Confirmation could NOT be sent to ", emailTo);
         }
-
-        sendConfirmMsg = false;
     }
     private async Task SendCCEmailDeleteConfirmation(string subjectMsg, string DeleteMsg)
     {
         // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, DeleteMsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         // " from ", currentBooking.DateArrive.Date.ToString("d"), " to ", currentBooking.DateDepart.Date.ToString("d"), " HAS BEEN DELETED");
-        string emailTo = configuration["EmailSettings:CCEmail"];
+        string emailTo = configuration["EmailSettings:CCEmail"] ?? string.Empty;
         var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, DeleteMsg);
         if (resultMsg)
         {
@@ -744,10 +804,34 @@
         sendConfirmMsg = false;
         StateHasChanged();
     }
-    private void SendTxtConfirmation()
+    private async Task SendTxtConfirmation()
     {
-        SendTxtConfirmation("");
+        // Called from modal dialog - uses selectedBookingForEmail
+        if (selectedBookingForEmail == null) return;
+
+        string txtrept = Chk_E_164_Phone(selectedBookingForEmail.UserPhone ?? "");
+        string subjectMsg = string.Concat("BkgRef: ", selectedBookingForEmail.BookingId.ToString(), " for ", selectedBookingForEmail.PropertyName,
+        " from ", selectedBookingForEmail.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", selectedBookingForEmail.DateDepart.Date.ToString("dd/MM/yyyy"));
+
+        var smsrqst = new SmsRequest
+        {
+            To = txtrept,
+            Message = subjectMsg
+        };
+        SmsResponse resultMsg = await SmsService.SendSmsAsync(smsrqst);
+        if (resultMsg.Success)
+        {
+            modalTitle = "SMS Msg Sent"; modalMessage = string.Concat("SMS Msg Confirmation sent to ", txtrept);
+        }
+        else
+        {
+            modalTitle = "SMS Msg NOT Sent"; modalMessage = string.Concat("SMS Msg could NOT be sent to ", txtrept);
+        }
+
+        sendConfirmMsg = false;
+        StateHasChanged();
     }
+
     private async Task SendTxtConfirmation(string subjectMsg, string txtrept, string DeleteMsg)
     {
         var smsrqst = new SmsRequest
@@ -765,17 +849,18 @@
             modalTitle = "SMS Msg NOT Sent"; modalMessage = string.Concat("SMS Msg could NOT be sent to ", txtrept);
         }
 
-        sendConfirmMsg = false; 
+        sendConfirmMsg = false;
         StateHasChanged();
     }
+
     private async Task SendTxtConfirmation(string txtrept)
     {
-        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.PropertyName,
         " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 
-        if (txtrept.Length == 0)
+        if (string.IsNullOrEmpty(txtrept))
         {
-            txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
+            txtrept = Chk_E_164_Phone(currentBkgUser?.UserPhone ?? "");
         }
         var smsrqst = new SmsRequest
         {
@@ -796,12 +881,12 @@
     }
     private async Task SendTxtConfirmationNoEmail(string txtrept)
     {
-        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
+        string subjectMsg = string.Concat("BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.PropertyName,
         " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 
-        if (txtrept.Length == 0)
+        if (string.IsNullOrEmpty(txtrept))
         {
-            txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
+            txtrept = Chk_E_164_Phone(currentBkgUser?.UserPhone ?? "");
         }
         var smsrqst = new SmsRequest
         {
@@ -826,14 +911,14 @@
     {
         StringBuilder sb = new StringBuilder();
         sb.Append("Kia ora ");
-        sb.Append(currentUser.UserFirstName);
+        sb.Append(currentBkgUser?.UserFirstName);
         sb.Append(" ");
-        sb.Append(currentUser.UserLastName);
+        sb.Append(currentBkgUser?.UserLastName);
         sb.Append("\n\n");
         sb.Append("BkgRef:");
         sb.Append(currentBooking.BookingId.ToString());
         sb.Append(" Has been confirmed, or reconfirmed for ");
-        sb.Append(currentBooking.Bkg_Property.Name);
+        sb.Append(currentBooking.PropertyName);
         sb.Append(" arriving after mid-day ");
         sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
         sb.Append(" departing before mid-day ");
@@ -864,15 +949,15 @@
     {
         StringBuilder sb = new StringBuilder();
         sb.Append("Kia ora ");
-        sb.Append(currentUser.UserFirstName);
+        sb.Append(currentBkgUser?.UserFirstName);
         sb.Append(" ");
-        sb.Append(currentUser.UserLastName);
+        sb.Append(currentBkgUser?.UserLastName);
         sb.Append("\n\n");
         sb.Append("BkgRef:");
         sb.Append(currentBooking.BookingId.ToString());
 
         sb.Append(" Has been confirmed, or reconfirmed for ");
-        sb.Append(currentBooking.Bkg_Property.Name);
+        sb.Append(currentBooking.PropertyName);
         sb.Append(" arriving after mid-day ");
         sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
         sb.Append(" departing before mid-day ");
@@ -899,18 +984,58 @@
                   "Ph 027 304 2002\r\n" +
                   "E - Mail : rvpark@pontifex.nz\r\n"); return sb.ToString();
     }
+
+    private string ConfirmBkgMsgForBooking(BookingDto booking)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("Kia ora ");
+        sb.Append(booking.UserFirstName);
+        sb.Append(" ");
+        sb.Append(booking.UserLastName);
+        sb.Append("\n\n");
+        sb.Append("BkgRef:");
+        sb.Append(booking.BookingId.ToString());
+        sb.Append(" Has been confirmed, or reconfirmed for ");
+        sb.Append(booking.PropertyName);
+        sb.Append(" arriving after mid-day ");
+        sb.Append(booking.DateArrive.Date.ToString("dd/MM/yyyy"));
+        sb.Append(" departing before mid-day ");
+        sb.Append(booking.DateDepart.Date.ToString("dd/MM/yyyy"));
+        sb.Append("\n\n");
+        sb.Append("Address is\r\n" +
+                  "        22 Fitzpatrick St\r\n" +
+                  "        Newlands\r\n" +
+                  "        Wellington 6037\r\n\r\n" +
+                  "Access is best from Stewart Drive. Either from the north where you would exit SH1 at Johnsonville or from the South also through Johnsonville's main street. Turn into Fitzpatrick St from Stewart Drive is best. " +
+                  "We are on the left corner of the 2nd street on the left going up Fitzpatrick St.\r\n\r\n" +
+                  "Access from Stewart Drive is also possible via Quigley St. Follow Quigley Street around until it T-intersects with Fitzpatrick St. Your park is then on the left of that intersection.\r\n\r\n" +
+                  "https://www.rvpark.nz/directions click for map from the South \r\n" +
+                  "https://www.rvpark.nz/directionsnorth click for map from the North \r\n" +
+                  "PLEASE BE AWARE: Some of the roads in Newlands are NOT suitable for RVs and larger vehicles SO DO NOT FOLLOW THE Map Apps THEY WILL GET YOU STUCK... Really We Are Not Kidding.\r\n\r\n" +
+                  "Payment is $30 for the night with NZMCA Memebrship otherwise $45 per night, payable in advance please to our bank account.\r\n" +
+                  "        Ronald Pontifex\r\n" +
+                  "        03 0525 0253043 000\r\n" +
+                  "(We have Wise Card if that suits you better.)\r\n\r\n" +
+                  "Please text us on arrival and we shall come out to meets you etc.\r\n" +
+                  "Again many thanks\r\n" +
+                  "Ron Pontifex\r\n" +
+                  "WELLINGTON New Zealand\r\n" +
+                  "Ph 027 304 2002\r\n" +
+                  "E - Mail : rvpark@pontifex.nz\r\n"); return sb.ToString();
+    }
+
     private string ConfirmTxtBkgMsg()
     {
         StringBuilder sb = new StringBuilder();
         sb.Append("Kia ora ");
-        sb.Append(currentUser.UserFirstName);
+        sb.Append(currentBkgUser?.UserFirstName);
         sb.Append(" ");
-        sb.Append(currentUser.UserLastName);
+        sb.Append(currentBkgUser?.UserLastName);
         sb.Append("\n\n");
         sb.Append("BkgRef:");
         sb.Append(currentBooking.BookingId.ToString());
         sb.Append(" Has been confirmed, or reconfirmed for ");
-        sb.Append(currentBooking.Bkg_Property.Name);
+        sb.Append(currentBooking.PropertyName);
         sb.Append(" arriving after mid-day ");
         sb.Append(currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"));
         sb.Append(" departing before mid-day ");
@@ -934,5 +1059,22 @@
             }
         }
         return srtn;
+    }
+
+    /// <summary>
+    /// Form model for creating/editing bookings - no EF entity dependency
+    /// </summary>
+    private class BookingFormModel
+    {
+        public int BookingId { get; set; }
+        public int PropertyId { get; set; }
+        public int UserId { get; set; }
+        public DateTime DateArrive { get; set; } = DateHelper.GetCurrentDateInNZ().Date;
+        public DateTime DateDepart { get; set; } = DateHelper.GetCurrentDateInNZ().Date.AddDays(1);
+        public decimal TotalPrice { get; set; }
+        public bool Paid { get; set; }
+        public string BookingStatus { get; set; } = "Requested";
+        public string BookingComments { get; set; } = "";
+        public string? PropertyName { get; set; }
     }
 }

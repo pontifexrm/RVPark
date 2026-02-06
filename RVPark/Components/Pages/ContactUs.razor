@@ -189,26 +189,26 @@ else
         // Using TNZ
         var apiUser = new TNZApiUser()  // this shoild come from configuration injection
             {
-                AuthToken = configuration["TNZ:AuthToken"]
+                AuthToken = configuration["TNZ:AuthToken"] ?? string.Empty
             };
         var client = new TNZApiClient(apiUser);
 
         var reponseEmail = client.Messaging.Email.SendMessage(
-            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+            fromEmail: configuration["TNZ:fromEmail"] ?? string.Empty,  // this should come from configuration injection
             emailSubject: emailMessage.Subject,
             messagePlain: emailMessage.ChkMsg,
             destination: emailMessage.Email
         );
         var reponseEmailcc = client.Messaging.Email.SendMessage(
-            fromEmail: configuration["TNZ:fromEmail"],  // this should come from configuration injection
+            fromEmail: configuration["TNZ:fromEmail"] ?? string.Empty,  // this should come from configuration injection
             emailSubject: "cc'd msg re: " + emailMessage.Email + "|" + emailMessage.Subject,
             messagePlain: emailMessage.ChkMsg + " " + userIpAddress,
-            destination: configuration["TNZ:CCemail"]
+            destination: configuration["TNZ:CCemail"] ?? string.Empty
         );
 
         // next send an SMS to admin to say we have a contact.
         // emailMessage.Phone = "";
-        string rept = configuration["TNZ:SMSrept"]; //"+64273042002";    // this shoild come from configuration injection
+        string rept = configuration["TNZ:SMSrept"] ?? string.Empty; //"+64273042002";    // this shoild come from configuration injection
                                                     //const string txtmsg = "From RVPark using TNZ API out of Blazor";
         var response = client.Messaging.SMS.SendMessage
                     (

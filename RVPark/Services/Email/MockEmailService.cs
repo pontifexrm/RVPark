@@ -1,7 +1,6 @@
-﻿using RVPark.Data;
+using RVPark.Data;
 using RVPark.Services.Environment;
 using RVPark.Services.Logging;
-using System.Runtime;
 
 namespace RVPark.Services.Email
 {

@@ -1,4 +1,4 @@
-﻿namespace RVPark.Components.Account
+namespace RVPark.Components.Account
 {
     public class AuthMessageSenderOptions
     {

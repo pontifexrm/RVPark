@@ -19,7 +19,7 @@ public class DeleteBookingHandler : IRequestHandler<DeleteBookingCommand, Result
 
     public async Task<Result> Handle(DeleteBookingCommand request, CancellationToken cancellationToken)
     {
-        var booking = await _context.bkg_Bookings!
+        var booking = await _context.bkg_Bookings
             .FirstOrDefaultAsync(b => b.BookingId == request.BookingId, cancellationToken);
 
         if (booking == null)
@@ -27,11 +27,11 @@ public class DeleteBookingHandler : IRequestHandler<DeleteBookingCommand, Result
             return Result.Failure($"Booking with ID {request.BookingId} not found.");
         }
 
-        var success = await _bookingEngine.DeleteBookingAsync(booking);
+        var result = await _bookingEngine.DeleteBookingAsync(booking);
 
-        if (!success)
+        if (!result.IsSuccess)
         {
-            return Result.Failure("Unable to delete booking.");
+            return Result.Failure(result.Error ?? "Unable to delete booking.");
         }
 
         return Result.Success();

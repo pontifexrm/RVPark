@@ -1,7 +1,4 @@
-﻿using System;
 using System.Reflection;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using RVPark.Data;
 
 
@@ -9,10 +6,10 @@ namespace RVPark.Services.Environment
 {
     public class EnvironmentInfoService : IEnvironmentInfoService
     {
-        private readonly IWebHostEnvironment _env;
-        private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment? _env;
+        private readonly IConfiguration? _configuration;
         private readonly ApplicationDbContext _dbContext;
-        private string _cachedMenuType;
+        private string? _cachedMenuType;
 
         public EnvironmentInfoService(ApplicationDbContext dbContext)
         {
@@ -28,9 +25,9 @@ namespace RVPark.Services.Environment
 
         public string EnvironmentName => _env?.EnvironmentName ?? "Unknown";
 
-        public string ServerName => ParseServerAndDatabase(_configuration["ConnectionStrings:DefaultConnection"]).Server ?? "n/a";
+        public string ServerName => ParseServerAndDatabase(_configuration?["ConnectionStrings:DefaultConnection"]).Server ?? "n/a";
 
-        public string DatabaseName => ParseServerAndDatabase(_configuration["ConnectionStrings:DefaultConnection"]).Database ?? "n/a";
+        public string DatabaseName => ParseServerAndDatabase(_configuration?["ConnectionStrings:DefaultConnection"]).Database ?? "n/a";
 
         public string FeatureMenuType
         {
@@ -51,12 +48,12 @@ namespace RVPark.Services.Environment
         {
             get
             {
-                var prodCcn = _configuration["ConnectionStrings:ProductionSrvDB"] ?? "";
+                var prodCcn = _configuration?["ConnectionStrings:ProductionSrvDB"] ?? "";
                 if (string.IsNullOrEmpty(prodCcn))
                     return false;
 
                 var (prodServer, prodDb) = ParseServerAndDatabase(prodCcn);
-                var (currServer, currDb) = ParseServerAndDatabase(_configuration["ConnectionStrings:DefaultConnection"] ?? "");
+                var (currServer, currDb) = ParseServerAndDatabase(_configuration?["ConnectionStrings:DefaultConnection"] ?? "");
                 return string.Equals(prodServer, currServer, StringComparison.OrdinalIgnoreCase)
                     && string.Equals(prodDb, currDb, StringComparison.OrdinalIgnoreCase);
             }
@@ -79,12 +76,16 @@ namespace RVPark.Services.Environment
                 if (p.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase) ||
                     p.StartsWith("Server=", StringComparison.OrdinalIgnoreCase))
                 {
-                    var idx = p.IndexOf('='); if (idx >= 0) server = p[(idx + 1)..].Trim();
+                    var idx = p.IndexOf('=');
+                    if (idx >= 0)
+                        server = p[(idx + 1)..].Trim();
                 }
                 else if (p.StartsWith("Initial Catalog=", StringComparison.OrdinalIgnoreCase) ||
                             p.StartsWith("Database=", StringComparison.OrdinalIgnoreCase))
                 {
-                    var idx = p.IndexOf('='); if (idx >= 0) database = p[(idx + 1)..].Trim();
+                    var idx = p.IndexOf('=');
+                    if (idx >= 0)
+                        database = p[(idx + 1)..].Trim();
                 }
             }
 
@@ -114,9 +115,9 @@ namespace RVPark.Services.Environment
 
                 return $"Name: {productName.ToString() ?? "n/a"}"
                 + $" Ver: {version?.ToString() ?? "0.0.0.0"} ";
-                    //+
-                    //   $"(File: {fileVersionAttr?.Version ?? "n/a"}, " +
-                    //   $"Product: {infoVersionAttr?.InformationalVersion ?? "n/a"})";
+                //+
+                //   $"(File: {fileVersionAttr?.Version ?? "n/a"}, " +
+                //   $"Product: {infoVersionAttr?.InformationalVersion ?? "n/a"})";
             }
         }
     }

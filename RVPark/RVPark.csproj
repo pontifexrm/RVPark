@@ -9,17 +9,31 @@
     <AssemblyVersion>1.0.70</AssemblyVersion>
     <AssemblyName>RVPark</AssemblyName>
     <RootNamespace>RVPark</RootNamespace>
+
+    <!-- Code Analysis / Linting -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="Components\Admin\Pages\Manage\**" />
+    <Compile Remove="Components\Pages\TabComponents\**" />
     <Content Remove="Components\Admin\Pages\Manage\**" />
+    <Content Remove="Components\Pages\TabComponents\**" />
     <EmbeddedResource Remove="Components\Admin\Pages\Manage\**" />
+    <EmbeddedResource Remove="Components\Pages\TabComponents\**" />
     <None Remove="Components\Admin\Pages\Manage\**" />
+    <None Remove="Components\Pages\TabComponents\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Data\Bkg_Engine.cs" />
+    <Compile Remove="Data\Bkg_UserService.cs" />
     <Compile Remove="Data\EmailSenderMailKit.cs" />
+    <Compile Remove="Data\EmailSenderSystem.cs" />
+    <Compile Remove="Data\SmsService.cs" />
     <Compile Remove="Services\CustomAppLoggerOLD.cs" />
     <Compile Remove="Services\Logging\SiteStatsService.cs" />
   </ItemGroup>
@@ -49,9 +63,6 @@
     <Content Remove="Components\Pages\Availabilityold.razor" />
     <Content Remove="Components\Pages\ContactUs.razor" />
     <Content Remove="Components\Pages\ContactUs01.razor" />
-    <Content Remove="Components\Pages\TabComponents\DBTblNavMenu.razor" />
-    <Content Remove="Components\Pages\TabComponents\DB_Maint.razor" />
-    <Content Remove="Components\Pages\TabComponents\DynamicCRUD.razor" />
     <Content Remove="libman.json" />
     <Content Remove="wwwroot\images\bethanylogo.png" />
     <Content Remove="wwwroot\images\GettyImages-954695858.jpg" />

@@ -18,5 +18,5 @@ namespace RVPark.Data
         public DateTime CreatedDte { get; set; } = DateTime.UtcNow;
 
     }
-    
+
 }

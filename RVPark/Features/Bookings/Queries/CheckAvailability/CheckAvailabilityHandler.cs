@@ -1,10 +1,10 @@
 using MediatR;
-using RVPark.Data;
 using RVPark.Features.Bookings.Services;
+using RVPark.Shared;
 
 namespace RVPark.Features.Bookings.Queries.CheckAvailability;
 
-public class CheckAvailabilityHandler : IRequestHandler<CheckAvailabilityQuery, bool>
+public class CheckAvailabilityHandler : IRequestHandler<CheckAvailabilityQuery, Result<bool>>
 {
     private readonly IBookingEngine _bookingEngine;
 
@@ -13,13 +13,13 @@ public class CheckAvailabilityHandler : IRequestHandler<CheckAvailabilityQuery, 
         _bookingEngine = bookingEngine;
     }
 
-    public Task<bool> Handle(CheckAvailabilityQuery request, CancellationToken cancellationToken)
+    public Task<Result<bool>> Handle(CheckAvailabilityQuery request, CancellationToken cancellationToken)
     {
-        var isAvailable = _bookingEngine.IsAvailable(
+        var result = _bookingEngine.IsAvailable(
             request.DateArrive,
             request.DateDepart,
             request.PropertyId);
 
-        return Task.FromResult(isAvailable);
+        return Task.FromResult(result);
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace RVPark.Data
+namespace RVPark.Data
 {
     // Need stats on user visits, similar to LoginStats and VisitStats and the location they visit and count.
     // If the User has not logged in the visit by IPAddress should be counted.

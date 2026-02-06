@@ -69,7 +69,7 @@
     private string? errorMessage;
 
     [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
+    private HttpContext? HttpContext { get; set; }
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
@@ -79,6 +79,15 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // HttpContext is only available during prerendering (SSR).
+        // In interactive server mode without prerender, redirect to the VSA login page.
+        if (HttpContext is null)
+        {
+            var returnUrl = ReturnUrl ?? "/";
+            NavigationManager.NavigateTo($"/Auth/Login?returnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
+            return;
+        }
+
         if (HttpMethods.IsGet(HttpContext.Request.Method))
         {
             // Clear the existing external cookie to ensure a clean login process
@@ -88,6 +97,13 @@
 
     public async Task LoginUser()
     {
+        // HttpContext is required for this form-based login
+        if (HttpContext is null)
+        {
+            NavigationManager.NavigateTo($"/Auth/Login?returnUrl={Uri.EscapeDataString(ReturnUrl ?? "/")}", forceLoad: true);
+            return;
+        }
+
         // This doesn't count login failures towards account lockout
         // To enable password failures to trigger account lockout, set lockoutOnFailure: true
         var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
@@ -98,7 +114,7 @@
 
         var loginLog = new LoginLog
         {
-            UserId = (result.Succeeded) ? (await _userManager.FindByEmailAsync(Input.Email)).Id : null,
+            UserId = (result.Succeeded) ? (await _userManager.FindByEmailAsync(Input.Email))?.Id : null,
             IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
             Success = result.Succeeded,
             Timestamp = DateTimeOffset.UtcNow

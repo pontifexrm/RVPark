@@ -32,14 +32,14 @@ public class CreateBookingHandler : IRequestHandler<CreateBookingCommand, Result
             UpdatedDte = DateTime.UtcNow
         };
 
-        var success = await _bookingEngine.CreateBookingAsync(booking);
+        var result = await _bookingEngine.CreateBookingAsync(booking);
 
-        if (!success)
+        if (!result.IsSuccess)
         {
-            return Result<BookingDto>.Failure("Unable to create booking. The requested dates may not be available.");
+            return Result<BookingDto>.Failure(result.Error ?? "Unable to create booking.");
         }
 
-        var dto = _mapper.Map<BookingDto>(booking);
+        var dto = _mapper.Map<BookingDto>(result.Value);
         return Result<BookingDto>.Success(dto);
     }
 }

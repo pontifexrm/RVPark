@@ -8,117 +8,36 @@ using RVPark.Data;
 
 namespace RVPark.Services
 {
+    /// <summary>
+    /// Result of a transfer operation between databases.
+    /// </summary>
+    public class TransferResult
+    {
+        public int AppLogsAdded { get; set; }
+        public int UsersAdded { get; set; }
+        public int LoginLogsAdded { get; set; }
+        public int VisitLogsAdded { get; set; }
+    }
+
     public class SiteStatsService
     {
-        //private readonly SourceDbContext _source;
-        //private readonly LocalDbContext _local;
-        private readonly ApplicationDbContext dbcontext;
+        private readonly ApplicationDbContext _dbContext;
 
-        //public SiteStatsService(SourceDbContext source, LocalDbContext local)
-        //{
-        //    _source = source;
-        //    _local = local;
-        //}
         public SiteStatsService(ApplicationDbContext context)
         {
-            dbcontext = context;
+            _dbContext = context;
         }
 
+        // NOTE: TransferAsync is currently disabled as it requires separate source and local database contexts.
+        // To enable, uncomment and provide proper SourceDbContext and LocalDbContext implementations.
+        /*
         public async Task<TransferResult> TransferAsync()
         {
-            var result = new TransferResult();
-
-            // Transfer AppLogs
-            var applog = await _source.AppLogs.AsNoTracking().ToListAsync<AppLog>();
-
-            if (applog.Any())
-            {
-                // Load local app logs once for duplicate checks
-                var localAppLogCache = await _local.AppLogs.AsNoTracking().ToListAsync();
-
-                foreach (var rec in applog)
-                {
-                    if (IsDuplicateRecord(rec, localAppLogCache))
-                        continue;
-
-                    ResetPrimaryKeyIfStoreGenerated(rec, _local);
-
-                    _local.AppLogs.Add(rec);
-                    result.AppLogsAdded++;
-                }
-
-                await _local.SaveChangesAsync();
-
-                // no tracked changes on _source because of AsNoTracking()
-                await _source.SaveChangesAsync();
-            }
-            // Transfer Bkg_Users BUT DO NOT DELETE THEM FROM THE SOURCE just compare and add any new ones
-            var userRecords = await _source.Bkg_Users.AsNoTracking().ToListAsync<Bkg_User>();
-            if (userRecords.Any())
-            {
-                foreach (var user in userRecords)
-                {
-                    // Unique by combination of AppUserId + UserName
-                    var exists = await _local.Bkg_Users.AnyAsync(u =>
-                        u.AppUserId == user.AppUserId &&
-                        u.UserName == user.UserName);
-
-                    if (!exists)
-                    {
-                        user.UserId = 0;
-                        _local.Bkg_Users.Add(user);
-                        result.UsersAdded++;
-                    }
-                }
-                await _local.SaveChangesAsync();
-
-            }
-            // Transfer LoginLogs
-            var loginRecords = await _source.LoginLogs.AsNoTracking().ToListAsync<LoginLog>();
-            if (loginRecords.Any())
-            {
-                // Load local login logs once for duplicate checks
-                var localLoginCache = await _local.LoginLogs.AsNoTracking().ToListAsync();
-
-                foreach (var rec in loginRecords)
-                {
-                    if (IsDuplicateLogin(rec, localLoginCache))
-                        continue;
-
-                    ResetPrimaryKeyIfStoreGenerated(rec, _local);
-
-                    _local.LoginLogs.Add(rec);
-                    result.LoginLogsAdded++;
-                }
-
-                await _local.SaveChangesAsync();
-                await _source.SaveChangesAsync();
-            }
-            // Transfer VisitLogs
-            var visitRecords = await _source.VisitLogs.AsNoTracking().ToListAsync<VisitLog>();
-            if (visitRecords.Any())
-            {
-                // Load local visit logs once for duplicate checks
-                var localVisitCache = await _local.VisitLogs.AsNoTracking().ToListAsync();
-
-                foreach (var rec in visitRecords)
-                {
-                    if (IsDuplicateRecord(rec, localVisitCache))
-                        continue;
-
-                    ResetPrimaryKeyIfStoreGenerated(rec, _local);
-
-                    _local.VisitLogs.Add(rec);
-                    result.VisitLogsAdded++;
-                }
-
-                await _local.SaveChangesAsync();
-                await _source.SaveChangesAsync();
-
-            }
-
-            return result;
+            // This method requires _source and _local DbContext instances
+            // which are not currently configured.
+            throw new NotImplementedException("TransferAsync requires separate source and local database contexts.");
         }
+        */
 
         private static void ResetPrimaryKeyIfStoreGenerated<TEntity>(TEntity entity, DbContext targetContext)
             where TEntity : class
@@ -248,8 +167,9 @@ namespace RVPark.Services
             if (t == typeof(DateTimeOffset)) return true;
             if (t == typeof(Guid)) return true;
             if (t == typeof(TimeSpan)) return true;
-            if (Nullable.GetUnderlyingType(t) != null)
-                return IsSimpleType(Nullable.GetUnderlyingType(t));
+            var underlyingType = Nullable.GetUnderlyingType(t);
+            if (underlyingType != null)
+                return IsSimpleType(underlyingType);
             return false;
         }
     }

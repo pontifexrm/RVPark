@@ -1,5 +1,5 @@
 using AutoMapper;
-namespace  RVPark.Data;
+namespace RVPark.Data;
 
 public class MappingProfile : Profile
 {

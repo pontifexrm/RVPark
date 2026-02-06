@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using RVPark.Data;
+using Microsoft.EntityFrameworkCore;
 namespace RVPark.Data
 {
     public class Bkg_UserService
@@ -13,11 +12,11 @@ namespace RVPark.Data
 
         public async Task<bool> BookingAnyAsync(int userId)
         {
-            return await (_context.bkg_Bookings?.AnyAsync(u => u.UserId == userId) ?? Task.FromResult(false));
+            return await _context.bkg_Bookings.AnyAsync(u => u.UserId == userId);
         }
         public async Task<bool> ReviewAnyAsync(int userId)
         {
-            return await (_context.bkg_Reviews?.AnyAsync(r => r.UserId == userId) ?? Task.FromResult(false));
+            return await _context.bkg_Reviews.AnyAsync(r => r.UserId == userId);
         }
         public async Task<Bkg_User?> DeleteBkgUserAsync(int usrId)
         {
@@ -34,10 +33,6 @@ namespace RVPark.Data
 
         public bool Bkg_AvailableAllSync(DateTime Fmdate, DateTime Todate)
         {
-            if (_context.bkg_Availabilities == null)
-            {
-                return false;
-            }
             bool res = _context.bkg_Availabilities
                 .Where(b => b.DateAvailable >= Fmdate && b.DateAvailable <= Todate)
                 .All(b => b.Available);

@@ -1,17 +1,9 @@
-﻿using Azure;
-//using Humanizer;
-//using Microsoft.CodeAnalysis.Differencing;
-using RVPark.Components.Account.Pages.Manage;
-using RVPark.Components.Pages;
-using RVPark.Components;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.Metrics;
-using System.IO;
 using System.Net;
 using System.Net.Mail;
 using System.Net.Sockets;
-using static System.Net.Mime.MediaTypeNames;
-using System.Numerics;
+//using Humanizer;
+//using Microsoft.CodeAnalysis.Differencing;
 
 
 namespace RVPark.Data;
@@ -30,22 +22,22 @@ public class EmailMessage
     #endregion
 
     #region Properties used in composing email message and are Application Specific
-    [Required, EmailAddress,MaxLength(48)]
+    [Required, EmailAddress, MaxLength(48)]
     public string Email { get; set; } = string.Empty;
 
     [Required, Phone]
     public string Phone { get; set; } = string.Empty;
 
-   // [Required, MinLength(3), MaxLength(128)]
+    // [Required, MinLength(3), MaxLength(128)]
     public string FirstName { get; set; } = string.Empty;
 
     [Required, MinLength(3), MaxLength(128)]
     public string Name { get; set; } = string.Empty;
 
 
-   // [Required, MinLength(3), MaxLength(128)]
+    // [Required, MinLength(3), MaxLength(128)]
     public string LastName { get; set; } = string.Empty;
-    
+
     [Required, MinLength(4), MaxLength(80)]
     public string Subject { get; set; } = string.Empty;
 
@@ -86,19 +78,19 @@ public class EmailMessage
         }
     }
 
-    public string  E_164_Phone  //IntPhoneFmt //The proper E.164 format is [+] [country code] [area code] [subscriber number].
+    public string E_164_Phone  //IntPhoneFmt //The proper E.164 format is [+] [country code] [area code] [subscriber number].
     {
         get
         {
             // purpose of this return is to gie the phone number in the +64nnnnnnnnnn format if it is not already.
             string srtn = string.Empty;
-            if(this.Phone.Length > 0)
+            if (this.Phone.Length > 0)
             {
                 if (Phone.StartsWith("+")) // then likely in the corect format already
                 {
                     srtn = Phone.Trim();
                 }
-                else if(Phone.StartsWith("0"))// then likely miss country code so remove the "0" and add "+64"
+                else if (Phone.StartsWith("0"))// then likely miss country code so remove the "0" and add "+64"
                 {
                     srtn = string.Concat("+64" + Phone[1..]); // this prefix should be a configurable for the ountry the app is being run in.
                 }
@@ -143,8 +135,9 @@ public class EmailMessage
     }
 
     public string ChkMsg
-    { 
-        get{
+    {
+        get
+        {
             string sRtn = string.Format("Hi {0} \r\n" +
                               "Thanks for your interest in RV Park NZ.\r\n\r\nWe have received your message and will be contacting you soon with our response. \r\n" +
                               "Just so you have a record of this message here are the details you sent to us. \r\n\r\n" +
@@ -159,7 +152,7 @@ public class EmailMessage
             this.Name, this.Email, this.Phone, this.Nzmca,
             this.Message, this.Subject, DateTime.Now.ToString("g"));
             return sRtn;
-        } 
+        }
     }
     public string smsMsg
     {
@@ -281,7 +274,8 @@ public class EmailMessage
     public bool IsValidEmail(string Email)
     {
         bool rtn = false;
-        if (Email == string.Empty || Email == null || Email == "") return false;
+        if (Email == string.Empty || Email == null || Email == "")
+            return false;
         try
         {
             MailAddress m = new MailAddress(Email);
@@ -289,7 +283,7 @@ public class EmailMessage
         }
         catch (FormatException)
         {
-            rtn  = false;
+            rtn = false;
         }
         if (rtn)
         {

@@ -367,7 +367,7 @@
             }
 
         }
-        catch (Exception e) { }
+        catch { }
 
         users = await ApplicationDbContext.Users.ToListAsync();
         isEditing = false;

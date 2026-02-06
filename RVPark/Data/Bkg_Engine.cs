@@ -1,11 +1,6 @@
-﻿using Microsoft.AspNetCore.Routing;
 //using Microsoft.CodeAnalysis.Operations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
-
 //using Microsoft.VisualStudio.TextTemplating;
-using RVPark.Components.Pages;
-using System;
 
 namespace RVPark.Data
 {
@@ -78,11 +73,9 @@ namespace RVPark.Data
                     var dte = currentBooking.DateArrive;
                     while (dte < currentBooking.DateDepart)
                     {
-#pragma warning disable CS8604 // Possible null reference argument.
                         var avail = _context.bkg_Availabilities
                             .Where(a => a.Bkg_PropertyId == currentBooking.PropertyId && a.DateAvailable == dte)
                             .FirstOrDefault();
-#pragma warning restore CS8604 // Possible null reference argument.
                         if (avail == null)
                         {
                             throw new InvalidOperationException($"Availability record not found for property {currentBooking.PropertyId} on date {dte}");
@@ -91,23 +84,23 @@ namespace RVPark.Data
                         {
                             avail.Available = true;
                             avail.AvailabilityStatus = string.Empty;
-                            _context.bkg_Availabilities.Update(avail); 
+                            _context.bkg_Availabilities.Update(avail);
                         }
                         dte = dte.AddDays(1);
                     }
                     // remove the booking
-                    _context.bkg_Bookings?.Remove(currentBooking);
+                    _context.bkg_Bookings.Remove(currentBooking);
                     await _context.SaveChangesAsync();
                     transaction.Commit();
                     return true;
                 }
-                catch (Exception ex)
+                catch
                 {
                     transaction.Rollback();
                     return false;
                 }
             }
-            
+
         }
 
         /// <summary>
@@ -161,7 +154,7 @@ namespace RVPark.Data
                         return false;
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
                     transaction.Rollback();
                     return false;
@@ -295,8 +288,8 @@ namespace RVPark.Data
                 {
                     try
                     {
-// was RMP 20251208                        chngAvailableStatus(new_bkg.DateArrive, cur_bkg.DateArrive, cur_bkg.PropertyId, true, string.Empty);
-                        chngAvailableStatus(cur_bkg.DateArrive, new_bkg.DateArrive,  cur_bkg.PropertyId, true, string.Empty);
+                        // was RMP 20251208                        chngAvailableStatus(new_bkg.DateArrive, cur_bkg.DateArrive, cur_bkg.PropertyId, true, string.Empty);
+                        chngAvailableStatus(cur_bkg.DateArrive, new_bkg.DateArrive, cur_bkg.PropertyId, true, string.Empty);
                         chngAvailableStatus(new_bkg.DateDepart, cur_bkg.DateDepart, cur_bkg.PropertyId, true, string.Empty);
                         _context.bkg_Bookings?.Update(new_bkg);
                         await _context.SaveChangesAsync();
@@ -371,7 +364,7 @@ namespace RVPark.Data
                         return false;
                     }
                 }
-            return result;
+                return result;
             } // Scenario G   P1 != P2
             else if (cur_bkg.PropertyId != new_bkg.PropertyId)
             {   // Check if the new booking is available and if so change the availability status of the property
@@ -453,11 +446,9 @@ namespace RVPark.Data
             var dte = fmdte;
             while (dte < todte)
             {
-#pragma warning disable CS8604 // Possible null reference argument.
                 var avail = _context.bkg_Availabilities
                     .Where(a => a.Bkg_PropertyId == propId && a.DateAvailable == dte)
                     .FirstOrDefault();
-#pragma warning restore CS8604 // Possible null reference argument.
                 if (avail != null)
                 {
                     if (avail.Available)
@@ -486,10 +477,8 @@ namespace RVPark.Data
             DateTime dte = fmdte;
             while (dte < todte)
             {
-#pragma warning disable CS8604 // Possible null reference argument.
                 var existingRecord = _context.bkg_Availabilities
                     .FirstOrDefault(a => a.Bkg_PropertyId == propId && a.DateAvailable == dte);
-#pragma warning restore CS8604 // Possible null reference argument.
 
                 if (existingRecord != null)
                 {

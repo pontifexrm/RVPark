@@ -1,4 +1,4 @@
-﻿namespace RVPark.Services.Environment
+namespace RVPark.Services.Environment
 {
     public interface IEnvironmentInfoService
     {

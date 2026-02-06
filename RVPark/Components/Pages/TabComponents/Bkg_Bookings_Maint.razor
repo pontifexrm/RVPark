@@ -9,8 +9,10 @@
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
-
-
+@using MediatR
+@using RVPark.Features.Bookings.Commands.CreateBooking
+@using RVPark.Features.Bookings.Commands.EditBooking
+@using RVPark.Features.Bookings.Commands.DeleteBooking
 
 @* Is Being Used *@
 
@@ -29,7 +31,7 @@
 @inject ISmsService SmsService
 
 @inject IConfiguration configuration
-@inject RVPark.Features.Bookings.Services.IBookingEngine BookingEngine
+@inject IMediator Mediator
 <!-- Page header with title and button to add a new Booking -->
 <div class="tab-content" style="display: flex; justify-content: space-between; align-items: center;">
     <div>
@@ -346,13 +348,6 @@ else
         showModal = true;
     }
 
-    // PSEUDOCODE / PLAN:
-    // 1. Create a new DbContext instance from DbContextFactory (async).
-    // 2. Use that local context to fetch the Bkg_User and Bkg_Property referenced by currentBooking.UserId and PropertyId.
-    // 3. Ensure the page-level bkg_Engine is initialized (do not shadow the field).
-    // 4. Call CreateBookingAsync for new bookings or EditBookingAsync for updates.
-    // 5. Preserve existing error handling and modal flags.
-    // 6. Dispose the local context (use await using) and then reload bookings.
     private async Task SaveBooking()
     {
         // create a scoped context from the factory
@@ -379,25 +374,48 @@ else
 
         if (currentBooking.BookingId == 0) // A new booking
         {
-            var savedOK = await BookingEngine.CreateBookingAsync( currentBooking);
-            if (!savedOK)
+            var result = await Mediator.Send(new CreateBookingCommand(
+                currentBooking.PropertyId,
+                currentBooking.UserId,
+                currentBooking.DateArrive,
+                currentBooking.DateDepart,
+                currentBooking.TotalPrice,
+                currentBooking.BookingComments ?? ""
+            ));
+
+            if (!result.IsSuccess)
             {
-                modalMessage = "Booking Not possible - Likely date not available!";
+                modalMessage = result.Error ?? "Booking Not possible - Likely date not available!";
                 allDatesAvailable = false;
                 showModal = true;
             }
             else
             {
+                if (result.Value != null)
+                {
+                    currentBooking.BookingId = result.Value.BookingId;
+                }
                 showModal = false;
                 modalMessage = "";
             }
         }
         else // editing existing bkg
         {
-            var savedOK = await BookingEngine.EditBookingAsync(orgnBkg, currentBooking);
-            if (!savedOK)
+            var result = await Mediator.Send(new EditBookingCommand(
+                currentBooking.BookingId,
+                currentBooking.PropertyId,
+                currentBooking.UserId,
+                currentBooking.DateArrive,
+                currentBooking.DateDepart,
+                currentBooking.TotalPrice,
+                currentBooking.Paid,
+                currentBooking.BookingStatus ?? "Booked",
+                currentBooking.BookingComments ?? ""
+            ));
+
+            if (!result.IsSuccess)
             {
-                modalMessage = "Could not save changes to this Booking";
+                modalMessage = result.Error ?? "Could not save changes to this Booking";
                 // restore original values
                 currentBooking.DateArrive = orgnBkg.DateArrive;
                 currentBooking.DateDepart = orgnBkg.DateDepart;
@@ -420,33 +438,18 @@ else
 
     private async Task DeleteBooking(int bookingId)
     {
-        var booking = await ApplicationDbContext.bkg_Bookings.FindAsync(bookingId);
-        if (booking != null)
+        var result = await Mediator.Send(new DeleteBookingCommand(bookingId));
+
+        if (!result.IsSuccess)
         {
-            try
-            {
-                await BookingEngine.DeleteBookingAsync(booking);
-                await LoadBookings();
-            }
-            catch (Exception ex)
-            {
-                modalTitle = "Error found deleting this Booking";
-                modalMessage = ex.ToString();
-                // allDatesAvailable = false;
-                showModal = true;
-            }
-
-            // await LoadBookings();
+            modalTitle = "Error found deleting this Booking";
+            modalMessage = result.Error ?? "Could not delete this booking.";
+            showModal = true;
         }
-
-
-        // var booking = await ApplicationDbContext.bkg_Bookings.FindAsync(bookingId);
-        // if (booking != null)
-        // {
-        //     ApplicationDbContext.bkg_Bookings.Remove(booking);
-        //     await ApplicationDbContext.SaveChangesAsync();
-        //     await LoadBookings();
-        // }
+        else
+        {
+            await LoadBookings();
+        }
     }
 
     private void CloseModal()
@@ -672,19 +675,19 @@ else
         sendConfirmMsg = true;
     }
 
-    private void SendEmailConfirmation()
+    private async Task SendEmailConfirmation()
     {
         string destination = currentBooking.Bkg_User.UserEmail;
-        SendEmailConfirmation(destination);
+        await SendEmailConfirmation(destination);
     }
-    private void SendTxtConfirmation()
+    private async Task SendTxtConfirmation()
     {
         string txtrept = Chk_E_164_Phone(currentBooking.Bkg_User.UserPhone);
-        SendTxtConfirmation(txtrept);
+        await SendTxtConfirmation(txtrept);
     }
-    private void SendAdhocConfirmation()
+    private async Task SendAdhocConfirmation()
     {
-        bool isEmail = true; 
+        bool isEmail = true;
         string sendtoWho = string.Empty;
         // if Me then send to the logged in user
         if (adhocConfirm.ToLower() == "me" || adhocConfirm.Length == 0)
@@ -711,11 +714,11 @@ else
         }
         if (isEmail)
         {
-            SendEmailConfirmation(adhocConfirm);
+            await SendEmailConfirmation(adhocConfirm);
         }
         else
         {
-            SendTxtConfirmation(adhocConfirm);
+            await SendTxtConfirmation(adhocConfirm);
         }
 
         adhocConfirm = string.Empty;

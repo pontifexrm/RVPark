@@ -311,9 +311,9 @@
                 isEditing = false;
                 ErrorMessage = "";
             }            
-            catch (Exception ex)
+            catch
             {
-                ErrorMessage = "Error trying to save this Parameter. Please try again";// Handle concurrency exception as needed
+                ErrorMessage = "Error trying to save this Parameter. Please try again";
             }
         }
         StateHasChanged();
@@ -340,9 +340,9 @@
                 freshDbContext.Entry(currentParameter).State = EntityState.Deleted;
                 await freshDbContext.SaveChangesAsync();
             }
-            catch (Exception ex)
+            catch
             {
-                ErrorMessage = "Error trying to delete this Parameter. Please try again";// Handle concurrency exception as needed
+                ErrorMessage = "Error trying to delete this Parameter. Please try again";
             }
 
         }

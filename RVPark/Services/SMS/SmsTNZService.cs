@@ -1,5 +1,3 @@
-﻿using Microsoft.Extensions.Configuration;
-using Org.BouncyCastle.Cms;
 using RVPark.Data;
 using RVPark.Services.Environment;
 using RVPark.Services.Logging;
@@ -9,10 +7,10 @@ namespace RVPark.Services.SMS
 {
     public class SmsTNZSettings
     {
-            public string AuthToken { get; set; } = string.Empty;
-            public string fromEmail { get; set; } = string.Empty;
-            public string CCemail { get; set; } = string.Empty;
-            public string SMSrept { get; set; } = string.Empty;
+        public string AuthToken { get; set; } = string.Empty;
+        public string fromEmail { get; set; } = string.Empty;
+        public string CCemail { get; set; } = string.Empty;
+        public string SMSrept { get; set; } = string.Empty;
 
     }
 
@@ -25,7 +23,7 @@ namespace RVPark.Services.SMS
         private readonly IAppLogger _appLogger;
         private readonly IEnvironmentInfoService _env;
 
-        public SmsTNZService(IConfiguration configuration,IAppLogger applogger, IEnvironmentInfoService env )
+        public SmsTNZService(IConfiguration configuration, IAppLogger applogger, IEnvironmentInfoService env)
         {
             _settings = configuration.GetSection("TNZ").Get<SmsTNZSettings>()
            ?? throw new InvalidOperationException("TNZ settings not configured");

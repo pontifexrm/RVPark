@@ -1,8 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
 using RVPark.Data;
-using TNZAPI.NET.Core;
 using RVPark.Services.Environment;
 using RVPark.Services.Logging;
+using TNZAPI.NET.Core;
 
 namespace RVPark.Services.Email
 {
@@ -47,7 +46,7 @@ namespace RVPark.Services.Email
             var alogMsg = $"EmailTo: {to} fm: {_settings.fromEmail} Subj: {subject} Msg: {body}";
             alogMsg = _env.ShouldDisplayEnvInfo ? $"TEST-{alogMsg}" : alogMsg;
 
-            var sVia = _env.ShouldDisplayEnvInfo ? $"TEST-TNZApiUser": $"TNZApiUser";
+            var sVia = _env.ShouldDisplayEnvInfo ? $"TEST-TNZApiUser" : $"TNZApiUser";
             await _applogger.LogAsync("Info", $"{sVia}", $"Email sent Details:-{alogMsg}");
 
             return true;
@@ -59,7 +58,7 @@ namespace RVPark.Services.Email
         public string fromEmail { get; set; } = string.Empty;
         public string CCemail { get; set; } = string.Empty;
         public string SMSrept { get; set; } = string.Empty;
-        
+
     }
 
 }

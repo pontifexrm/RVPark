@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RVPark.Data
 {
@@ -10,7 +8,7 @@ namespace RVPark.Data
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int PropertyId { get; set; }
-        [Required(ErrorMessage = "Name is required")] 
+        [Required(ErrorMessage = "Name is required")]
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
@@ -46,7 +44,7 @@ namespace RVPark.Data
         public bool Enabled { get; set; } = true;
 
         public ICollection<Bkg_Availability>? Bkg_Availabilities { get; set; }
-        public ICollection<Bkg_Booking>? Bkg_Bookings { get; set; }  
+        public ICollection<Bkg_Booking>? Bkg_Bookings { get; set; }
 
         public Bkg_User? Bkg_User { get; set; }
 

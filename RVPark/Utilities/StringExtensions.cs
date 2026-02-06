@@ -1,5 +1,3 @@
-using System;
-
 namespace RVPark.Utilities
 {
     public static class StringExtensions

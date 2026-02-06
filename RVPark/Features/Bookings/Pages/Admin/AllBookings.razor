@@ -18,6 +18,11 @@
 @using RVPark.Services.Logging
 @using RVPark.Services.Email;
 @using RVPark.Services.SMS;
+@using MediatR
+@using RVPark.Features.Bookings.Commands.CreateBooking
+@using RVPark.Features.Bookings.Commands.EditBooking
+@using RVPark.Features.Bookings.Commands.DeleteBooking
+@using RVPark.Features.Bookings.Queries.CheckAvailability
 
 @* Is Being Used *@
 
@@ -40,7 +45,7 @@
 @inject IAppLogger AppLogger
 
 @inject IConfiguration configuration
-@inject RVPark.Features.Bookings.Services.IBookingEngine BookingEngine
+@inject IMediator Mediator
 <AuthorizeView>
     <Authorized>
         <!-- Page header with title and button to add a new Booking -->
@@ -498,22 +503,32 @@
         currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
         currentBooking.DateArrive = Fmdate; currentBooking.DateDepart = Todate;
 
-
-
         // if a new booking then we need to Create it else Change it.
         if (currentBooking.BookingId == 0) // A new booking
         {
-            currentBooking.CreatedDte = DateHelper.GetCurrentDateTimeInNZ();//DateTime.Now;
-            currentBooking.UpdatedDte = DateHelper.GetCurrentDateTimeInNZ();//DateTime.Now;
-            var savedOK = await BookingEngine.CreateBookingAsync(currentBooking);
-            if (!savedOK)
+            var result = await Mediator.Send(new CreateBookingCommand(
+                currentBooking.PropertyId,
+                currentBooking.UserId,
+                currentBooking.DateArrive,
+                currentBooking.DateDepart,
+                currentBooking.TotalPrice,
+                currentBooking.BookingComments ?? ""
+            ));
+
+            if (!result.IsSuccess)
             {
-                modalMessage = "Booking Not possible - Likely date not available!";
+                modalMessage = result.Error ?? "Booking Not possible - Likely date not available!";
                 allDatesAvailable = false;
                 showModal = true;
+                StateHasChanged();
             }
             else
             {
+                // Update currentBooking with the returned booking ID
+                if (result.Value != null)
+                {
+                    currentBooking.BookingId = result.Value.BookingId;
+                }
                 var logmsg = string.Concat("New Bkg. Ref: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
                     " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 
@@ -523,7 +538,7 @@
 
                 // Need to send a cc'd to rvpark@pontifex.nz For New Booking
                 await SendCCEmailConfirmation();
-
+                StateHasChanged();
             }
         }
         else // editing existing bkg
@@ -531,11 +546,21 @@
             string subjectMsg = string.Concat("Bkg Changed for:", currentBooking.Bkg_User.UserEmail, " Changed! And Now is - BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
                     " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 
-            currentBooking.UpdatedDte = DateHelper.GetCurrentDateTimeInNZ();//DateTime.Now;
-            var savedOK = await BookingEngine.EditBookingAsync(orgnBkg, currentBooking);
-            if (!savedOK)
+            var result = await Mediator.Send(new EditBookingCommand(
+                currentBooking.BookingId,
+                currentBooking.PropertyId,
+                currentBooking.UserId,
+                currentBooking.DateArrive,
+                currentBooking.DateDepart,
+                currentBooking.TotalPrice,
+                currentBooking.Paid,
+                currentBooking.BookingStatus ?? "Booked",
+                currentBooking.BookingComments ?? ""
+            ));
+
+            if (!result.IsSuccess)
             {
-                modalMessage = "Could not save changes to this Booking";
+                modalMessage = result.Error ?? "Could not save changes to this Booking";
                 // need to return the currentBooking to the orgnBkg.
                 currentBooking.DateArrive = orgnBkg.DateArrive.Date;
                 currentBooking.DateDepart = orgnBkg.DateDepart.Date;
@@ -547,6 +572,7 @@
                 currentBooking.UserId = orgnBkg.UserId;
                 allDatesAvailable = false;
                 showModal = true;
+                StateHasChanged();
             }
             else
             {
@@ -556,7 +582,7 @@
                 if (currentBooking.DateArrive != orgnBkg.DateArrive)
                 {
                     chngmsg = string.Concat("Arrival Date Changed from ", orgnBkg.DateArrive.ToString("dd/MM/yyyy"), " to ", currentBooking.DateArrive.ToString("dd/MM/yyyy"));
-                }   
+                }
                 if (currentBooking.DateDepart != orgnBkg.DateDepart)
                 {
                     chngmsg = string.Concat(chngmsg, " Departure Date Changed from ", orgnBkg.DateDepart.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.ToString("dd/MM/yyyy"));
@@ -586,7 +612,7 @@
 
                 // Need to send a cc'd to rvpark@pontifex.nz  For Edit Booking showing Changes made if possible.
                 await SendCCEmailConfirmation(chngmsg);
-
+                StateHasChanged();
             }
 
         }
@@ -611,17 +637,19 @@
             .Include(b => b.Bkg_Property)
             .FirstOrDefaultAsync(b => b.BookingId == curBkgId);
         if (bookingToDelete != null)
-        { 
+        {
             var logmsg = string.Concat("Booking Deleted by ", currentUser.UserName," BkgRef ", bookingToDelete.BookingId.ToString(),
                 " for ", bookingToDelete.Bkg_User.UserName,
                 " at ", bookingToDelete.Bkg_Property.Name,
                 " from ", bookingToDelete.DateArrive.ToString("dd/MM/yyyy"),
                 " to ", bookingToDelete.DateDepart.ToString("dd/MM/yyyy"));
-            var deletedOK = await BookingEngine.DeleteBookingAsync(bookingToDelete);
-            if (!deletedOK)
+
+            var result = await Mediator.Send(new DeleteBookingCommand(curBkgId));
+
+            if (!result.IsSuccess)
             {
                 modalTitle = "Could not delete this Booking";
-                modalMessage = "Likely because it is not allowed as per business rules.";
+                modalMessage = result.Error ?? "Likely because it is not allowed as per business rules.";
                 msgSent = true;
             }
             else
@@ -637,6 +665,7 @@
         curBkgId = 0;
 
         await LoadBookings();
+        StateHasChanged();
     }
 
     private void CloseModal()
@@ -763,13 +792,13 @@
         currentBooking = bookings.FirstOrDefault(b => b.BookingId == bookingId);
         sendConfirmMsg = true;
     }
-    private void SendEmailConfirmation()
+    private async Task SendEmailConfirmation()
     {
         // This is to the BkgUser and the bkg_User.email is destination and F/L Names are From the currentBooking.Bkg_User.
         string destination = currentBooking.Bkg_User.UserEmail;
-        SendEmailConfirmation(destination);
+        await SendEmailConfirmation(destination);
     }
-    private void SendTxtConfirmation()
+    private async Task SendTxtConfirmation()
     {
         // This is to the BkgUser and the bkg_User.phone is destination and F/L Names are From the currentBooking.Bkg_User.
         // send a short text message if they have an email address otherwise the full more expensive one
@@ -778,12 +807,12 @@
         if (emailMessage.IsValidEmail(stmp))
         {
             // send a SHORT text message
-            SendTxtConfirmation(txtrept);
+            await SendTxtConfirmation(txtrept);
         }
         else
         {
             // send the FULL txt message as no email address
-            SendTxtConfirmationNoEmail(txtrept);
+            await SendTxtConfirmationNoEmail(txtrept);
         }
     }
     private async Task SendEmailConfirmation(string emailTo)
@@ -805,7 +834,7 @@
         sendConfirmMsg = false;
         StateHasChanged();
     }
-    private void SendAdhocConfirmation()
+    private async Task SendAdhocConfirmation()
     {
         // This is to the Adhoc Destination either email or phne.
         // BUT if 'Me' then to the currentUser and F/L Names are From the currentBooking.Bkg_User with a leading text saying cc'd to Adhoc Address.
@@ -839,11 +868,11 @@
         }
         if (isEmail)
         {
-            SendEmailAdhocConfirmation(adhocConfirm);
+            await SendEmailAdhocConfirmation(adhocConfirm);
         }
         else
         {
-            SendTxtAdhocConfirmation(adhocConfirm); // Send a txt message (abreviated) to the adhoc phone number.
+            await SendTxtAdhocConfirmation(adhocConfirm); // Send a txt message (abreviated) to the adhoc phone number.
         }
 
         adhocConfirm = string.Empty;
@@ -871,7 +900,7 @@
     { // this is a CC email to the configured CC email address for New Bookings CC ToEmail
         string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
-        string emailTo = configuration["EmailSettings:CCEmail"];
+        string emailTo = configuration["EmailSettings:CCEmail"] ?? string.Empty;
         var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, ConfirmBkgMsg());
         if (resultMsg) {
             modalTitle = "Adhoc Email Sent"; modalMessage = string.Concat("Adhoc Email Confirmation sent to ", emailTo);}
@@ -889,7 +918,7 @@
         // CCMsg += "\r\n" + ConfirmBkgMsg();
 
         // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, chngmsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
-        string emailTo = configuration["EmailSettings:CCEmail"];
+        string emailTo = configuration["EmailSettings:CCEmail"] ?? string.Empty;
         var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, CCMsg);
         if (resultMsg) {
             modalTitle = "Adhoc Email Sent"; modalMessage = string.Concat("Adhoc Email Confirmation sent to ", emailTo);}
@@ -904,7 +933,7 @@
     {
         // string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, DeleteMsg, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         // " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"), " HAS BEEN DELETED");
-        string emailTo = configuration["EmailSettings:CCEmail"];
+        string emailTo = configuration["EmailSettings:CCEmail"] ?? string.Empty;
         var resultMsg = await EmailService.SendEmailAsync(emailTo, subjectMsg, DeleteMsg);
         if (resultMsg)
         {

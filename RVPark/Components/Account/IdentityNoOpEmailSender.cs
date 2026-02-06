@@ -1,6 +1,6 @@
-using RVPark.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using RVPark.Data;
 using IEmailSender = Microsoft.AspNetCore.Identity.UI.Services.IEmailSender;
 
 namespace RVPark.Components.Account

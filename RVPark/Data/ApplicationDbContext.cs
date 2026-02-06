@@ -7,19 +7,19 @@ namespace RVPark.Data
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-        public DbSet<ApplicationUser>? ApplicationUsers { get; set; }
-        public DbSet<Bkg_Availability>? bkg_Availabilities { get; set; }
-        public DbSet<Bkg_Booking>? bkg_Bookings { get; set; }
-        public DbSet<Bkg_Payment>? bkg_Payments { get; set; }
-        public DbSet<Bkg_Property>? bkg_Properties { get; set; }
-        public DbSet<Bkg_User>? bkg_Users { get; set; }
-        public DbSet<Bkg_Review>? bkg_Reviews { get; set; }
-        public DbSet<Contact>? contacts { get; set; }
-        public DbSet<AppLog>? AppLogs { get; set; }
-        public DbSet<VisitLog>? VisitLogs { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; } = null!;
+        public DbSet<Bkg_Availability> bkg_Availabilities { get; set; } = null!;
+        public DbSet<Bkg_Booking> bkg_Bookings { get; set; } = null!;
+        public DbSet<Bkg_Payment> bkg_Payments { get; set; } = null!;
+        public DbSet<Bkg_Property> bkg_Properties { get; set; } = null!;
+        public DbSet<Bkg_User> bkg_Users { get; set; } = null!;
+        public DbSet<Bkg_Review> bkg_Reviews { get; set; } = null!;
+        public DbSet<Contact> contacts { get; set; } = null!;
+        public DbSet<AppLog> AppLogs { get; set; } = null!;
+        public DbSet<VisitLog> VisitLogs { get; set; } = null!;
 
-        public DbSet<LoginLog>? LoginLogs { get; set; }
-        public DbSet<AppParameter>? AppParameters { get; set; }
+        public DbSet<LoginLog> LoginLogs { get; set; } = null!;
+        public DbSet<AppParameter> AppParameters { get; set; } = null!;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -34,26 +34,24 @@ namespace RVPark.Data
 
         public async Task<Bkg_User?> GetBkgUserByIdAsync(int userId)
         {
-            return bkg_Users != null ? await bkg_Users.FirstOrDefaultAsync(u => u.UserId == userId) : null;
+            return await bkg_Users.FirstOrDefaultAsync(u => u.UserId == userId);
         }
         public async Task<Bkg_User?> GetBkgUserByAppUserIdAsync(string appUserId)
         {
-            return bkg_Users != null ? await bkg_Users.FirstOrDefaultAsync(u => u.AppUserId == appUserId): null;
+            return await bkg_Users.FirstOrDefaultAsync(u => u.AppUserId == appUserId);
         }
 
         public async Task<bool> BookingAnyAsync(int userId)
         {
-            return await (bkg_Bookings?.AnyAsync(u => u.UserId == userId) ?? Task.FromResult(false));
+            return await bkg_Bookings.AnyAsync(u => u.UserId == userId);
         }
         public async Task<bool> ReviewAnyAsync(int userId)
         {
-            return await (bkg_Reviews?.AnyAsync(r => r.UserId == userId) ?? Task.FromResult(false));
+            return await bkg_Reviews.AnyAsync(r => r.UserId == userId);
         }
         public async Task<Bkg_User?> DeleteBkgUserAsync(int usrId)
         {
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var buser = await bkg_Users.FindAsync(usrId);
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
             if (buser == null)
             {
                 return null;
@@ -66,10 +64,6 @@ namespace RVPark.Data
 
         public bool Bkg_AvailableAllSync(DateTime Fmdate, DateTime Todate)
         {
-            if (bkg_Availabilities == null)
-            {
-                return false;
-            }
             bool res = bkg_Availabilities
                 .Where(b => b.DateAvailable >= Fmdate && b.DateAvailable <= Todate)
                 .All(b => b.Available);
@@ -84,7 +78,7 @@ namespace RVPark.Data
             var roles = await (from userRole in UserRoles
                                join role in Roles on userRole.RoleId equals role.Id
                                where userRole.UserId == userId
-                               select role.Name).ToListAsync();
+                               select role.Name ?? string.Empty).ToListAsync();
 
             return roles;
         }
@@ -112,15 +106,15 @@ namespace RVPark.Data
         }
         public async Task<int> GetUserCountAsync()
         {
-            return await (bkg_Users?.CountAsync() ?? Task.FromResult(0));
+            return await bkg_Users.CountAsync();
         }
         public async Task<int> GetIdentityUserCountAsync()
         {
-            return await (ApplicationUsers?.CountAsync() ?? Task.FromResult(0));
+            return await ApplicationUsers.CountAsync();
         }
         public async Task<int> CountUserConfirmedAsync()
         {
-            return await (ApplicationUsers?.CountAsync(u => u.EmailConfirmed) ?? Task.FromResult(0));
-        }   
+            return await ApplicationUsers.CountAsync(u => u.EmailConfirmed);
+        }
     }
 }

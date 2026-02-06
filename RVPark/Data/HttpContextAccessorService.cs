@@ -1,4 +1,4 @@
-﻿namespace RVPark.Data
+namespace RVPark.Data
 {
     public class HttpContextAccessorService
     {
@@ -10,7 +10,7 @@
         }
         public string GetUserIpAddress()
         {
-            var context = _httpContextAccessor.HttpContext; 
+            var context = _httpContextAccessor.HttpContext;
             var publicIpAddress = context?.Request?.Headers["X-Real-IP"] ?? "Unknown";
             if (publicIpAddress.ToString() == "")
             {

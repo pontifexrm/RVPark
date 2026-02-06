@@ -207,7 +207,7 @@ else
             }
             await ApplicationDbContext.SaveChangesAsync();
         }
-        catch (Exception e) { }
+        catch { }
 
         isEditing = false;
     }

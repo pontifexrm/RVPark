@@ -1,13 +1,13 @@
-﻿using Microsoft.Extensions.Options;
+using System.Net.Http.Headers;
+using System.Text.Json;
+using Microsoft.Extensions.Options;
 using RVPark.Data;
 using RVPark.Services.Environment;
 using RVPark.Services.Logging;
-using System.Net.Http.Headers;
-using System.Text.Json;
 
 namespace RVPark.Services.SMS
 {
-  
+
     public class SmsEveryoneSettings
     {
         public string ApiKey { get; set; } = string.Empty;
@@ -25,7 +25,7 @@ namespace RVPark.Services.SMS
 
         public SmsEveryoneService(
             HttpClient httpClient,
-            IOptions<SmsEveryoneSettings> settings  ,
+            IOptions<SmsEveryoneSettings> settings,
             ILogger<SmsEveryoneService> logger,
             IAppLogger appLogger,
             IEnvironmentInfoService env)
@@ -60,7 +60,7 @@ namespace RVPark.Services.SMS
             try
             {
                 var originator = request.From ?? _settings.SenderId;
-                if(request.To.StartsWith("+"))      
+                if (request.To.StartsWith("+"))
                 {
                     request.To = request.To.Substring(1);
                 }

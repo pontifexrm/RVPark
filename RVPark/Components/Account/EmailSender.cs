@@ -1,11 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Identity;
 using RVPark.Data;
 using RVPark.Services.Email;
-using System.Net.Mail;
-using System.Net.NetworkInformation;
 
 
 namespace RVPark.Components.Account
@@ -43,7 +38,7 @@ namespace RVPark.Components.Account
 
         }
 
-        public async Task Execute(string authToken,  string fromEmail, string subject, string message,
+        public async Task Execute(string authToken, string fromEmail, string subject, string message,
             string toEmail)
         {
             //Implemented email sending via this template's email service NB authToken not needed here

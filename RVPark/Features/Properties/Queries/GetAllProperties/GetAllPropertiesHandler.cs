@@ -19,7 +19,7 @@ public class GetAllPropertiesHandler : IRequestHandler<GetAllPropertiesQuery, Li
 
     public async Task<List<PropertyDto>> Handle(GetAllPropertiesQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.bkg_Properties!.AsQueryable();
+        var query = _context.bkg_Properties.AsQueryable();
 
         if (request.EnabledOnly)
         {

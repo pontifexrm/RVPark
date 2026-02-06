@@ -1,28 +1,20 @@
-using AutoMapper;
+using System.Globalization;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using RVPark.Components;
 using RVPark.Components.Account;
 using RVPark.Data;
 using RVPark.Features.Authentication.Services;
 using RVPark.Features.Bookings.Services;
 using RVPark.Services;
-using RVPark.Services.Email;
 using RVPark.Services.Environment;
 using RVPark.Services.Logging;
 using RVPark.Shared.Behaviors;
 using Syncfusion.Blazor;
-using System;
-using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,7 +26,7 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-builder.Services.AddScoped<Bkg_UserService>();
+//builder.Services.AddScoped<Bkg_UserService>();
 
 // MediatR
 builder.Services.AddMediatR(cfg =>
@@ -64,7 +56,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 builder.Services.AddAntiforgery(options =>
 {
     options.HeaderName = "X-CSRF-TOKEN";
-}); 
+});
 
 
 builder.Services.AddAuthentication(options =>
@@ -74,7 +66,8 @@ builder.Services.AddAuthentication(options =>
     })
     .AddIdentityCookies();
 
-builder.Services.ConfigureApplicationCookie(options => {
+builder.Services.ConfigureApplicationCookie(options =>
+{
     options.ExpireTimeSpan = TimeSpan.FromDays(5);
     options.SlidingExpiration = true;
 });

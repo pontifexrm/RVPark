@@ -222,9 +222,9 @@
             
                 availabilities = await query.AsNoTracking().ToListAsync();
         }
-            catch (Exception ex)
+        catch
         {
-           // Console.WriteLine($"Error ordering availability: {ex.Message}");
+            // Error loading availability - silently continue
         }
         //availabilities = await query.AsNoTracking().ToListAsync();   // Simulate getting availability status
         // return GetRandomStatus();

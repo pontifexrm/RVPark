@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RVPark.Data
 {
@@ -25,16 +25,16 @@ namespace RVPark.Data
         public string UserComments { get; set; } = string.Empty;
         public DateTime CreatedDte { get; set; } = DateTime.UtcNow;
 
-        public ICollection<Bkg_Property> Bkg_Properties { get; set; }
-        public ICollection<Bkg_Booking> Bkg_Bookings { get; set; }
-        public ICollection<Bkg_Review> Bkg_Reviews { get; set; }
-        public ICollection<Bkg_Payment> Bkg_Payments { get; set; }
+        public ICollection<Bkg_Property>? Bkg_Properties { get; set; }
+        public ICollection<Bkg_Booking>? Bkg_Bookings { get; set; }
+        public ICollection<Bkg_Review>? Bkg_Reviews { get; set; }
+        public ICollection<Bkg_Payment>? Bkg_Payments { get; set; }
 
         public string UserNmeOrEmail
         {
             get
             {
-                if( UserName != UserEmail)
+                if (UserName != UserEmail)
                 {
                     return UserEmail;
                 }
@@ -42,7 +42,7 @@ namespace RVPark.Data
                 {
                     return UserEmail;
                 }
-               
+
             }
         }
     }

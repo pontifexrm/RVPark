@@ -180,3 +180,119 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 // AutoMapper
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
 ```
+
+## VSA Conversion Status Report
+● VSA Conversion Status Report as at 06/02/2026 after a fair bit of work converting core booking features to Vertical Slice Architecture (VSA). This report summarizes the current state of the codebase, highlighting what has been converted, what remains in legacy structure, and recommendations for next steps.
+
+  ### Summary
+
+  The project is partially converted to VSA. Core booking functionality uses MediatR, but significant legacy code remains.
+
+  ---
+  Features Folder (VSA Structure)
+  ┌────────────────┬─────────────────────────────┬───────────────────────────────────────────────────────────────────────┬────────────┬──────┬─────────┬─────────────┐
+  │    Feature     │          Commands           │                                Queries                                │ Validators │ DTOs │ Mapping │    Pages    │
+  ├────────────────┼─────────────────────────────┼───────────────────────────────────────────────────────────────────────┼────────────┼──────┼─────────┼─────────────┤
+  │ Authentication │ 3 (Login, Logout, Register) │ 1 (GetCurrentUser)                                                    │ 2          │ 2    │ -       │ 2 + 7 Admin │
+  ├────────────────┼─────────────────────────────┼───────────────────────────────────────────────────────────────────────┼────────────┼──────┼─────────┼─────────────┤
+  │ Bookings       │ 3 (Create, Edit, Delete)    │ 4 (GetById, GetUserBookings, CheckAvailability, GetBkgUserByUsername) │ 3          │ 2    │ 1       │ 9           │
+  ├────────────────┼─────────────────────────────┼───────────────────────────────────────────────────────────────────────┼────────────┼──────┼─────────┼─────────────┤
+  │ Properties     │ 1 (UpdateProperty)          │ 2 (GetAll, GetById)                                                   │ 1          │ 1    │ 1       │ 6           │
+  ├────────────────┼─────────────────────────────┼───────────────────────────────────────────────────────────────────────┼────────────┼──────┼─────────┼─────────────┤
+  │ Admin          │ -                           │ -                                                                     │ -          │ -    │ -       │ 3           │
+  └────────────────┴─────────────────────────────┴───────────────────────────────────────────────────────────────────────┴────────────┴──────┴─────────┴─────────────┘
+  Total in Features/: 46 .cs files, 36 .razor pages
+
+  ---
+  Legacy Code Remaining (NOT in VSA)
+
+  Components/Pages/ (18 pages)
+
+  - Home.razor, About.razor, Error.razor, Auth.razor
+  - ContactUs.razor, Thingstoknow.razor, Thingstoknowdetail.razor
+  - TabComponents/ (11 maintenance pages):
+    - DB_Maint.razor, DBTblNavMenu.razor, DynamicCRUD.razor
+    - AspNetRoles_Maint.razor, AspNetUser_Maint.razor, AspNetUserRoles_Maint.razor
+    - Bkg_Bookings_Maint.razor, Bkg_User_Maint.razor, Bkg_Property_Maint.razor
+    - Bkg_Availability_Maint.razor, BkgUser_Bookings.razor
+
+  Components/Account/ (40+ pages)
+
+  - All Identity scaffolded pages remain in legacy location
+  - Login, Register, ForgotPassword, 2FA, Manage/* etc.
+
+  Data/ Folder (Legacy Services & Models)
+
+  - Bkg_Engine.cs - Old booking engine (kept for reference)
+  - Bkg_UserService.cs - Should move to Features/Bookings/Services/
+  - EmailSenderMailKit.cs, EmailSenderSystem.cs - Duplicates of Services/Email/
+  - SmsService.cs, SmsModels.cs - Duplicates of Services/SMS/
+  - MappingProfile.cs - Legacy mapping (should consolidate)
+  - Various helper classes that could move to Shared/
+
+  ---
+  MediatR Usage
+  ┌───────────────────┬──────────────────────────────────────────────────────────┐
+  │      Status       │                       Description                        │
+  ├───────────────────┼──────────────────────────────────────────────────────────┤
+  │ Implemented       │ All booking CRUD operations use MediatR commands/queries │
+  ├───────────────────┼──────────────────────────────────────────────────────────┤
+  │ Implemented       │ CheckAvailability query returns Result<bool>             │
+  ├───────────────────┼──────────────────────────────────────────────────────────┤
+  │ Implemented       │ BookingEngine returns Result<T> with error messages      │
+  ├───────────────────┼──────────────────────────────────────────────────────────┤
+  │ Implemented       │ ValidationBehavior pipeline in place                     │
+  ├───────────────────┼──────────────────────────────────────────────────────────┤
+  │ Not Using MediatR │ TabComponent maintenance pages (direct DbContext)        │
+  ├───────────────────┼──────────────────────────────────────────────────────────┤
+  │ Not Using MediatR │ Identity/Account pages                                   │
+  └───────────────────┴──────────────────────────────────────────────────────────┘
+  ---
+  FluentValidation
+
+  6 validators exist:
+  - LoginValidator, RegisterValidator
+  - CreateBookingValidator, EditBookingValidator, DeleteBookingValidator
+  - UpdatePropertyValidator
+
+  Missing validators for: Queries, other commands
+
+  ---
+  AutoMapper
+
+  2 mapping profiles:
+  - BookingMappingProfile (Bkg_Booking → BookingDto)
+  - PropertyMappingProfile (Bkg_Property → PropertyDto)
+
+  Legacy: Data/MappingProfile.cs still exists
+
+  ---
+  Recommended Next Steps
+
+  1. High Priority:
+    - Move Components/Pages/ContactUs.razor to Features/
+    - Create MediatR queries for TabComponent pages or migrate them
+  2. Medium Priority:
+    - Consolidate duplicate services in Data/ folder
+    - Move Bkg_UserService.cs to Features/Bookings/Services/
+    - Delete Data/Bkg_Engine.cs (legacy, replaced by BookingEngine)
+  3. Lower Priority:
+    - Migrate Identity/Account pages to Features/Authentication/
+    - Add missing validators for queries
+    - Create DTOs for remaining entities (Bkg_User, Bkg_Availability, etc.)
+
+  ---
+  ### Completion Estimate as at 06/02/2026
+  ┌────────────────────────┬─────────────────────────────────────────────┐
+  │          Area          │                   Status                    │
+  ├────────────────────────┼─────────────────────────────────────────────┤
+  │ Bookings Feature       │ ~90% complete                               │
+  ├────────────────────────┼─────────────────────────────────────────────┤
+  │ Properties Feature     │ ~70% complete                               │
+  ├────────────────────────┼─────────────────────────────────────────────┤
+  │ Authentication Feature │ ~50% complete (Identity pages not migrated) │
+  ├────────────────────────┼─────────────────────────────────────────────┤
+  │ Admin Feature          │ ~30% complete                               │
+  ├────────────────────────┼─────────────────────────────────────────────┤
+  │ Overall VSA Conversion │ ~55%                                        │
+  └────────────────────────┴─────────────────────────────────────────────┘

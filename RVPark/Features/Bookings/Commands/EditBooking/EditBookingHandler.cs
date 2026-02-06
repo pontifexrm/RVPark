@@ -23,7 +23,8 @@ public class EditBookingHandler : IRequestHandler<EditBookingCommand, Result<Boo
 
     public async Task<Result<BookingDto>> Handle(EditBookingCommand request, CancellationToken cancellationToken)
     {
-        var currentBooking = await _context.bkg_Bookings!
+        var currentBooking = await _context.bkg_Bookings
+            .AsNoTracking()
             .FirstOrDefaultAsync(b => b.BookingId == request.BookingId, cancellationToken);
 
         if (currentBooking == null)
@@ -46,14 +47,14 @@ public class EditBookingHandler : IRequestHandler<EditBookingCommand, Result<Boo
             UpdatedDte = DateTime.UtcNow
         };
 
-        var success = await _bookingEngine.EditBookingAsync(currentBooking, newBooking);
+        var result = await _bookingEngine.EditBookingAsync(currentBooking, newBooking);
 
-        if (!success)
+        if (!result.IsSuccess)
         {
-            return Result<BookingDto>.Failure("Unable to edit booking. The requested dates may not be available.");
+            return Result<BookingDto>.Failure(result.Error ?? "Unable to edit booking.");
         }
 
-        var dto = _mapper.Map<BookingDto>(newBooking);
+        var dto = _mapper.Map<BookingDto>(result.Value);
         return Result<BookingDto>.Success(dto);
     }
 }

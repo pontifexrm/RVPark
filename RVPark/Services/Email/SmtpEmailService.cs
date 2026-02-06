@@ -1,12 +1,9 @@
-﻿using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens.Experimental;
+using System.Net.Mail;
+using System.Text;
+using Microsoft.Extensions.Options;
 using RVPark.Data;
 using RVPark.Services.Environment;
 using RVPark.Services.Logging;
-using System.Net.Mail;
-using System.Runtime;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RVPark.Services.Email
 {
@@ -59,7 +56,7 @@ namespace RVPark.Services.Email
             MailAddress toEmail = new MailAddress(to);
             MailAddress ccEmail = new MailAddress("ron@pontifex.nz");
             using MailMessage message = new MailMessage(sender, toEmail);
-            message.Subject = 
+            message.Subject =
                     _env.ShouldDisplayEnvInfo ? $"TEST-{subject}" : subject;
             message.Body = htmlMessage;
             message.Bcc.Add(ccEmail);
@@ -88,7 +85,7 @@ namespace RVPark.Services.Email
                     await _appLogger.LogAsync("Info", $"{sVia}", $"Email sent Details:-{alogMsg}");
 
                 }
-                catch (Exception ex)
+                catch
                 {
                     throw;
                 }

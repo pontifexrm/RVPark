@@ -1,4 +1,4 @@
-﻿using RVPark.Data;
+using RVPark.Data;
 
 namespace RVPark.Services.Email
 {

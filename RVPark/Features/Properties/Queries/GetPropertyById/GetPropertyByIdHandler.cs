@@ -20,7 +20,7 @@ public class GetPropertyByIdHandler : IRequestHandler<GetPropertyByIdQuery, Resu
 
     public async Task<Result<PropertyDto>> Handle(GetPropertyByIdQuery request, CancellationToken cancellationToken)
     {
-        var property = await _context.bkg_Properties!
+        var property = await _context.bkg_Properties
             .FirstOrDefaultAsync(p => p.PropertyId == request.PropertyId, cancellationToken);
 
         if (property == null)

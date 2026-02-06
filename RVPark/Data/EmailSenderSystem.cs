@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Options;
 using System.Net.Mail;
 using System.Text;
+using Microsoft.Extensions.Options;
 
 namespace RVPark.Data;
 
@@ -55,7 +55,7 @@ public class EmailSenderSystem : IEmailSnder
             {
                 await smtp.SendMailAsync(message);
             }
-            catch (Exception ex)
+            catch
             {
                 throw;
             }

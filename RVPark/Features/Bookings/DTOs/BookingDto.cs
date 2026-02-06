@@ -9,8 +9,15 @@ public record BookingDto(
     decimal TotalPrice,
     bool Paid,
     string BookingStatus,
-    string BookingComments,
+    string? BookingComments,
     DateTime CreatedDte,
     DateTime UpdatedDte,
-    int Nights
+    int Nights,
+    // Related data for display
+    string? PropertyName = null,
+    string? UserFirstName = null,
+    string? UserLastName = null,
+    string? UserName = null,
+    string? UserEmail = null,
+    string? UserPhone = null
 );

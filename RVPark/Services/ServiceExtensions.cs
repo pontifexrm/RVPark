@@ -1,4 +1,3 @@
-﻿using Microsoft.Extensions.Configuration;
 using RVPark.Services.Email;
 using RVPark.Services.SMS;
 
@@ -20,7 +19,7 @@ namespace RVPark.Services
         // Method to register MailKit implementation
         public static IServiceCollection AddMailKitEmailService(this IServiceCollection services)
         {
-//            var settings = configuration.GetSection("MailKitSettings").Get<MailKitSettings>();
+            //            var settings = configuration.GetSection("MailKitSettings").Get<MailKitSettings>();
             services.AddScoped<IEmailService, MailKitEmailService>();
             return services;
         }
@@ -62,7 +61,7 @@ namespace RVPark.Services
             services.AddScoped<IEmailService, MockEmailService>();
             return services;
         }
-       
+
 
     }
 }

@@ -20,7 +20,7 @@ public class GetBookingByIdHandler : IRequestHandler<GetBookingByIdQuery, Result
 
     public async Task<Result<BookingDto>> Handle(GetBookingByIdQuery request, CancellationToken cancellationToken)
     {
-        var booking = await _context.bkg_Bookings!
+        var booking = await _context.bkg_Bookings
             .FirstOrDefaultAsync(b => b.BookingId == request.BookingId, cancellationToken);
 
         if (booking == null)

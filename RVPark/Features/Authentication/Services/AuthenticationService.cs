@@ -154,7 +154,7 @@ public class AuthenticationService : IAuthenticationService
         }
 
         var roles = await _userManager.GetRolesAsync(user);
-        var bkgUser = await _dbContext.bkg_Users!
+        var bkgUser = await _dbContext.bkg_Users
             .FirstOrDefaultAsync(u => u.AppUserId == user.Id);
 
         return new CurrentUserDto(
@@ -189,7 +189,7 @@ public class AuthenticationService : IAuthenticationService
             Timestamp = DateTimeOffset.UtcNow
         };
 
-        _dbContext.LoginLogs!.Add(loginLog);
+        _dbContext.LoginLogs.Add(loginLog);
         await _dbContext.SaveChangesAsync();
     }
 
@@ -210,7 +210,7 @@ public class AuthenticationService : IAuthenticationService
 
     private async Task CreateOrUpdateBkgUserAsync(ApplicationUser user, string firstName, string lastName, string? mobile)
     {
-        var existingBkgUser = await _dbContext.bkg_Users!
+        var existingBkgUser = await _dbContext.bkg_Users
             .FirstOrDefaultAsync(u => u.UserEmail == user.Email);
 
         if (existingBkgUser != null)
@@ -229,7 +229,7 @@ public class AuthenticationService : IAuthenticationService
             user.UserState = existingBkgUser.UserState;
             user.UserZip = existingBkgUser.UserZip;
 
-            _dbContext.bkg_Users!.Update(existingBkgUser);
+            _dbContext.bkg_Users.Update(existingBkgUser);
             _dbContext.Users.Update(user);
         }
         else
@@ -245,7 +245,7 @@ public class AuthenticationService : IAuthenticationService
                 UserPhone = mobile ?? string.Empty,
                 CreatedDte = DateTime.UtcNow
             };
-            await _dbContext.bkg_Users!.AddAsync(bkgUser);
+            await _dbContext.bkg_Users.AddAsync(bkgUser);
         }
 
         await _dbContext.SaveChangesAsync();

@@ -1,5 +1,5 @@
-using RVPark.Data;
 using Microsoft.AspNetCore.Identity;
+using RVPark.Data;
 
 namespace RVPark.Components.Account
 {
@@ -11,10 +11,11 @@ namespace RVPark.Components.Account
 
             if (user is null)
             {
+                // RedirectToWithStatus has [DoesNotReturn] attribute, so this never returns
                 redirectManager.RedirectToWithStatus("Account/InvalidUser", $"Error: Unable to load user with ID '{userManager.GetUserId(context.User)}'.", context);
             }
 
-            return user;
+            return user!;
         }
     }
 }

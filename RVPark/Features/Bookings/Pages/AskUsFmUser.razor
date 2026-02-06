@@ -14,6 +14,10 @@
 @using RVPark.Services
 @using RVPark.Services.Email
 @using RVPark.Services.SMS
+@using MediatR
+@using RVPark.Features.Bookings.Commands.CreateBooking
+@using RVPark.Features.Bookings.Commands.EditBooking
+@using RVPark.Features.Bookings.Queries.CheckAvailability
 
 @using Syncfusion.Blazor.Buttons
 @inject IConfiguration configuration
@@ -25,7 +29,7 @@
 @inject HttpContextAccessorService httpContextAccessorService
 @inject IEmailService EmailService
 @inject ISmsService SmsService
-@inject RVPark.Features.Bookings.Services.IBookingEngine BookingEngine
+@inject IMediator Mediator
 
 <style>
 
@@ -219,17 +223,22 @@
             newBooking.PropertyId = searchPropertyId;
             newBooking.BookingStatus = "Requested";
             newBooking.Bkg_User = currentUser;
-            //        newBooking.Bkg_Property = BkgProperties.FirstOrDefault(p => p.PropertyId == rqstPropertyId);
-            currentBooking = newBooking;  // maybe ???
+            currentBooking = newBooking;
 
-            bkgAvailable = BookingEngine.RequestBooking(newBooking);
+            var availResult = await Mediator.Send(new CheckAvailabilityQuery(
+                searchPropertyId,
+                ContactInput.Fmdate.Date,
+                ContactInput.Todate.Date
+            ));
+
+            bkgAvailable = availResult.IsSuccess && availResult.Value;
             if (bkgAvailable)
             {
                 verificationResult = "✅ Your booking request is AVAILABLE. You can SAVE it if you like. Press Cancel if you do not.";
             }
             else
             {
-                verificationResult = "❌  Sorry but your booking request is not possible. ";
+                verificationResult = availResult.Error ?? "❌  Sorry but your booking request is not possible. ";
             }
         }
         else
@@ -239,7 +248,7 @@
         if(ContactInput.Subject != string.Empty || ContactInput.Message != string.Empty)
         {
             verificationResult += " We have your message and will get back to you shortly. Meantime you will recieve an email copy of your message.";
-            JustSendContactUs();
+            await JustSendContactUs();
         }
 
         currentStep = 2;
@@ -253,53 +262,70 @@
     {
         currentBooking.Bkg_User = await ApplicationDbContext.bkg_Users.FindAsync(currentBooking.UserId);
         currentBooking.Bkg_Property = await ApplicationDbContext.bkg_Properties.FindAsync(currentBooking.PropertyId);
-        string s = configuration["SMSSettings:SMSrept"];
+        string s = configuration["SMSSettings:SMSrept"] ?? string.Empty;
         string txtrept = Chk_E_164_Phone(s);
-        //        currentBooking.DateArrive = Fmdate; currentBooking.DateDepart = Todate;
 
         // if a new booking then we need to Create it else Change it.
         if (currentBooking.BookingId == 0) // A new booking
         {
             currentBooking.DateArrive = Fmdate.Date; currentBooking.DateDepart = Todate.Date;
-            currentBooking.CreatedDte = DateTime.UtcNow;
-            currentBooking.UpdatedDte = DateTime.UtcNow;
-            var savedOK = await BookingEngine.CreateBookingAsync(currentBooking);
-            if (!savedOK)
+
+            var result = await Mediator.Send(new CreateBookingCommand(
+                currentBooking.PropertyId,
+                currentBooking.UserId,
+                currentBooking.DateArrive,
+                currentBooking.DateDepart,
+                currentBooking.TotalPrice,
+                currentBooking.BookingComments ?? ""
+            ));
+
+            if (!result.IsSuccess)
             {
-                verificationResult += "❌ Error found saving this new Booking";
+                verificationResult += result.Error ?? "❌ Error found saving this new Booking";
             }
             else
             {
+                // Update currentBooking with the returned booking ID
+                if (result.Value != null)
+                {
+                    currentBooking.BookingId = result.Value.BookingId;
+                }
                 // will send an email confirmation
-                SendEmailConfirmation();
-                SendTxtConfirmation(txtrept); //send a txt to System Admin
+                await SendEmailConfirmation();
+                await SendTxtConfirmation(txtrept); //send a txt to System Admin
                 // Need to send a cc'd to rvpark@pontifex.nz
-                SendCCEmailConfirmation();
+                await SendCCEmailConfirmation();
             }
         }
         else // editing existing bkg
         {
-            currentBooking.UpdatedDte = DateTime.UtcNow;
+            var result = await Mediator.Send(new EditBookingCommand(
+                currentBooking.BookingId,
+                currentBooking.PropertyId,
+                currentBooking.UserId,
+                currentBooking.DateArrive,
+                currentBooking.DateDepart,
+                currentBooking.TotalPrice,
+                currentBooking.Paid,
+                currentBooking.BookingStatus ?? "Booked",
+                currentBooking.BookingComments ?? ""
+            ));
 
-            var savedOK = await BookingEngine.EditBookingAsync(orgnBkg, currentBooking);
-            if (!savedOK)
+            if (!result.IsSuccess)
             {
-                verificationResult += "❌ Error found saving this edited Booking";
-
+                verificationResult += result.Error ?? "❌ Error found saving this edited Booking";
             }
             else
             {
                 // will send an email confirmation
-                SendEmailConfirmation();
-                SendTxtConfirmation(txtrept); //send a txt to System Admin
+                await SendEmailConfirmation();
+                await SendTxtConfirmation(txtrept); //send a txt to System Admin
                 // Need to send a cc'd to rvpark@pontifex.nz
-                SendCCEmailConfirmation();
+                await SendCCEmailConfirmation();
             }
-
         }
         confirmSent = true;
         StateHasChanged();
-        //ExitForm();
     }
     private async Task JustSendContactUs()
     {
@@ -323,13 +349,13 @@
         else {verificationResult = string.Concat("Email Confirmation could NOT be sent to ", emailMessage.Email);}
 
         // Now send a CC to admin
-        string ccemail = configuration["EmailSettings:CCEmail"];
+        string ccemail = configuration["EmailSettings:CCEmail"] ?? string.Empty;
         resultMsg = await EmailService.SendEmailAsync(ccemail, "cc'd msg re: " + emailMessage.Email + "|" + emailMessage.Subject, emailMessage.ChkMsg + " " + userIpAddress);
         if (resultMsg) { verificationResult = string.Concat("Email Confirmation sent to ", emailMessage.Email); }
         else { verificationResult = string.Concat("Email Confirmation could NOT be sent to ", emailMessage.Email); }
 
         // Now send an SMS Msg
-        string rept = configuration["SMSSettings:SMSrept"];
+        string rept = configuration["SMSSettings:SMSrept"] ?? string.Empty;
         var smsrqst = new SmsRequest
         {
             To = rept,
@@ -358,16 +384,16 @@
         string subjectMsg = string.Concat("CC msg of email to:", currentBooking.Bkg_User.UserEmail, " BkgRef: ", currentBooking.BookingId.ToString(), " for ", currentBooking.Bkg_Property.Name,
         " from ", currentBooking.DateArrive.Date.ToString("dd/MM/yyyy"), " to ", currentBooking.DateDepart.Date.ToString("dd/MM/yyyy"));
 
-        var resultMsg = await EmailService.SendEmailAsync(configuration["EmailSettings:CCemail"], subjectMsg, ConfirmBkgMsg());
+        var resultMsg = await EmailService.SendEmailAsync(configuration["EmailSettings:CCemail"] ?? string.Empty, subjectMsg, ConfirmBkgMsg());
         if (resultMsg) { verificationResult += string.Concat("Email Confirmation sent to ", emailMessage.Email); }
         else { verificationResult += string.Concat("Email Confirmation could NOT be sent to ", emailMessage.Email); }
 
 
 
     }
-    private void SendTxtConfirmation()
+    private async Task SendTxtConfirmation()
     {
-        SendTxtConfirmation("");
+        await SendTxtConfirmation("");
     }
     private async Task SendTxtConfirmation(string txtrept)
     {

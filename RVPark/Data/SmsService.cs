@@ -1,4 +1,4 @@
-﻿namespace RVPark.Data
+namespace RVPark.Data
 {
     public class SmsService
     {
